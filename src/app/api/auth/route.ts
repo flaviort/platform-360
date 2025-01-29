@@ -1,11 +1,7 @@
 // this is just a fake endpoint
-
-export const users = [
-    { username: 'test@test.com', password: 'test' },
-    { username: 'test2@test.com', password: 'test2' }
-]
+import { users } from './users'
   
-export async function POST(request) {
+export async function POST(request: Request) {
     try {
         const body = await request.json()
         const { Email, Password } = body
