@@ -1,0 +1,74 @@
+@use '../variables' as *;
+@use 'sass:map';
+
+@mixin generate-spacing-classes($prefix, $property, $name, $value, $breakpoint: null) {
+    @if $breakpoint == null {
+        .#{$prefix}-#{$name} { #{$property}: $value; }
+    } @else {
+        .#{$prefix}-#{$breakpoint}-#{$name} { #{$property}: $value; }
+    }
+}
+
+$spacing-values: (
+    '0': 0,
+    'half': 0.5rem,
+    '1': 1rem,
+    '2': 2rem,
+    '3': 3rem,
+    '4': 4rem,
+    'smallest': var(--smallest),
+    'smaller': var(--smaller),
+    'small': var(--small),
+    'medium': var(--medium),
+    'big': var(--big),
+    'bigger': var(--bigger)
+);
+
+$breakpoints: (
+    'xs': 'only screen and (min-width: 421px)',
+    'sm': 'only screen and (min-width: 576px)',
+    'md': 'only screen and (min-width: 768px)',
+    'lg': 'only screen and (min-width: 993px)',
+    'xl': 'only screen and (min-width: 1201px)',
+    '2xl': 'only screen and (min-width: 1401px)'
+);
+
+@each $name, $value in $spacing-values {
+    @include generate-spacing-classes('p', 'padding', $name, $value);
+    @include generate-spacing-classes('pt', 'padding-block-start', $name, $value);
+    @include generate-spacing-classes('pb', 'padding-block-end', $name, $value);
+    @include generate-spacing-classes('pl', 'padding-inline-start', $name, $value);
+    @include generate-spacing-classes('pr', 'padding-inline-end', $name, $value);
+    @include generate-spacing-classes('m', 'margin', $name, $value);
+    @include generate-spacing-classes('mt', 'margin-block-start', $name, $value);
+    @include generate-spacing-classes('mb', 'margin-block-end', $name, $value);
+    @include generate-spacing-classes('ml', 'margin-inline-start', $name, $value);
+    @include generate-spacing-classes('mr', 'margin-inline-end', $name, $value);
+
+    .px-#{$name} { padding-inline: $value; }
+    .py-#{$name} { padding-block: $value; }
+    .mx-#{$name} { margin-inline: $value; }
+    .my-#{$name} { margin-block: $value; }
+}
+
+@each $breakpoint, $media-query in $breakpoints {
+    @media #{map.get($breakpoints, $breakpoint)} {
+        @each $name, $value in $spacing-values {
+            @include generate-spacing-classes('p', 'padding', $name, $value, $breakpoint);
+            @include generate-spacing-classes('pt', 'padding-block-start', $name, $value, $breakpoint);
+            @include generate-spacing-classes('pb', 'padding-block-end', $name, $value, $breakpoint);
+            @include generate-spacing-classes('pl', 'padding-inline-start', $name, $value, $breakpoint);
+            @include generate-spacing-classes('pr', 'padding-inline-end', $name, $value, $breakpoint);
+            @include generate-spacing-classes('m', 'margin', $name, $value, $breakpoint);
+            @include generate-spacing-classes('mt', 'margin-block-start', $name, $value, $breakpoint);
+            @include generate-spacing-classes('mb', 'margin-block-end', $name, $value, $breakpoint);
+            @include generate-spacing-classes('ml', 'margin-inline-start', $name, $value, $breakpoint);
+            @include generate-spacing-classes('mr', 'margin-inline-end', $name, $value, $breakpoint);
+
+            .px-#{$breakpoint}-#{$name} { padding-inline: $value; }
+            .py-#{$breakpoint}-#{$name} { padding-block: $value; }
+            .mx-#{$breakpoint}-#{$name} { margin-inline: $value; }
+            .my-#{$breakpoint}-#{$name} { margin-block: $value; }
+        }
+    }
+}

@@ -1,0 +1,22 @@
+@use '../variables' as *;
+
+.font { font-family: $font; }
+
+.text-95 { @include text-95; }
+.text-80 { @include text-80; }
+.text-65 { @include text-65; }
+.text-45 { @include text-45; }
+.text-35 { @include text-35; }
+.text-30 { @include text-30; }
+.text-25 { @include text-25; }
+.text-20 { @include text-20; }
+.text-18 { @include text-18; }
+.text-16 { @include text-16; }
+.text-14 { @include text-14; }
+.text-12 { @include text-12; }
+
+.light { font-weight: $light; }
+.regular { font-weight: $regular; }
+.medium { font-weight: $medium; }
+.semi-bold { font-weight: $semi-bold; }
+.bold { font-weight: $bold; }

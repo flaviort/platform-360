@@ -1,0 +1,23 @@
+@use '../variables' as *;
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+	
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+.rotation,
+.rotation-reverse {
+	animation-name: rotation;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+	animation-duration: calc(var(--speed) * 1s);
+}
+
+.rotation-reverse {
+	animation-direction: reverse;
+}

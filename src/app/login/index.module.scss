@@ -1,0 +1,44 @@
+.page {
+    text-align: center;
+    max-width: 100%;
+
+    .whiteBlock {
+        background-color: $pure-white;
+        border: var(--1px) solid $gray-200;
+        border-radius: .75rem;
+        padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+        width: 25rem;
+        max-width: 100%;
+
+        @media #{$mq-md-min} {
+            padding-bottom: 2rem;
+            border-radius: 1rem;
+        }
+
+        .form {
+            margin-block-start: 2rem;
+
+            .options {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                margin-block-end: 1.5rem;
+
+                .forgot {
+                    display: block;
+                    width: fit-content;
+                }
+            }
+
+            .submit {
+                width: 100%;
+                text-transform: uppercase;
+            }
+        }
+    }
+
+    .bottomText {
+        margin-block-start: 2rem;
+    }
+}

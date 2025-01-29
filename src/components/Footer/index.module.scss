@@ -1,0 +1,98 @@
+.component {
+	position: relative;
+	overflow: hidden;
+
+	.top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: column;
+		gap: var(--smaller);
+
+		@media #{$mq-sm-min} {
+			gap: 2rem;
+		}
+
+		@media #{$mq-lg-min} {
+			flex-direction: row;
+			gap: 1rem;
+		}
+
+		.logo {
+			display: flex;
+			width: 20rem;
+			transition: .3s ease-in-out;
+			max-width: 90%;
+
+			@media #{$mq-lg-min} {
+				width: 16rem;
+			}
+
+			@media #{$mq-xl-min} {
+				width: 18rem;
+			}
+
+			@media #{$mq-sm-max} {
+				order: 2;
+			}
+
+			&:hover,
+			&:focus-visible {
+				opacity: .7;
+			}
+
+			img,
+			svg {
+				width: 100%;
+			}
+		}
+
+		.menu {
+			display: flex;
+			align-items: center;
+			flex-direction: column;
+			gap: .5rem;
+			color: $white;
+			font-weight: $medium;
+
+			@media #{$mq-sm-min} {
+				flex-direction: row;
+				gap: 2rem;
+			}
+
+			@media #{$mq-lg-min} {
+				gap: 1.5rem;
+			}
+
+			@media #{$mq-xl-min} {
+				gap: 2rem;
+			}
+
+			@media #{$mq-sm-max} {
+				order: 3;
+			}
+		}
+
+		.donate {
+			@media #{$mq-sm-max} {
+				order: 1;
+				width: 90%;
+			}
+		}
+	}
+
+	.bottom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: column;
+		gap: .25rem;
+		text-align: center;
+
+		@media #{$mq-lg-min} {
+			align-items: flex-start;
+			flex-direction: row;
+			gap: 1rem;
+		}
+	}
+}

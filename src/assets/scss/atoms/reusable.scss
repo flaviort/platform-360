@@ -1,0 +1,43 @@
+@use '../variables' as *;
+
+.cover {
+	position: absolute;
+	z-index: 0;
+    top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.relative {
+	position: relative;
+}
+
+.z0 { z-index: 0; }
+.z1 { z-index: 1; }
+.z2 { z-index: 2; }
+.z3 { z-index: 3; }
+.z4 { z-index: 4; }
+.z5 { z-index: 5; }
+.z9 { z-index: 9; }
+
+.nowrap { white-space: nowrap; }
+.uppercase { text-transform: uppercase; }
+
+[data-stagger] > * { will-change: transform, opacity; }
+
+:root {
+	--smallest: clamp(1rem, 3vw, 2rem);
+	--smaller: clamp(2rem, 4vw, 3rem);
+	--small: clamp(2.5rem, 6vw, 5rem);
+	--medium: clamp(3rem, 9vw, 7rem);
+	--big: clamp(4rem, 10vw, 9rem);
+	--bigger: clamp(7rem, 17vw, 15rem);
+
+	--1px: 1px;
+
+	@media #{$mq-md-min} {
+		--1px: .05rem;
+	}
+}

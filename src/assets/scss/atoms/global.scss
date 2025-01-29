@@ -1,0 +1,159 @@
+@use '../variables' as *;
+
+sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline
+}
+
+sub {
+    bottom: -0.25em
+}
+
+sup {
+    top: -0.5em
+}
+
+*, *:after, *:before {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+li, ul, ol, figure { 
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+.cf::after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: '';
+	clear: both;
+	height: 0;
+}
+
+.swiper-pagination-bullet {
+	background-color: currentColor;
+}
+
+canvas, img, video, picture, figure {
+	max-width: 100%;
+	height: auto;
+	box-sizing: border-box;
+	display: block;
+ }
+
+svg {
+    max-width: 100%;
+	height: auto;
+    fill: currentColor;
+}
+
+button {
+	appearance: none;
+	outline: none;
+	border: none;
+	background-color: transparent;
+	cursor: pointer;
+	padding: 0;
+}
+
+a {
+	color: currentColor;
+}
+
+a, a:hover {
+	text-decoration: none;
+}
+
+textarea, input, select {
+	appearance: none;
+	outline: none;
+}
+
+textarea {
+	resize: vertical;
+}
+
+h1, h2, h3, h4, h5, h6, p, a, li, ul, ol, span, strong, em {
+	padding: 0;
+	margin: 0;
+	margin-block-start: 0;
+    margin-block-end: 0;
+	font-weight: inherit;
+	font-size: inherit;
+}
+
+strong, b {
+	font-weight: $bold;
+}
+
+br {
+	line-height: inherit;
+}
+
+section,
+main,
+.container {
+	position: relative;
+}
+
+html,
+body {
+	-webkit-font-smoothing: antialiased;
+    background-color: $gray-50;
+    font-family: $font;
+	color: $gray-800;
+	font-weight: $regular;
+	font-style: normal;
+	font-size: 16px;
+	line-height: 1.6;
+	ascent-override: 110%;
+	scroll-behavior: smooth;
+	width: 100%;
+
+	@media #{$mq-3xl-min} {
+		font-size: 1vw;
+	}
+}
+
+.skip-content {
+	position: fixed;
+	z-index: 99999999;
+	top: .25rem;
+	left: .25rem;
+	opacity: 0;
+	pointer-events: none;
+	padding: .275rem .5rem;
+	font-size: .8rem;
+	border-radius: .125rem;
+
+	&:focus-visible {
+		opacity: 1;
+		background-color: $white;
+		color: $black;
+		border: none;
+		outline: none;
+	}
+}
+
+.ul {
+	position: relative;
+
+	li {
+		display: block;
+		position: relative;
+		padding-left: .75rem;
+		margin-bottom: .25rem;
+
+		&:before {
+			content: '\2219';
+			position: absolute;
+			left: 0;
+		}
+	}
+}

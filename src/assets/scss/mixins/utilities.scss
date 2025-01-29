@@ -1,0 +1,15 @@
+@mixin line-clamp($lines) {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+           -line-clamp: $lines;
+    -webkit-box-orient: vertical;
+}
+
+@mixin limit-text-width($width) {
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: $width;
+}

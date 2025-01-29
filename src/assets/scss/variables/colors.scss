@@ -1,0 +1,60 @@
+$transparent:           transparent;
+$pure-white:            #fff;
+$white:                 #F9FAFB;
+
+$gray-50:               #F3F4F6;
+$gray-100:              #F3F4F6;
+$gray-200:              #E5E7EB;
+$gray-300:              #bbb;
+$gray-400:              #9CA3AF;
+$gray-500:              #6B7280;
+$gray-600:              #555;
+$gray-700:              #333;
+$gray-800:              #1F2937;
+$gray-900:              #111;
+
+$black:                 #0d0e13;
+$pure-black:            #000;
+
+$green:                 #86EFAC;
+$yellow:                #FDE047;
+$red:                   #F87171;
+
+$purple-dark:           #48238F;
+$purple:                #6D28D9;
+$purple-light:          #99CAFF;
+
+$blue:                  #3691E1;
+$blue-light:            #57B0FF;
+
+// create a color map
+$colors: (
+    'transparent':          $transparent,
+    'pure-white':           $pure-white,
+    'white':                $white,
+
+    'gray-50':              $gray-50,
+    'gray-100':             $gray-100,
+    'gray-200':             $gray-200,
+    'gray-300':             $gray-300,
+    'gray-400':             $gray-400,
+    'gray-500':             $gray-500,
+    'gray-600':             $gray-600,
+    'gray-700':             $gray-700,
+    'gray-800':             $gray-800,
+    'gray-900':             $gray-900,
+
+    'black':                $black,
+    'pure-black':           $pure-black,
+
+    'green':                $green,
+    'yellow':               $yellow,
+    'red':                  $red,
+
+    'purple-dark':          $purple-dark,
+    'purple':               $purple,
+    'purple-light':         $purple-light,
+
+    'blue':                 $blue,
+    'blue-light':           $blue-light
+);

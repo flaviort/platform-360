@@ -1,0 +1,83 @@
+.accordion {
+    text-align: left;
+
+    &.isActive {
+        .title {
+            color: $black;
+
+            .circle {
+                transform: rotate(-90deg);
+                background-color: $black;
+                color: $white;
+            }
+        }
+
+        .content {
+            grid-template-rows: 1fr;
+
+            > div {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+    }
+
+    .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        border-bottom: 1px solid $black;
+        padding: .5rem 0 .5rem .125rem;
+        cursor: pointer;
+        transition: .3s ease-in-out;
+
+        &:hover {
+            color: $black;
+        }
+
+        .circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            min-width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border: 1px solid $black;
+            color: $black;
+            padding: .75rem;
+            transition: .3s ease-in-out;
+
+            svg {
+                width: 100%;
+                height: 100%;
+                transform: translateX(.1rem);
+                transition: transform .3s ease-in-out;
+            }
+        }
+    }
+
+    .content {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: .3s ease-in-out;
+
+        > div {
+            min-height: 0;
+            transition: .3s ease-in-out;
+            visibility: hidden;
+            opacity: 0;
+
+            > div {
+                padding: 1rem .125rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: var(--smallest);
+            }
+        }
+    }
+}

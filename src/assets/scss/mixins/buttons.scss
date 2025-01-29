@@ -1,0 +1,13 @@
+@mixin hover-underline() {
+    cursor: pointer;
+    --border-color: currentColor;
+    --border-width: var(--1px);
+    --bottom-distance: 0px;
+    display: inline;
+    background-image: linear-gradient(var(--border-color), var(--border-color));
+    background-size: 0% var(--border-width);
+    background-repeat: no-repeat;
+    transition: background-size .3s ease-in-out;
+    background-position: 0 calc(100% - var(--bottom-distance));
+    width: fit-content;
+}

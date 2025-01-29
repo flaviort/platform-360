@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.platform360.ai
+
+# Sitemaps
+Sitemap: https://www.platform360.ai/sitemap.xml

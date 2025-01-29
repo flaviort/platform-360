@@ -1,0 +1,25 @@
+@mixin gradient-top($color, $height) {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: $height;
+    background: linear-gradient(0deg, rgba($color, 0) 0%, $color 100%);
+}
+
+@mixin gradient-bottom($color, $height) {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: $height;
+    background: linear-gradient(0deg, $color 0%, rgba($color, 0) 100%);
+}
+
+@mixin gradient-left-right($colorStart, $colorEnd) {
+    background: linear-gradient(90deg, $colorStart 0%, $colorEnd 100%);
+}
