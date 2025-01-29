@@ -6,10 +6,6 @@ import Link from 'next/link'
 
 // components
 import AccountWrapper from '@/layouts/Account'
-import { Form, Input } from '@/components/Form'
-
-// img / svg
-import UxSpinner from '@/assets/svg/ux/spinner.svg'
 
 // data / utils / db
 import { pages } from '@/utils/routes'

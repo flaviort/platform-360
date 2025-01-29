@@ -57,8 +57,8 @@ export const Form = ({
         // clear any old error messages
         setGlobalError('')
 
-        // fake response time (2s)
-        let fakeTimer = 2000
+        // fake response time (1s)
+        let fakeTimer = 1000
 
         if (form.current) {
             (form.current as HTMLElement).classList.add('is-sending')
@@ -103,8 +103,10 @@ export const Form = ({
                     onSuccess(responseData)
 
                     if(form.current) {
-                        form.current.classList.remove('is-sending')
-                        document.dispatchEvent(new Event('formSent'))
+                        setTimeout(() => {
+                            form?.current?.classList.remove('is-sending')
+                            document.dispatchEvent(new Event('formSent'))  
+                        }, 600)
 
                         if (clearOnSubmit) {
                             form?.current?.reset()

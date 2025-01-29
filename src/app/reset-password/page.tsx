@@ -3,13 +3,11 @@
 // libraries
 import clsx from 'clsx'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 // components
 import AccountWrapper from '@/layouts/Account'
-import { Form, Input } from '@/components/Form'
-
-// img / svg
-import UxSpinner from '@/assets/svg/ux/spinner.svg'
+import { Form, Input, Submit } from '@/components/Form'
 
 // data / utils / db
 import { pages } from '@/utils/routes'
@@ -18,6 +16,9 @@ import { pages } from '@/utils/routes'
 import styles from './index.module.scss'
 
 export default function ResetPassword() {
+
+	const router = useRouter()
+
 	return (
 		<AccountWrapper>
 			<div className={styles.page}>
@@ -33,8 +34,8 @@ export default function ResetPassword() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/auth'
-						onSuccess={() => {}}
+						endpoint='/api/reset-password'
+						onSuccess={() => router.push(pages.reset_password_success)}
 						onError={() => {}}
 					>
 
@@ -61,21 +62,11 @@ export default function ResetPassword() {
 
 						</div>
 
-						<button
-							type='submit'
-							className={clsx(styles.submit, 'button button--gradient-blue text-16')}
-						>
-							<span className='button__text'>
-								Reset Password
-							</span>
-
-							<span className='button__loading'>
-								<span className='rotation' style={{ '--speed': '.3' } as any}>
-									<UxSpinner />
-								</span>
-							</span>
-
-						</button>
+						<Submit
+							style='gradient-blue'
+							className={styles.submit}
+							text='Reset Password'
+						/>
 
 						<Link href={pages.login} className='hover-underline text-16 gray-400'>
 							Cancel

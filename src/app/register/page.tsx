@@ -7,10 +7,7 @@ import Link from 'next/link'
 
 // components
 import AccountWrapper from '@/layouts/Account'
-import { Form, Input, Select } from '@/components/Form'
-
-// img / svg
-import UxSpinner from '@/assets/svg/ux/spinner.svg'
+import { Form, Input, Select, Submit } from '@/components/Form'
 
 // data / utils / db
 import { pages } from '@/utils/routes'
@@ -210,21 +207,11 @@ export default function Register() {
 
 						</div>
 
-						<button
-							type='submit'
-							className={clsx(styles.submit, 'button button--gradient-blue text-16')}
-						>
-							<span className='button__text'>
-								Create account
-							</span>
-
-							<span className='button__loading'>
-								<span className='rotation' style={{ '--speed': '.3' } as any}>
-									<UxSpinner />
-								</span>
-							</span>
-
-						</button>
+						<Submit
+							style='gradient-blue'
+							className={styles.submit}
+							text='Create Account'
+						/>
 
 					</Form>
 
