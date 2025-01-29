@@ -31,7 +31,7 @@ export default function Login() {
 					<Form
 						className={styles.form}
 						endpoint='/api/auth'
-						onSuccess={() => alert("You're not logged in but nothing will happen because we don't have the other screens yet")}
+						onSuccess={() => alert("You're now logged in! But nothing will happen because we don't have the other screens YET")}
 						onError={() => {}}
 					>
 
