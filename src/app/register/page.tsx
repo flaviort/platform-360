@@ -88,8 +88,8 @@ export default function Register() {
 
 								<div className='col-12'>
 									<Select
-										id='create-account-area'
-										label='Area of interest'
+										id='create-account-role'
+										label='Role'
 										defaultValue=''
 										required
 										onChange={(e) => setDifferentArea(e.target.value === 'Other')}
