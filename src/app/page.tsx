@@ -1,5 +1,5 @@
 // pages
-import Account from '@/app/login/page'
+import Account from '@/app/account/login/page'
 
 export default function Default() {
 	return (

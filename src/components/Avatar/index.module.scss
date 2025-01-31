@@ -1,0 +1,15 @@
+.component {
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	width: 2.25rem;
+	min-width: 2.25rem;
+	height: 2.25rem;
+	background-color: $blue;
+	color: $white;
+	text-transform: uppercase;
+	font-weight: $medium;
+}

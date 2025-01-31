@@ -1,21 +1,21 @@
-export function phone(str) {
+export function phone(str: string) {
 	return (
 		'tel:' + str.replace(/[^0-9]/g, '')
 	)
 }
 
-export function email(str) {
+export function email(str: string) {
 	return (
 		'mailto:' + str
 	)
 }
 
 // get vw / vh
-export const vw = (coef) => window.innerWidth * (coef/100)
-export const vh = (coef) => window.innerHeight * (coef/100)
+export const vw = (coef: number) => window.innerWidth * (coef/100)
+export const vh = (coef: number) => window.innerHeight * (coef/100)
 
 // limit characters
-export function limitCharacters(text, limit) {
+export function limitCharacters(text: string, limit: number) {
     if (text.length <= limit) {
         return text
     } else {
@@ -24,7 +24,7 @@ export function limitCharacters(text, limit) {
 }
 
 // slugify
-export function slugify(str) {
+export function slugify(str: string) {
     return String(str)
         .normalize('NFKD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -57,4 +57,9 @@ export const placeholder = (theme = 'dark') => {
     `
 
     return typeof window === 'undefined' ? Buffer.from(shimmer).toString('base64') : window.btoa(shimmer)
+}
+
+// first char
+export function firstChar(str: string) {
+    return str.charAt(0) || ''
 }

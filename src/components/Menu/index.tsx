@@ -8,15 +8,21 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { usePathname } from 'next/navigation'
 
+// components
+import Avatar from '@/components/Avatar'
+
 // img / svg
 import Logo from '@/assets/svg/logo/logo.svg'
-import UxLongArrowRight from '@/assets/svg/ux/long-arrow-right.svg'
 
 // css
 import styles from './index.module.scss'
 
 // utils
 import { pages } from '@/utils/routes'
+import { firstChar, limitCharacters } from '@/utils/functions'
+
+// db
+import { user } from '@/db/db'
 
 export default function Menu() {
 
@@ -100,61 +106,77 @@ export default function Menu() {
         <>
 
             <section className={styles.topMenu}>
-                <div className='container'>
+                <div className='container container--big'>
 
                     <div className={clsx(styles.flex, 'white')}>
 
-                        <Link
-                            href={pages.home}
-                            aria-label='Go to homepage'
-                            className={styles.logo}
-                            id='logo-menu'
-                            onClick={closeFsMenu}
-                        >
-                            <Logo />
-                        </Link>
+                        <div className={styles.left}>
 
-                        <div className={styles.right}>
+                            <Link
+                                href={pages.dashboard_my_reports}
+                                aria-label='Go to homepage'
+                                className={styles.logo}
+                            >
+                                <Logo />
+                            </Link>
 
-                            <ul className={styles.menu}>
+                            <ul className={clsx(styles.menu, 'text-16')}>
                                 {[
                                     {
-                                        name: 'Home',
+                                        name: 'My Reports',
+                                        href: '#'
+                                    },
+                                    {
+                                        name: 'Solutions',
+                                        href: '#'
+                                    },
+                                    {
+                                        name: 'Resources',
                                         href: '#'
                                     }
                                 ].map((item, i) => (
                                     <li key={i}>
-                                        <Link
-                                            href={item.href}
-                                            className={clsx(
-                                                'medium hover-underline',
-                                                {[styles.active]: currentPath === item.href}
-                                            )}
-                                            onClick={closeFsMenu}
-                                        >
+                                        <Link href={item.href} className='white medium'>
                                             {item.name}
                                         </Link>
                                     </li>
                                 ))}
                             </ul>
 
-                            <button
-                                className={clsx(
-                                    styles.openFs,
-                                    isShown && styles.active,
-                                    'medium'
-                                )}
-                                onClick={openCloseFsMenu}
-                                type='button'
-                            >
+                        </div>
 
-                                <span className='uppercase purple bold text-35'>
-                                    <span>Menu</span>
-                                    <span>Menu</span>
-                                </span>
+                        <div className={styles.right}>
 
-                                <span className='uppercase purple bold text-35'>
-                                    Close
+                            <div className={styles.icons}>
+
+                            </div>
+
+                            <div className={styles.tokens}>
+
+                            </div>
+
+                            <button className={styles.user}>
+
+                                <Avatar
+                                    image={user.image?.src}
+                                    alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
+                                    letter={user.name?.first}
+                                />
+
+                                <span className={styles.nameEmail}>
+
+                                    <span className='text-16 white bold'>
+                                        {user.name.first} {user.name.last && firstChar(user.name?.last) + '.'}
+                                    </span>
+
+                                    <span
+                                        className='text-14 white'
+                                        //{...(user.email.length > 20 ? { 'aria-label': user.email } : {})}
+                                        //data-balloon-pos='down-right'
+                                    >
+                                        {limitCharacters(user.email, 20)}
+                                    </span>
+
                                 </span>
 
                             </button>
@@ -163,37 +185,6 @@ export default function Menu() {
 
                     </div>
 
-                </div>
-            </section>
-
-            <section className={styles.fsMenu} id='fs-menu'>
-                <div className='container'>
-                    <div className={styles.flex}>
-
-                        <ul className={styles.menu}>
-                            {[
-                                {
-                                    name: 'Home',
-                                    href: pages.home
-                                }
-                            ].map((item, i) => (
-                                <li key={i}>
-                                    <Link
-                                        href={item.href}
-                                        className={clsx(
-                                            'text-95 bold uppercase',
-                                            {[styles.active]: currentPath === item.href}
-                                        )}
-                                        onClick={closeFsMenu}
-                                        data-text={item.name}
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-
-                    </div>
                 </div>
             </section>
 

@@ -3,6 +3,7 @@
 // libraries
 import clsx from 'clsx'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 // components
 import AccountWrapper from '@/layouts/Account'
@@ -15,6 +16,9 @@ import { pages } from '@/utils/routes'
 import styles from './index.module.scss'
 
 export default function Login() {
+
+	const router = useRouter()
+
 	return (
 		<AccountWrapper>
 			<div className={styles.page}>
@@ -31,7 +35,7 @@ export default function Login() {
 					<Form
 						className={styles.form}
 						endpoint='/api/auth'
-						onSuccess={() => alert("You're now logged in! But nothing will happen because we don't have the other screens YET")}
+						onSuccess={() => router.push(pages.dashboard_my_reports)}
 						onError={() => {}}
 					>
 

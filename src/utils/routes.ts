@@ -9,14 +9,15 @@ export const pages = {
 	error: '/404',
 
 	// login area
-	login: '/login',
-	register: '/register',
-	forgot: '/forgot-password',
-	forgot_confirmation: '/forgot-password-confirmation',
-	reset_password: '/reset-password',
-	reset_password_success: '/reset-password-success',
+	login: '/account/login',
+	register: '/account/register',
+	forgot: '/account/forgot-password',
+	forgot_confirmation: '/account/forgot-password-confirmation',
+	reset_password: '/account/reset-password',
+	reset_password_success: '/account/reset-password-success',
 
 	// dashboard
+	dashboard_my_reports: '/dashboard/my-reports',
 
 	// terms, privacy, etc
 	terms: '/terms-of-use',
