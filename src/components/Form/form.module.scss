@@ -83,9 +83,6 @@
 
         &:has(select) .sideIcon {
             pointer-events: none;
-            min-width: .675rem;
-            width: .675rem;
-            height: .675rem;
 
             svg {
                 opacity: .3;

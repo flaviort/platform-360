@@ -1,18 +1,16 @@
 'use client'
 
 // libraries
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
-import { usePathname } from 'next/navigation'
 
 // components
 import Avatar from '@/components/Avatar'
 
 // img / svg
 import Logo from '@/assets/svg/logo/logo.svg'
+import { CircleHelp, Mail, Bell, Zap, Folders, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Menu } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -21,15 +19,10 @@ import styles from './index.module.scss'
 import { pages } from '@/utils/routes'
 import { firstChar, limitCharacters } from '@/utils/functions'
 
-// db
+// db (temporary)
 import { user } from '@/db/db'
 
-export default function Menu() {
-
-    const currentPath = usePathname()
-
-    // animation ref
-    const menuAnimationRef = useRef<gsap.core.Timeline | null>(null)
+export default function TopMenu() {
 
     // open / close fs menu
     const [isShown, setIsShown] = useState(false)
@@ -41,66 +34,6 @@ export default function Menu() {
     const closeFsMenu = () => {
 		setIsShown(false)
 	}
-
-    useEffect(() => {
-		setIsShown(isShown)
-
-        if (menuAnimationRef.current) {
-            if (isShown) {
-                menuAnimationRef.current.play()
-                document.body.style.overflowY = 'scroll'
-                document.body.style.position = 'fixed'
-            } else {
-                menuAnimationRef.current.reverse()
-                document.body.style.overflowY = 'auto'
-                document.body.style.position = 'relative'
-            }
-        }
-	}, [isShown])
-
-    // menu animation
-    useGSAP(() => {
-        const menuAnimation = gsap.timeline({
-            paused: true
-        })
-
-        menuAnimation.to('#fs-menu', {
-            clipPath: 'inset(0% 0% 0% 0%)',
-            ease: 'power2.inOut',
-            duration: 1
-        })
-
-        menuAnimation.to('#logo-menu svg path', {
-            fill: '#F3F2EC',
-            ease: 'power2.inOut',
-            duration: .6
-        }, '-=1')
-    
-        menuAnimation.fromTo('#fs-menu li', {
-            y: 50,
-            autoAlpha: 0
-        }, {
-            y: 0,
-            autoAlpha: 1,
-            stagger: .05
-        }, '-=.5')
-
-        menuAnimation.fromTo('#fs-menu .button', {
-            y: 50,
-            autoAlpha: 0
-        }, {
-            y: 0,
-            autoAlpha: 1
-        }, '-=.4')
-
-        menuAnimation.to('#fs-menu', {
-            overflowY: 'auto',
-            duration: 0
-        })
-        
-        // store the animation timeline in the ref
-        menuAnimationRef.current = menuAnimation
-    })
 
     return (
         <>
@@ -124,7 +57,7 @@ export default function Menu() {
                                 {[
                                     {
                                         name: 'My Reports',
-                                        href: '#'
+                                        href: pages.dashboard_my_reports
                                     },
                                     {
                                         name: 'Solutions',
@@ -136,7 +69,7 @@ export default function Menu() {
                                     }
                                 ].map((item, i) => (
                                     <li key={i}>
-                                        <Link href={item.href} className='white medium'>
+                                        <Link href={item.href} className='white semi-bold'>
                                             {item.name}
                                         </Link>
                                     </li>
@@ -149,9 +82,48 @@ export default function Menu() {
 
                             <div className={styles.icons}>
 
+                                <button
+                                    className={clsx(styles.icon, styles.menu)}
+                                    aria-label='Help'
+                                >
+                                    <Menu />
+                                </button>
+
+                                <button
+                                    className={styles.icon}
+                                    aria-label='Help'
+                                    data-balloon-pos='down-center'
+                                >
+                                    <CircleHelp />
+                                </button>
+
+                                <button
+                                    className={styles.icon}
+                                    aria-label='Messages'
+                                    data-balloon-pos='down-center'
+                                >
+                                    <Mail />
+                                </button>
+
+                                <button
+                                    className={styles.icon}
+                                    aria-label='Notifications'
+                                    data-balloon-pos='down-center'
+                                >
+                                    <Bell />
+                                </button>
+
                             </div>
 
                             <div className={styles.tokens}>
+
+                                <button
+                                    className={clsx(styles.button, 'text-16 semi-bold')}
+                                >
+                                    <Zap className={styles.icon} />
+                                    <span className={styles.number}>104</span>
+                                    <span className={styles.text}>Tokens</span>
+                                </button>
 
                             </div>
 
@@ -171,10 +143,10 @@ export default function Menu() {
 
                                     <span
                                         className='text-14 white'
-                                        //{...(user.email.length > 20 ? { 'aria-label': user.email } : {})}
+                                        //{...(user.email.length > 15 ? { 'aria-label': user.email } : {})}
                                         //data-balloon-pos='down-right'
                                     >
-                                        {limitCharacters(user.email, 20)}
+                                        {limitCharacters(user.email, 15)}
                                     </span>
 
                                 </span>

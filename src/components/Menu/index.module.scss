@@ -1,14 +1,21 @@
+@use 'sass:color';
+
 .topMenu {
 	position: relative;
 	z-index: 90;
 	width: 100%;
-	padding: 1.5rem 0;
+	padding: 1.25rem 0;
 	background-color: $purple-dark;
+
+	@media #{$mq-sm-min} {
+		padding: 1.5rem 0;
+	}
 
 	.flex {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 1.5rem;
 
 		.left {
 			display: flex;
@@ -17,8 +24,18 @@
 
 			.logo {
 				display: flex;
-				width: 13rem;
+				width: 12rem;
+				max-width: 100%;
 				transition: .3s ease-in-out;
+
+				@media #{$mq-md-min} {
+					width: 13rem;
+				}
+
+				@media #{$mq-sm-max} {
+					max-width: 13rem;
+					width: 100%;
+				}
 	
 				&:hover,
 				&:focus-visible {
@@ -36,6 +53,10 @@
 				align-items: center;
 				gap: 2rem;
 
+				@media #{$mq-xl-max} {
+					display: none;
+				}
+
 				a {
 					opacity: .675;
 					transition: .3s ease-in-out;
@@ -49,26 +70,189 @@
 		}
 
 		.right {
-			.icons {
+			display: flex;
+			align-items: center;
 
+			@media #{$mq-sm-min} {
+				gap: .75rem;
+			}
+
+			@media #{$mq-md-min} {
+				gap: 1rem;
+			}
+
+			@media #{$mq-lg-min} {
+				gap: 1.5rem;
+			}
+
+			.icons {
+				display: flex;
+				align-items: center;
+				gap: 1.25rem;
+				order: 3;
+
+				@media #{$mq-md-min} {
+					margin-right: .5rem;
+					order: unset;
+				}
+
+				@media #{$mq-lg-min} {
+					gap: 1.5rem;
+				}
+
+				@media #{$mq-xl-min} {
+					gap: 2rem;
+				}
+
+				.icon {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 1rem;
+					min-width: 1rem;
+					height: 1rem;
+
+					&:hover,
+					&:focus-visible {
+						svg {
+							color: $purple-light;
+						}
+					}
+
+					&:not(.menu) {
+						@media #{$mq-md-max} {
+							display: none;
+						}
+					}
+
+					&.menu {
+						@media #{$mq-xl-min} {
+							display: none;
+						}
+
+						@media #{$mq-md-max} {
+							color: $purple;
+							background-color: $white;
+							border-radius: 50%;
+							width: 2.25rem;
+							height: 2.25rem;
+							min-width: 2.25rem;
+							padding: .575rem;
+							transition: .2s ease-in-out;
+						}
+
+						@media #{$mq-sm-max} {
+							border-radius: .275rem;
+							border-top-left-radius: 0;
+							border-bottom-left-radius: 0;
+							background-color: $purple;
+							color: $white;
+							border-left: var(--1px) solid $purple-dark;
+							height: 2.5rem;
+							width: 3rem;
+							padding: 0;
+						}
+
+						&:hover,
+						&:focus-visible {
+							@media #{$mq-md-max} {
+								background-color: $gray-200;
+							}
+
+							@media #{$mq-sm-max} {
+								background-color: color.adjust($purple, $lightness: 5%);
+							}
+
+							svg {
+								@media #{$mq-md-max} {
+									color: $purple-dark;
+								}
+
+								@media #{$mq-sm-max} {
+									color: $white;
+								}
+							}
+						}
+					}
+
+					svg {
+						width: 100%;
+						height: 100%;
+						transition: .2s ease-in-out;
+
+						@media #{$mq-sm-max} {
+							width: 1rem;
+							height: 1rem;
+						}
+					}
+				}
 			}
 
 			.tokens {
+				.button {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					padding: .375rem .875rem;
+					font-weight: $medium;
+					background-color: $purple;
+					border-radius: 2rem;
+					transition: .3s ease-in-out;
 
+					@media #{$mq-sm-max} {
+						height: 2.5rem;
+						padding: .5rem .75rem;
+						border-radius: .275rem;
+						border-top-right-radius: 0;
+						border-bottom-right-radius: 0;
+					}
+
+					&:hover,
+					&:focus-visible {
+						background-color: color.adjust($purple, $lightness: 5%);
+					}
+
+					.icon {
+						stroke-width: 0;
+						fill: $white;
+						width: 1rem;
+						min-width: 1rem;
+						height: 1rem;
+						margin-right: .25rem;
+
+						@media #{$mq-xl-min} {
+							margin-right: .5rem;
+						}
+					}
+
+					.text {
+						@media #{$mq-xl-max} {
+							display: none;
+						}
+					}
+				}
 			}
 
 			.user {
-				display: flex;
+				display: none;
 				align-items: center;
-				gap: .75rem;
+				gap: .5rem;
+
+				@media #{$mq-sm-min} {
+					display: flex;
+				}
 
 				.nameEmail {
-					display: flex;
+					display: none;
 					flex-direction: column;
 					text-align: left;
 
+					@media #{$mq-lg-min} {
+						display: flex;
+					}
+
 					span {
-						line-height: 1.4;
+						line-height: 1.3;
 					}
 				}
 			}

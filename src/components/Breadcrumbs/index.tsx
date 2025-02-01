@@ -2,14 +2,14 @@
 import clsx from 'clsx'
 import Link from 'next/link'
 
-// img / svg
-import UxAngleRight from '@/assets/svg/ux/angle-right.svg'
+// svg
+import { ChevronRight } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
 
 interface BreadcrumbsProps {
-    breadcrumbs: Array<{
+    breadcrumbs?: Array<{
         name: string
         link: string
     }>
@@ -22,7 +22,7 @@ export default function Breadcrumbs({
         <section className={clsx(styles.component, 'bg-gray-200 gray-500')}>
             <div className='container container--big'>
                 <ul className={styles.breadcrumbs}>
-                    {breadcrumbs.map((item, i) => (
+                    {breadcrumbs?.map((item, i) => (
                         <li key={i}>
 
                             <Link
@@ -33,7 +33,7 @@ export default function Breadcrumbs({
                             </Link>
 
                             {i < breadcrumbs.length - 1 && (
-                                <UxAngleRight />
+                                <ChevronRight />
                             )}
 
                         </li>

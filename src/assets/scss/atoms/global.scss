@@ -45,9 +45,9 @@ canvas, img, video, picture, figure {
 	height: auto;
 	box-sizing: border-box;
 	display: block;
- }
+}
 
-svg {
+svg:not(.lucide) {
     max-width: 100%;
 	height: auto;
     fill: currentColor;
@@ -55,7 +55,6 @@ svg {
 
 button {
 	appearance: none;
-	outline: none;
 	border: none;
 	background-color: transparent;
 	cursor: pointer;
@@ -72,7 +71,6 @@ a, a:hover {
 
 textarea, input, select {
 	appearance: none;
-	outline: none;
 }
 
 textarea {

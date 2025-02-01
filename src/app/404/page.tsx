@@ -16,7 +16,9 @@ export const metadata = {
 export default function Error404() {
 	return (
 		<main className={styles.page}>
-
+			<section>
+				error 404
+			</section>
 		</main>
 	)
 }

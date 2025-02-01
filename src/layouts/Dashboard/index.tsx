@@ -1,5 +1,5 @@
 // components
-import Menu from '@/components/Menu'
+import TopMenu from '@/components/Menu'
 
 // css
 import styles from './index.module.scss'
@@ -14,7 +14,7 @@ export default function DashboardWrapper({
 	return (
 		<main className={styles.component}>
 			
-			<Menu />
+			<TopMenu />
 
 			{children}
 

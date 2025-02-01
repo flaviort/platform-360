@@ -6,11 +6,7 @@ import React, { useRef, useState } from 'react'
 import { useForm, FormProvider, useFormContext, SubmitHandler, RegisterOptions } from 'react-hook-form'
 
 // svg
-import UxEye from '@/assets/svg/ux/eye.svg'
-import UxEyeSlash from '@/assets/svg/ux/eye-slash.svg'
-import UxAngleDown from '@/assets/svg/ux/angle-down.svg'
-import UxSpinner from '@/assets/svg/ux/spinner.svg'
-import UxCheck from '@/assets/svg/ux/check.svg'
+import { Check, LoaderCircle, ChevronDown, Eye, EyeOff } from 'lucide-react'
 
 // css
 import styles from './form.module.scss'
@@ -315,9 +311,9 @@ export const Input = ({
                         type='button'
                     >
                         {isPasswordVisible ? (
-                            <UxEyeSlash />
+                            <EyeOff />
                         ) : (
-                            <UxEye />
+                            <Eye />
                         )}
                     </button>
                 )}
@@ -415,7 +411,7 @@ export const Select = ({
                 </select>
 
                 <span className={styles.sideIcon}>
-                    <UxAngleDown />
+                    <ChevronDown />
                 </span>
 
             </div>
@@ -559,8 +555,8 @@ export const Submit = ({
             </span>
 
             <span className='button__loading'>
-                <span className='rotation' style={{ '--speed': '.3' } as any}>
-                    <UxSpinner />
+                <span className='rotation' style={{ '--speed': '.5' } as any}>
+                    <LoaderCircle />
                 </span>
             </span>
 
@@ -631,7 +627,7 @@ export const Checkbox = ({
             <span className={styles.radioWrapperInner}>
 
                 <span className={styles.radioBox}>
-                    <UxCheck />
+                    <Check />
                 </span>
 
                 <span className={clsx(styles.radioText, 'text-14')}>

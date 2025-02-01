@@ -1,10 +1,10 @@
 // pages
-import DashboardHome from '@/app/dashboard/home/page'
+import DashboardMyReports from '@/app/dashboard/my-reports/page'
 
 export default function Default() {
 	return (
 		<>
-			<DashboardHome />
+			<DashboardMyReports />
 		</>
 	)
 }
