@@ -46,7 +46,7 @@ export default function TopMenu() {
                         <div className={styles.left}>
 
                             <Link
-                                href={pages.dashboard_my_reports}
+                                href={pages.dashboard.my_reports}
                                 aria-label='Go to homepage'
                                 className={styles.logo}
                             >
@@ -57,7 +57,7 @@ export default function TopMenu() {
                                 {[
                                     {
                                         name: 'My Reports',
-                                        href: pages.dashboard_my_reports
+                                        href: pages.dashboard.my_reports
                                     },
                                     {
                                         name: 'Solutions',

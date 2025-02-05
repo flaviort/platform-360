@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 // components
 import AccountWrapper from '@/layouts/Account'
@@ -20,6 +21,8 @@ export default function Register() {
 
 	const [differentArea, setDifferentArea] = useState(false)
 
+	const router = useRouter()
+
 	return (
 		<AccountWrapper>
 			<div className={styles.page}>
@@ -35,8 +38,8 @@ export default function Register() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/auth'
-						onSuccess={() => {}}
+						endpoint='/api/account/register'
+						onSuccess={() => router.push(pages.account.register_confirmation)}
 						onError={() => {}}
 					>
 
@@ -218,7 +221,7 @@ export default function Register() {
 				</div>
 
 				<p className={clsx(styles.bottomText, 'text-18')}>
-					Already have an account? <Link href={pages.login} className='hover-underline blue medium'>Sign in</Link>
+					Already have an account? <Link href={pages.account.login} className='hover-underline blue medium'>Sign in</Link>
 				</p>
 
 			</div>

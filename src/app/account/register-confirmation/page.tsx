@@ -1,7 +1,4 @@
-'use client'
-
 // libraries
-import clsx from 'clsx'
 import Link from 'next/link'
 
 // components
@@ -13,28 +10,26 @@ import { pages } from '@/utils/routes'
 // css
 import styles from './index.module.scss'
 
-export default function ForgotPasswordConfirmation() {
+export default function RegisterConfirmation() {
 	return (
 		<AccountWrapper>
 			<div className={styles.page}>
 				<div className={styles.whiteBlock}>
 
 					<h2 className='text-25 bold'>
-						Check your Email
+						You're almost set!
 					</h2>
 
-					<p className={clsx(styles.desc, 'text-16')}>
-						An email with instructions to reset your password has been sent to you.<br /><br />
-
-						Remember to check your spam folder in case you didn't find the email.
+					<p className='text-16'>
+						Thanks for registering! We’ve emailed you a link to confirm your account, please check both your inbox and spam folder. Once you confirm, your account will be ready to use.
 					</p>
 
 					<Link
 						href={pages.account.login}
-						className={clsx(styles.button, 'button button--gradient-blue text-16')}
+						className='button text-16 button--gradient-blue uppercase'
 					>
 						<span className='button__text'>
-							Back
+							Login	
 						</span>
 					</Link>
 

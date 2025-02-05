@@ -28,7 +28,7 @@ export default function ResetPasswordSuccess() {
 					</p>
 
 					<Link
-						href={pages.login}
+						href={pages.account.login}
 						className={clsx(styles.submit, 'button button--gradient-blue text-16')}
 					>
 						<span className='button__text'>

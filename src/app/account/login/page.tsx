@@ -34,8 +34,8 @@ export default function Login() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/auth'
-						onSuccess={() => router.push(pages.dashboard_my_reports)}
+						endpoint='/api/account/auth'
+						onSuccess={() => router.push(pages.dashboard.my_reports)}
 						onError={() => {}}
 					>
 
@@ -67,7 +67,7 @@ export default function Login() {
 									name='remember'
 								/>
 
-								<Link href={pages.forgot} className={clsx(styles.forgot, 'hover-underline blue text-14')}>
+								<Link href={pages.account.forgot} className={clsx(styles.forgot, 'hover-underline blue text-14')}>
 									Forgot your password?
 								</Link>
 
@@ -86,7 +86,7 @@ export default function Login() {
 				</div>
 
 				<p className={clsx(styles.bottomText, 'text-18')}>
-					Don't have an account? <Link href={pages.register} className='hover-underline blue medium'>Register now</Link>
+					Don't have an account? <Link href={pages.account.register} className='hover-underline blue medium'>Register now</Link>
 				</p>
 
 			</div>

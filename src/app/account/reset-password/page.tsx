@@ -34,8 +34,8 @@ export default function ResetPassword() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/reset-password'
-						onSuccess={() => router.push(pages.reset_password_success)}
+						endpoint='/api/account/reset-password'
+						onSuccess={() => router.push(pages.account.reset_password_success)}
 						onError={() => {}}
 					>
 
@@ -68,7 +68,7 @@ export default function ResetPassword() {
 							text='Reset Password'
 						/>
 
-						<Link href={pages.login} className='hover-underline text-16 gray-400'>
+						<Link href={pages.account.login} className='hover-underline text-16 gray-400'>
 							Cancel
 						</Link>
 

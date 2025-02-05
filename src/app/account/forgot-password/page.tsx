@@ -34,8 +34,8 @@ export default function ForgotPassword() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/forgot-password'
-						onSuccess={() => router.push(pages.forgot_confirmation)}
+						endpoint='/api/account/forgot-password'
+						onSuccess={() => router.push(pages.account.forgot_confirmation)}
 						onError={() => {}}
 					>
 
@@ -61,7 +61,7 @@ export default function ForgotPassword() {
 				</div>
 
 				<p className={clsx(styles.bottomText, 'text-18')}>
-					Remember your password? <Link href={pages.login} className='hover-underline blue medium'>Sign in</Link>
+					Remember your password? <Link href={pages.account.login} className='hover-underline blue medium'>Sign in</Link>
 				</p>
 
 			</div>
