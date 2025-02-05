@@ -12,12 +12,12 @@ export default function DashboardWrapper({
 	children
 }: DashboardWrapperProps) {
 	return (
-		<main className={styles.component}>
+		<>
 			
 			<TopMenu />
 
 			{children}
 
-		</main>
+		</>
 	)
 }

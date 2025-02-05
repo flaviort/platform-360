@@ -1,0 +1,26 @@
+.component {
+	padding-top: 1.5rem;
+	padding-bottom: 1.5rem;
+
+	@media #{$mq-md-min} {
+		padding-top: 2rem;
+		padding-bottom: 2rem;
+	}
+
+	.flex {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 2rem;
+
+		.left {
+			display: flex;
+			flex-direction: column;
+			gap: .5rem;
+
+			@media #{$mq-md-min} {
+				gap: .75rem;
+			}
+		}
+	}
+}

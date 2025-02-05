@@ -46,6 +46,19 @@
         }
     }
 
+    &--hollow-light {
+        background-color: transparent;
+        border: var(--1px) solid $gray-400;
+        color: $gray-400;
+
+        &:hover,
+        &:focus-visible {
+            background-color: $blue;
+            border-color: $blue;
+            color: $white;
+        }
+    }
+
     &--hollow-white {
         border: var(--1px) solid $white;
         color: $white;

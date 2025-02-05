@@ -51,53 +51,21 @@ export const metadata: Metadata = {
 	}
 }
 
+interface RootLayoutProps {
+	children: React.ReactNode
+}
+
 export default function RootLayout({
 	children
-}: {
-	children: React.ReactNode
-}) {
-
-	// schema
-	const jsonLd = {
-		"@context": "https://schema.org/",
-		"@type": "Organization",
-		"name": "Platform 360",
-		"logo": "https://platform360.com/img/logo.png",
-		"url": "https://platform360.com",
-		"worksFor": {
-			"@type": "Organization",
-			"name": "Platform 360"
-		},
-		"description": "Platform 360° provides turnkey data solutions addressing competitive analysis across products and retailers.",
-		"keywords": [
-			"Data-Driven Insights",
-			"Competitive Analysis",
-			"Emerging Trends",
-			"Historical Data",
-			"Consumer Preferences",
-			"AI (Artificial Intelligence)",
-			"Market Trends",
-			"Product Development",
-			"Customizable Reports",
-			"Actionable Solutions"
-		]
-	}
-
+}: RootLayoutProps) {
 	return (
 		<html lang='en-US' className={clsx(inter.className)}>
 
 			<body id='start'>
 
-				<div id='main-content'>
-					{children}
-				</div>
+				{children}
 
 				<Guidelines />
-
-				<script
-					type='application/ld+json'
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-				/>
 
 				<GoogleAnalytics gaId='G-FE8FLM7CTP' />
 
