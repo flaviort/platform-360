@@ -22,14 +22,14 @@
                     gap: 1.5rem;
                 }
 
-                @media #{$mq-xs-max} {
+                @media #{$mq-sm-max} {
                     width: 100%;
                 }
 
                 .filters {
                     position: relative;
 
-                    @media #{$mq-xs-max} {
+                    @media #{$mq-sm-max} {
                         width: 100%;
                     }
 
@@ -37,7 +37,7 @@
                         padding: .75rem 1rem;
                         gap: .5rem;
 
-                        @media #{$mq-xs-max} {
+                        @media #{$mq-sm-max} {
                             width: 100%;
                             justify-content: space-between;
                             padding: .75rem;
@@ -49,7 +49,7 @@
                             height: 1rem;
 
                             &:first-child {
-                                @media #{$mq-xs-max} {
+                                @media #{$mq-sm-max} {
                                     display: none;
                                 }
                             }
@@ -62,7 +62,7 @@
                     align-items: center;
                     gap: 1.25rem;
 
-                    @media #{$mq-xs-max} {
+                    @media #{$mq-sm-max} {
                         width: 100%;
                     }
 
@@ -74,7 +74,7 @@
                             display: none;
                         }
 
-                        @media #{$mq-xs-max} {
+                        @media #{$mq-sm-max} {
                             width: 100%;
                             justify-content: space-between;
                             padding: .75rem;
@@ -254,6 +254,311 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    .list {
+        position: relative;
+        overflow: hidden;
+
+        &:after {
+            content: '';
+            position: absolute;
+            z-index: 2;
+            bottom: 0;
+            right: 0;
+            width: 1.075rem;
+            height: .5rem;
+            background-color: $white;
+
+            @media #{$mq-lg-min} {
+                width: calc((100vw - 92%) / 2);
+            }
+
+            @media #{$mq-lg-min} {
+                width: calc(2rem - .675rem);
+            }
+
+            @media #{$mq-xl-min} {
+                content: none;
+            }
+        }
+
+        .listWrapper {
+            position: relative;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+
+            @media #{$mq-xl-min} {
+                overflow-x: hidden;
+            }
+
+            @media #{$mq-lg-max} {
+                width: calc(100% + 3rem);
+            }
+
+            @media #{$mq-md-max} {
+                width: calc(100% + 2rem);
+            }
+
+            @media #{$mq-sm-max} {
+                width: calc(100% + 1.75rem);
+            }
+
+            @media #{$mq-xs-max} {
+                width: calc(100% + 1rem);
+            }
+
+            &::-webkit-scrollbar {
+                height: .25rem;
+            }
+            
+            &::-webkit-scrollbar-track {
+                background: $gray-200;
+            }
+            
+            &::-webkit-scrollbar-thumb {
+                background: $purple;
+                border-radius: .25rem;
+            }
+            
+            &::-webkit-scrollbar-thumb:hover {
+                cursor: grab;
+            }
+
+            > * {
+                &:last-child {
+                    &.listItem {
+                        border-bottom: none;
+                    }
+
+                    &.listGroup {
+                        .listItem {
+                            &:last-child {
+                                border-bottom: none;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .listTitle {
+                position: relative;
+                display: grid;
+                grid-template-columns: 2.5fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
+                padding: 1rem 0;
+                border-top: var(--1px) solid $gray-200;
+                border-bottom: var(--1px) solid $gray-200;
+                min-width: 60rem;
+                margin-bottom: calc(var(--1px) * -1);
+
+                @media #{$mq-sm-min} {
+                    min-width: 55rem;
+                }
+
+                button {
+                    display: flex;
+                    align-items: center;
+                    gap: .275rem;
+                    transition: .1s ease-in-out;
+                    text-align: left;
+
+                    &:hover,
+                    &:focus-visible {
+                        color: $gray-500;
+                    }
+                }
+            }
+
+            .listGroup {
+                .listGroupTitle {
+                    background-color: rgba($gray-200, .5);
+                    border-top: var(--1px) solid $gray-200;
+                    border-bottom: var(--1px) solid $gray-200;
+                    padding: 1rem;
+                    min-width: 60rem;
+
+                    @media #{$mq-sm-min} {
+                        min-width: 55rem;
+                    }
+                }
+            }
+
+            .listItem {
+                position: relative;
+                display: grid;
+                align-items: center;
+                grid-template-columns: 2.5fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
+                padding: 1rem 0;
+                border-top: var(--1px) solid $gray-200;
+                border-bottom: var(--1px) solid $gray-200;
+                transition: .1s ease-in-out;
+                min-width: 60rem;
+
+                @media #{$mq-sm-min} {
+                    min-width: 55rem;
+                }
+
+                &:hover,
+                &:focus-visible {
+                    background-color: $gray-100;
+                }
+
+                .nameCol {
+
+                }
+
+                .statusCol {
+                    padding-left: .875rem;
+
+                    .status {
+                        font-size: 0;
+                        color: transparent;
+                        display: block;
+                        width: .875rem;
+                        min-width: .875rem;
+                        height: .875rem;
+                        border-radius: 50%;
+                        padding: 0;
+                        margin: 0;
+
+                        &.empty {
+                            border: .1rem dashed $gray-400;
+                        }
+
+                        &.red {
+                            background-color: #F87171;
+                        }
+
+                        &.yellow {
+                            background-color: #FDE047;
+                        }
+
+                        &.green {
+                            background-color: #86EFAC;
+                        }
+                    }
+                }
+
+                .categoryCol {
+
+                }
+
+                .dateCol {
+                    .at {
+                        @media #{$mq-xl-max} {
+                            display: none;
+                        }
+                    }
+
+                    br {
+                        @media #{$mq-xl-min} {
+                            display: none;
+                        }
+                    }
+                }
+
+                .productCol {
+
+                }
+
+                .createdByCol {
+                    display: flex;
+                    align-items: center;
+                    gap: .75rem;
+                }
+
+                .actionCol {
+                    .ellipsis {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 2rem;
+                        min-width: 2rem;
+                        height: 2rem;
+                        padding: .5rem;
+                        color: $gray-500;
+                        transition: .2s ease-in-out;
+                        border-radius: .25rem;
+
+                        &:hover,
+                        &:focus-visible {
+                            color: $white;
+                            background-color: $gray-500;
+                        }
+
+                        svg {
+                            width: 100%;
+                            height: auto;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .pagination {
+        .flex {
+            border-top: var(--1px) solid $gray-400;
+            padding-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+
+            .left {
+
+            }
+
+            .right {
+                display: flex;
+                align-items: center;
+                gap: .5rem;
+
+                @media #{$mq-lg-min} {
+                    padding-right: 1rem;
+                }
+
+                button {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 2rem;
+                    min-width: 2rem;
+                    height: 2rem;
+                    padding: .25rem;
+                    color: $gray-600;
+                    transition: .3s ease-in-out;
+
+                    &:disabled {
+                        color: $gray-400!important;
+                        pointer-events: none!important;
+                    }
+
+                    &:hover,
+                    &:focus {
+                        color: $blue;
+                    }
+
+                    &:first-child {
+                        &:hover,
+                        &:focus-visible {
+                            transform: translateX(-.25rem);
+                        }
+                    }
+
+                    &:last-child {
+                        &:hover,
+                        &:focus-visible {
+                            transform: translateX(.25rem);
+                        }
+                    }
+
+                    svg {
+                        width: 100%;
                     }
                 }
             }

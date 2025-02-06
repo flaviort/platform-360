@@ -1,0 +1,43 @@
+.component {
+	display: flex;
+	align-items: center;
+
+	> * {
+		margin-left: -.75rem;
+		box-shadow: 0 0 0 .1rem $white;
+
+		&:nth-child(2) {
+			z-index: 2;
+		}
+
+		&:nth-child(3) {
+			z-index: 3;
+		}
+
+		&:nth-child(4) {
+			z-index: 4;
+		}
+	}
+
+	.plus {
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		width: 2.125rem;
+		min-width: 2.125rem;
+		height: 2.125rem;
+		background-color: $gray-200;
+		color: $blue;
+		text-transform: uppercase;
+		font-weight: $medium;
+
+		svg {
+			width: .875rem;
+			min-width: .875rem;
+			height: .875rem;
+		}
+	}
+}
