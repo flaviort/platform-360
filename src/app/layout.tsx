@@ -63,6 +63,8 @@ export default function RootLayout({
 
 			<body id='start'>
 
+				<div id='portal'></div>
+
 				{children}
 
 				<Guidelines />

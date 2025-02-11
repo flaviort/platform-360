@@ -8,6 +8,7 @@ import { fakeProjects } from '@/db/fake-projects'
 
 // css
 import styles from './index.module.scss'
+import Dialog from '@/components/Dialog'
 
 export default function DashboardMyReports() {
 

@@ -4,14 +4,18 @@
 import clsx from 'clsx'
 import Link from 'next/link'
 import { StaticImageData } from 'next/image'
+import { useState, useEffect, useRef } from 'react'
 
 // components
 import Avatar from '@/components/Avatar'
 import MultipleAvatar from '@/components/MultipleAvatar'
 import Filters from './filters'
+import Portal from '@/components/Utils/Portal'
+import usePopoverPosition from '@/components/Utils/Portal/usePopoverPosition'
+import Fancybox from '@/components/Utils/Fancybox'
 
 // img / svg
-import { Ellipsis, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Ellipsis, ArrowLeft, ArrowRight, FilePenLine, Trash2, LoaderCircle } from 'lucide-react'
 import UxSort from '@/assets/svg/ux/sort.svg'
 
 // css
@@ -171,6 +175,62 @@ interface ListItemProps {
 export function ListItem({
 	item
 }: ListItemProps) {
+
+	// options
+	const [optionsSub, setOptionsSub] = useState(false)
+	const optionsSubRef = useRef<HTMLDivElement>(null)
+	const popoverRef = useRef<HTMLDivElement>(null)
+
+	const popoverStyle = usePopoverPosition(optionsSubRef, optionsSub)
+
+	const openOptionsSub = () => {
+		setOptionsSub((prev) => !prev)
+	}
+
+	const closeOptionsSub = () => {
+		setOptionsSub(false)
+	}
+
+	useEffect(() => {
+		function handleKeyDown(e: KeyboardEvent) {
+			if (e.key === 'Escape' && optionsSub) {
+				closeOptionsSub()
+			}
+		}
+
+		function handleClickOutside(e: MouseEvent) {
+			if (!optionsSub) return
+	  
+			const target = e.target as Node
+
+			// if clicked inside toggle / buttons
+			if (optionsSubRef.current?.contains(target)) {
+				return
+			}
+			
+			// if click inside the popover itself
+			if (popoverRef.current?.contains(target)) {
+				return
+			}
+
+			// if clicks inside the fancybox
+			const fancyboxContainer = document.getElementById('confirm-delete')
+			if (fancyboxContainer && fancyboxContainer.contains(target)) {
+				return
+			}
+
+			closeOptionsSub()
+		}
+	  
+		document.addEventListener('mousedown', handleClickOutside)
+		document.addEventListener('keydown', handleKeyDown)
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown)
+			document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [optionsSub])
+
 	return (
 		<div className={styles.listItem}>
 
@@ -241,14 +301,135 @@ export function ListItem({
 				/>
 			</div>
 			
-			<div className={styles.actionCol}>
+			<div className={styles.actionCol} ref={optionsSubRef}>
+				
 				<button
-					className={styles.ellipsis}
-					data-balloon-pos='up'
+					className={clsx(
+						styles.ellipsis,
+						optionsSub && styles.open
+					)}
+					data-balloon-pos='up-right'
 					aria-label='Options'
+					onClick={openOptionsSub}
 				>
 					<Ellipsis />
 				</button>
+
+				{optionsSub && (
+    				<Portal>
+						<div
+							ref={popoverRef}
+							className={clsx(
+								styles.optionsSub,
+								optionsSub && styles.open
+							)}
+							style={popoverStyle}
+						>
+							<div className={styles.subWrapper}>
+
+								<Link
+									href='#'
+									className='text-14 bold'
+									onClick={closeOptionsSub}
+								>
+
+									<FilePenLine />
+
+									<span>
+										Edit
+									</span>
+
+								</Link>
+
+								<Fancybox
+									options={{
+										on: {
+											done: (fancybox: any) => {
+
+												const no = fancybox.container.querySelector('.no')
+												const yes = fancybox.container.querySelector('.yes')
+
+												no?.addEventListener('click', () => (
+													console.log('no'),
+													setTimeout(() => {
+														closeOptionsSub()	
+													}, 300)
+												))
+
+												yes?.addEventListener('click', () => (
+													console.log('yes'),
+													setTimeout(() => {
+														closeOptionsSub()	
+													}, 300)
+												))
+											}
+										}
+									}}
+								>
+									<a
+										href='#confirm-delete'
+										data-fancybox
+										className='text-14 bold red'
+									>
+
+										<Trash2 />
+
+										<span>
+											Delete
+										</span>
+
+									</a>
+
+									<div className={styles.popup} id='confirm-delete'>
+
+										<h2 className='text-45 bold'>
+											Are you sure?
+										</h2>
+
+										<p className='text-16'>
+											This is a destructive action and cannot be undone.
+										</p>
+
+										<div className={styles.buttons}>
+
+											<button
+												className='button button--gradient-blue text-16 no'
+												data-fancybox-close
+											>
+												No
+											</button>
+
+											<button
+												className={clsx(
+													styles.confirm,
+													'button button--hollow text-16 yes'
+												)}
+												data-fancybox-close
+											>
+												
+												<span className='button__text'>
+													Yes
+												</span>
+
+												<span className='button__loading'>
+													<span className='rotation' style={{ '--speed': '.5' } as any}>
+														<LoaderCircle />
+													</span>
+												</span>
+
+											</button>
+
+										</div>
+
+									</div>
+
+								</Fancybox>
+
+							</div>
+						</div>
+					</Portal>
+				)}
+
 			</div>
 
 		</div>
