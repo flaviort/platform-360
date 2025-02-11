@@ -2,6 +2,9 @@
     overflow: hidden;
 
     .filtersSection {
+        position: relative;
+        z-index: 2;
+
         .flex {
             position: relative;
             display: flex;
@@ -43,6 +46,18 @@
                             padding: .75rem;
                         }
 
+                        &.open {
+                            background-color: $blue;
+                            border-color: $blue;
+                            color: $white;
+
+                            svg {
+                                &:last-child {
+                                    transform: rotate(180deg);
+                                }
+                            }
+                        }
+
                         svg {
                             width: 1rem;
                             min-width: 1rem;
@@ -53,11 +68,65 @@
                                     display: none;
                                 }
                             }
+
+                            &:last-child {
+                                transition: transform .2s ease-in-out;
+                            }
+                        }
+                    }
+
+                    .sub {
+                        position: absolute;
+                        z-index: 2;
+                        top: calc(100% + .25rem);
+                        left: 0;
+                        background-color: $pure-white;
+                        box-shadow: 0 0 1rem 0 rgba($black, .025);
+                        border-radius: .25rem;
+                        border: var(--1px) solid $gray-200;
+                        display: flex;
+                        opacity: 0;
+                        visibility: hidden;
+                        transition: .3s ease-in-out;
+
+                        @media #{$mq-sm-max} {
+                            min-width: 100%;
+                        }
+
+                        &.open {
+                            opacity: 1;
+                            visibility: visible;
+                        }
+                        
+                        .subWrapper {
+                            display: flex;
+                            flex-direction: column;
+                            width: 100%;
+
+                            button {
+                                padding: .75rem 1.25rem;
+                                border-bottom: var(--1px) solid $gray-200;
+                                white-space: nowrap;
+                                transition: .1s ease-in-out;
+                                width: 100%;
+                                text-align: left;
+                                min-width: 12rem;
+
+                                &:hover,
+                                &:focus-visible {
+                                    background-color: $gray-100;
+                                }
+
+                                &:last-child {
+                                    border-bottom: none;
+                                }
+                            }
                         }
                     }
                 }
 
                 .products {
+                    position: relative;
                     display: flex;
                     align-items: center;
                     gap: 1.25rem;
@@ -80,10 +149,79 @@
                             padding: .75rem;
                         }
 
+                        &.open {
+                            background-color: $blue;
+                            border-color: $blue;
+                            color: $white;
+
+                            svg {
+                               transform: rotate(180deg);
+                            }
+                        }
+
                         svg {
                             width: 1rem;
                             min-width: 1rem;
                             height: 1rem;
+                            transition: transform .2s ease-in-out;
+                        }
+                    }
+
+                    .sub {
+                        position: absolute;
+                        z-index: 2;
+                        top: calc(100% + .25rem);
+                        left: 0;
+                        background-color: $pure-white;
+                        box-shadow: 0 0 1rem 0 rgba($black, .025);
+                        border-radius: .25rem;
+                        border: var(--1px) solid $gray-200;
+                        display: flex;
+                        opacity: 0;
+                        visibility: hidden;
+                        transition: .3s ease-in-out;
+
+                        @media #{$mq-sm-max} {
+                            min-width: 100%;
+                        }
+
+                        &.open {
+                            opacity: 1;
+                            visibility: visible;
+                        }
+                        
+                        .subWrapper {
+                            display: flex;
+                            flex-direction: column;
+                            width: 100%;
+
+                            button {
+                                padding: .75rem 1.25rem;
+                                border-bottom: var(--1px) solid $gray-200;
+                                white-space: nowrap;
+                                transition: .1s ease-in-out;
+                                width: 100%;
+                                text-align: left;
+                                display: flex;
+                                align-items: center;
+                                gap: .75rem;
+                                min-width: 12rem;
+
+                                &:hover,
+                                &:focus-visible {
+                                    background-color: $gray-100;
+                                }
+
+                                &:last-child {
+                                    border-bottom: none;
+                                }
+
+                                svg {
+                                    width: 1rem;
+                                    min-width: 1rem;
+                                    height: 1rem;
+                                }
+                            }
                         }
                     }
 
@@ -196,19 +334,72 @@
                             height: auto;
                             visibility: hidden;
                             opacity: 0;
-                            top: 100%;
+                            top: calc(100% + .25rem);
                             right: 0;
+                            width: 100%;
+                            padding: 1rem;
+                            background-color: $pure-white;
+                            box-shadow: 0 0 1rem 0 rgba($black, .025);
+                            border-radius: .25rem;
+                            border: var(--1px) solid $gray-200;
+                            transition: .3s ease-in-out;
                         }
 
-                        svg {
+                        &.open {
+                            opacity: 1;
+                            visibility: visible;
+                        }
+
+                        .icon {
                             position: absolute;
                             z-index: 2;
                             top: 50%;
                             left: .75rem;
                             transform: translateY(-50%);
+                            display: flex;
                             width: 1rem;
                             height: 1rem;
                             color: $gray-400;
+
+                            @media #{$mq-xl-max} {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: .5rem;
+                                width: auto;
+                                height: auto;
+                                padding: .95rem 1rem;
+                                color: $white;
+                                border-radius: .275rem;
+                                border-top-left-radius: 0;
+                                border-bottom-left-radius: 0;
+                                left: auto;
+                                right: 1rem;
+                                @include gradient-left-right($blue-light, $blue);
+                                transition: .3s ease-in-out;
+
+                                &:hover,
+                                &:focus-visible {
+                                    filter: brightness(1.1);
+                                }
+                            }
+
+                            span {
+                                @media #{$mq-xl-min} {
+                                    display: none;
+                                }
+                            }
+
+                            svg {
+                                width: 100%;
+                                height: 100%;
+
+                                @media #{$mq-xl-max} {
+                                    width: 1rem;
+                                    min-width: 1rem;
+                                    height: 1rem;
+                                }
+                            }
                         }
 
                         .input {
@@ -228,17 +419,36 @@
                             @media #{$mq-3xl-min} {
                                 width: 22rem;
                             }
+
+                            @media #{$mq-xl-max} {
+                                width: 100%;
+                                padding: 1rem 8rem 1rem 1rem;
+                            }
                         }
                     }
                 }
 
                 .new {
+                    position: relative;
+
                     .button {
                         padding: .75rem;
 
                         @media #{$mq-sm-min} {
                             padding: .75rem 1rem;
                             gap: .25rem;
+                        }
+
+                        &.open {
+                            background-color: $blue;
+                            border-color: $blue;
+                            color: $white;
+
+                            svg {
+                                &:last-child {
+                                    transform: rotate(180deg);
+                                }
+                            }
                         }
 
                         span {
@@ -249,9 +459,76 @@
 
                         svg {
                             &:last-child {
+                                transition: transform .2s ease-in-out;
+
                                 @media #{$mq-sm-max} {
                                     display: none;
                                 }
+                            }
+                        }
+                    }
+
+                    .sub {
+                        position: absolute;
+                        z-index: 2;
+                        top: calc(100% + .25rem);
+                        right: 0;
+                        background-color: $pure-white;
+                        box-shadow: 0 0 1rem 0 rgba($black, .025);
+                        border-radius: .25rem;
+                        border: var(--1px) solid $gray-200;
+                        display: flex;
+                        opacity: 0;
+                        visibility: hidden;
+                        transition: .3s ease-in-out;
+
+                        @media #{$mq-sm-max} {
+                            min-width: 100%;
+                        }
+
+                        &.open {
+                            opacity: 1;
+                            visibility: visible;
+                        }
+                        
+                        .subWrapper {
+                            display: flex;
+                            flex-direction: column;
+                            width: 100%;
+
+                            p {
+                                display: block;
+                                padding: .75rem 1.25rem .25rem 1.25rem;
+                            }
+
+                            button {
+                                padding: .75rem 1.25rem;
+                                white-space: nowrap;
+                                transition: .1s ease-in-out;
+                                width: 100%;
+                                text-align: left;
+                                display: flex;
+                                align-items: center;
+                                gap: .75rem;
+                                min-width: 12rem;
+
+                                &:hover,
+                                &:focus-visible {
+                                    background-color: $gray-100;
+                                }
+
+                                svg {
+                                    width: 1rem;
+                                    min-width: 1rem;
+                                    height: 1rem;
+                                }
+                            }
+
+                            .line {
+                                display: block;
+                                width: 100%;
+                                height: var(--1px);
+                                background-color: rgba($gray-300, .5);
                             }
                         }
                     }

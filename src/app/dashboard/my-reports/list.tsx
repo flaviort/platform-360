@@ -7,6 +7,7 @@ import { StaticImageData } from 'next/image'
 
 // components
 import Avatar from '@/components/Avatar'
+import MultipleAvatar from '@/components/MultipleAvatar'
 import Filters from './filters'
 
 // img / svg
@@ -15,7 +16,6 @@ import UxSort from '@/assets/svg/ux/sort.svg'
 
 // css
 import styles from './index.module.scss'
-import MultipleAvatar from '@/components/MultipleAvatar'
 
 export interface ListProps {
     projects: Array<{
