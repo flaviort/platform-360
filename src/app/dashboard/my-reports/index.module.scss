@@ -377,14 +377,26 @@
                                 right: 1rem;
                                 @include gradient-left-right($blue-light, $blue);
                                 transition: .3s ease-in-out;
+                            }
 
-                                &:hover,
-                                &:focus-visible {
+                            @media #{$mq-sm-max} {
+                                padding: 1.05rem;
+                            }
+
+                            &:hover,
+                            &:focus-visible {
+                                @media #{$mq-xl-max} {
                                     filter: brightness(1.1);
                                 }
                             }
 
                             span {
+                                display: none;
+
+                                @media #{$mq-sm-min} {
+                                    display: block;
+                                }
+
                                 @media #{$mq-xl-min} {
                                     display: none;
                                 }
@@ -423,6 +435,10 @@
                             @media #{$mq-xl-max} {
                                 width: 100%;
                                 padding: 1rem 8rem 1rem 1rem;
+                            }
+
+                            @media #{$mq-sm-max} {
+                                padding: 1rem 4rem 1rem 1rem;
                             }
                         }
                     }
