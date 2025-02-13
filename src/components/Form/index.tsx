@@ -158,6 +158,7 @@ export interface InputProps {
     id: string
     label: string
     labelAlwaysVisible?: boolean
+    hideLabel?: boolean
     type: string
     placeholder: string
     className?: string
@@ -176,6 +177,7 @@ export const Input = ({
     id,
     label,
     labelAlwaysVisible,
+    hideLabel,
     type,
     placeholder,
     className,
@@ -275,16 +277,19 @@ export const Input = ({
         <div className={clsx(
             styles.formLine,
             className,
+            hideLabel && styles.noLabel,
             !hideValidations && errors[label] && styles.error
         )}>
 
-            <label
-                className={clsx(styles.label, 'text-16')}
-                htmlFor={id}
-                data-shrink={shouldShrinkLabel ? 'false' : isLabelAlwaysVisible}
-            >
-                {label} {required && <span className='red'>*</span>}
-            </label>
+            {!hideLabel && (
+                <label
+                    className={clsx(styles.label, 'text-16')}
+                    htmlFor={id}
+                    data-shrink={shouldShrinkLabel ? 'false' : isLabelAlwaysVisible}
+                >
+                    {label} {required && <span className='red'>*</span>}
+                </label>
+            )}
 
             <div className={styles.lineWrapper}>
 
@@ -382,6 +387,7 @@ export const Select = ({
         <div className={clsx(
             styles.formLine,
             className,
+            hideLabel && styles.noLabel,
             !hideValidations && errors[label] && styles.error
         )}>
 
@@ -609,7 +615,8 @@ export const Checkbox = ({
             htmlFor={id}
             className={clsx(
                 styles.radioWrapper,
-                className
+                className,
+                errors[name] && styles.error
             )}
             data-error={errors[name] ? true : false}
             data-label
@@ -626,9 +633,16 @@ export const Checkbox = ({
 
             <span className={styles.radioWrapperInner}>
 
-                <span className={styles.radioBox}>
-                    <Check />
-                </span>
+                {type === 'radio' ? (
+                    <span className={clsx(styles.radioBox, styles.circle)}>
+                        <span className={styles.circleInner}></span>
+                    </span>
+                ) : (
+                    <span className={styles.radioBox}>
+                        <Check />
+                    </span>
+                )}
+                
 
                 <span className={clsx(styles.radioText, 'text-14')}>
                     {label}

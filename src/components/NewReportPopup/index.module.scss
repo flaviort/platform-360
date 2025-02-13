@@ -1,0 +1,170 @@
+.component {
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    inset: 0;
+    background-color: transparent;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 0 0 1rem;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	max-height: 100%;
+
+	@media #{$mq-md-min} {
+		padding: 1rem;
+	}
+
+    .bg {
+        position: fixed;
+        z-index: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba($black, .75);
+    }
+
+    .wrapper {
+        position: relative;
+        z-index: 2;
+        background-color: $white;
+		display: block;
+        width: 45rem;
+        max-width: 100%;
+		height: fit-content;
+		min-height: 100%;
+
+		@media #{$mq-md-min} {
+			border-radius: .5rem;
+		}
+
+		.form {
+			width: 100%;
+
+			.top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 1rem;
+				padding: 1rem 1.5rem;
+				width: 100%;
+				border-bottom: var(--1px) solid $gray-200;
+				margin-bottom: 1rem;
+
+				@media #{$mq-md-min} {
+					padding: 1.75rem 2rem;
+					margin-bottom: 2rem;
+				}
+
+				.left {
+					display: flex;
+					align-items: center;
+					gap: .5rem;
+
+					svg {
+						width: .75rem;
+						min-width: .75rem;
+						height: .75rem;
+						color: $purple;
+					}
+				}
+
+				.close {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 2rem;
+					min-width: 2rem;
+					height: 2rem;
+					padding: .375rem;
+
+					&:hover,
+					&:focus-visible {
+						svg {
+							transform: rotate(180deg);
+							color: $gray-800;
+						}
+					}
+
+					svg {
+						width: 100%;
+						color: $gray-400;
+						transition: .3s ease-in-out;
+					}
+				}
+			}
+
+			.middle {
+				padding: 0 1.5rem;
+				display: flex;
+				flex-direction: column;
+
+				@media #{$mq-md-min} {
+					padding: 0 2rem;
+				}
+
+				.group {
+					display: grid;
+					gap: .25rem;
+
+					@media #{$mq-md-min} {
+						grid-template-columns: 9rem 1fr;
+						gap: 0;
+					}
+
+					&:has(.checkboxes) {
+						padding: .75rem 0;
+
+						.label {
+							padding-top: 0;
+						}
+					}
+
+					.label {
+						padding-left: .075rem;
+
+						@media #{$mq-md-min} {
+							padding-left: 0;
+							padding-top: .325rem;
+						}
+					}
+
+					.input {
+						&.checkboxes {
+							display: flex;
+							align-items: center;
+							flex-wrap: wrap;
+							gap: 1.25rem;
+							
+							@media #{$mq-md-min} {
+								gap: 2rem;
+							}
+						}
+
+						.helper {
+							margin-top: -.5rem;
+						}
+					}
+				}
+			}
+
+			.bottom {
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				gap: 1rem;
+				padding: 1rem 1.5rem;
+				width: 100%;
+				border-top: var(--1px) solid $gray-200;
+				margin-top: 1rem;
+
+				@media #{$mq-md-min} {
+					padding: 1.75rem 2rem;
+					margin-top: 2rem;
+				}
+			}
+		}
+    }
+}

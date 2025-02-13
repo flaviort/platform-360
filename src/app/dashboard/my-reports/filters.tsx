@@ -7,9 +7,10 @@ import { useState, useEffect, useRef } from 'react'
 
 // components
 import { SubWrapper, Sub } from '@/components/SubMenu'
+import PopupShop360 from '@/components/NewReportPopup'
 
 // img / svg
-import { ListFilter, ChevronDown, Search, Plus, Folders, ShoppingCart, ChartNoAxesCombined, FilePenLine, } from 'lucide-react'
+import { ListFilter, ChevronDown, Search, Plus, Folders, ShoppingCart, ChartNoAxesCombined, FilePenLine } from 'lucide-react'
 import demand360 from '@/assets/img/logos/demand-360.png'
 import feedback360 from '@/assets/img/logos/feedback-360.png'
 import insight360 from '@/assets/img/logos/insight-360.png'
@@ -294,37 +295,25 @@ export default function Filters() {
 									Reports
 								</p>
 
-								{[
-									{
-										icon: ShoppingCart,
-										text: 'Demand360'
-									},
-									{
-										icon: ChartNoAxesCombined,
-										text: 'Feedback360'
-									},
-									{
-										icon: Search,
-										text: 'Shop360'
-									},
-									{
-										icon: FilePenLine,
-										text: 'Insight360'
-									}
-								].map((item, i) => (
-									<button
-										className='text-14 bold'
-										key={i}
-									>
+								<PopupShop360
+									icon={ShoppingCart}
+									text='Demand360'
+								/>
 
-										<item.icon />
+								<PopupShop360
+									icon={ChartNoAxesCombined}
+									text='Feedback360'
+								/>
 
-										<span>
-											{item.text}
-										</span>
+								<PopupShop360
+									icon={Search}
+									text='Shop360'
+								/>
 
-									</button>
-								))}
+								<PopupShop360
+									icon={FilePenLine}
+									text='Insight360'
+								/>
 
 							</Sub>
 

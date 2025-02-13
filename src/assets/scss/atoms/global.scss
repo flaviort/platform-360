@@ -155,3 +155,8 @@ body {
 		}
 	}
 }
+
+body:has(dialog[open]),
+body.no-scroll {
+    overflow: hidden;
+}
