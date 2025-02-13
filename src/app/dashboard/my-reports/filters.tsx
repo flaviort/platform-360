@@ -5,6 +5,9 @@ import clsx from 'clsx'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 
+// components
+import { SubWrapper, Sub } from '@/components/SubMenu'
+
 // img / svg
 import { ListFilter, ChevronDown, Search, Plus, Folders, ShoppingCart, ChartNoAxesCombined, FilePenLine, } from 'lucide-react'
 import demand360 from '@/assets/img/logos/demand-360.png'
@@ -16,84 +19,6 @@ import shop360 from '@/assets/img/logos/shop-360.png'
 import styles from './index.module.scss'
 
 export default function Filters() {
-
-	// filters
-	const [filtersSub, setFiltersSub] = useState(false)
-  
-	const filtersSubRef = useRef(null)
-
-	const openFiltersSub = () => {
-		setFiltersSub((prev) => !prev)
-	}
-
-	const closeFiltersSub = () => {
-		setFiltersSub(false)
-	}
-
-	useEffect(() => {
-		function handleKeyDown(e: KeyboardEvent) {
-			if (e.key === 'Escape' && filtersSub) {
-				closeFiltersSub()
-			}
-		}
-
-		function handleClickOutside(e: MouseEvent) {
-			if (
-				filtersSub &&
-				filtersSubRef.current &&
-				!(filtersSubRef.current as HTMLElement).contains(e.target as Node)
-			) {
-				closeFiltersSub()
-			}
-		}
-
-		document.addEventListener('keydown', handleKeyDown)
-		document.addEventListener('mousedown', handleClickOutside)
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown)
-			document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [filtersSub])
-
-	// products
-	const [productsSub, setProductsSub] = useState(false)
-  
-	const productsSubRef = useRef(null)
-
-	const openProductsSub = () => {
-		setProductsSub((prev) => !prev)
-	}
-
-	const closeProductsSub = () => {
-		setProductsSub(false)
-	}
-
-	useEffect(() => {
-		function handleKeyDown(e: KeyboardEvent) {
-			if (e.key === 'Escape' && productsSub) {
-				closeProductsSub()
-			}
-		}
-
-		function handleClickOutside(e: MouseEvent) {
-			if (
-				productsSub &&
-				productsSubRef.current &&
-				!(productsSubRef.current as HTMLElement).contains(e.target as Node)
-			) {
-				closeProductsSub()
-			}
-		}
-
-		document.addEventListener('keydown', handleKeyDown)
-		document.addEventListener('mousedown', handleClickOutside)
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown)
-			document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [productsSub])
 
 	// search
 	const [searchMobile, setSearchMobile] = useState(false)
@@ -141,45 +66,6 @@ export default function Filters() {
 		}
 	}, [searchMobile])
 
-	// + new
-	const [newReportSub, setNewReportSub] = useState(false)
-  
-	const newReportSubRef = useRef(null)
-
-	const openNewReportSub = () => {
-		setNewReportSub((prev) => !prev)
-	}
-
-	const closeNewReportSub = () => {
-		setNewReportSub(false)
-	}
-
-	useEffect(() => {
-		function handleKeyDown(e: KeyboardEvent) {
-			if (e.key === 'Escape' && newReportSub) {
-				closeNewReportSub()
-			}
-		}
-
-		function handleClickOutside(e: MouseEvent) {
-			if (
-				newReportSub &&
-				newReportSubRef.current &&
-				!(newReportSubRef.current as HTMLElement).contains(e.target as Node)
-			) {
-				closeNewReportSub()
-			}
-		}
-
-		document.addEventListener('keydown', handleKeyDown)
-		document.addEventListener('mousedown', handleClickOutside)
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown)
-			document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [newReportSub])
-
 	return (
 		<section className={styles.filtersSection}>
 			<div className='container container--big'>
@@ -187,15 +73,14 @@ export default function Filters() {
 
 					<div className={styles.left}>
 
-						<div className={styles.filters} ref={filtersSubRef}>
+						<SubWrapper className={styles.filters}>
 
 							<button
 								className={clsx(
 									styles.filtersButton,
-									'button button--hollow-light text-16',
-									filtersSub && styles.open
+									'button button--hollow-light text-16'
 								)}
-								onClick={openFiltersSub}
+								data-toggle-sub
 							>
 
 								<ListFilter />
@@ -208,46 +93,37 @@ export default function Filters() {
 
 							</button>
 
-							<div
-								className={clsx(
-									styles.sub,
-									filtersSub && styles.open
-								)}
-							>
-								<div className={styles.subWrapper}>
-									{[
-										{
-											text: 'Filter option 1'
-										},
-										{
-											text: 'Filter option 2'
-										},
-										{
-											text: 'Filter option 3'
-										}
-									].map((item, i) => (
-										<button
-											className='text-14 bold'
-											key={i}
-											onClick={closeFiltersSub}
-										>
-											{item.text}
-										</button>
-									))}
-								</div>
-							</div>
+							<Sub className={styles.sub}>
+								{[
+									{
+										text: 'Filter option 1'
+									},
+									{
+										text: 'Filter option 2'
+									},
+									{
+										text: 'Filter option 3'
+									}
+								].map((item, i) => (
+									<button
+										className='text-14 bold'
+										key={i}
+									>
+										{item.text}
+									</button>
+								))}
+							</Sub>
 
-						</div>
+						</SubWrapper>
 
-						<div className={styles.products} ref={productsSubRef}>
+						<SubWrapper className={styles.products}>
 
 							<button
 								className={clsx(
 									styles.productsMobile,
-									'button button--hollow-light text-16',
-									productsSub && styles.open
+									'button button--hollow-light text-16'
 								)}
-								onClick={openProductsSub}
+								data-toggle-sub
 							>
 
 								<span className='medium'>
@@ -258,47 +134,39 @@ export default function Filters() {
 
 							</button>
 
-							<div className={
-								clsx(
-									styles.sub,
-									productsSub && styles.open
-								)}
-							>
-								<div className={styles.subWrapper}>
-									{[
-										{
-											icon: ShoppingCart,
-											text: 'Demand360'
-										},
-										{
-											icon: ChartNoAxesCombined,
-											text: 'Feedback360'
-										},
-										{
-											icon: Search,
-											text: 'Shop360'
-										},
-										{
-											icon: FilePenLine,
-											text: 'Insight360'
-										}
-									].map((item, i) => (
-										<button
-											className='text-14 bold'
-											key={i}
-											onClick={closeFiltersSub}
-										>
+							<Sub className={styles.sub}>
+								{[
+									{
+										icon: ShoppingCart,
+										text: 'Demand360'
+									},
+									{
+										icon: ChartNoAxesCombined,
+										text: 'Feedback360'
+									},
+									{
+										icon: Search,
+										text: 'Shop360'
+									},
+									{
+										icon: FilePenLine,
+										text: 'Insight360'
+									}
+								].map((item, i) => (
+									<button
+										className='text-14 bold'
+										key={i}
+									>
 
-											<item.icon />
+										<item.icon />
 
-											<span>
-												{item.text}
-											</span>
+										<span>
+											{item.text}
+										</span>
 
-										</button>
-									))}
-								</div>
-							</div>
+									</button>
+								))}
+							</Sub>
 
 							<p className={clsx(styles.label, 'text-14 gray-400 bold uppercase')}>
 								<span>View by product:</span>
@@ -342,7 +210,7 @@ export default function Filters() {
 								))}
 							</div>
 							
-						</div>
+						</SubWrapper>
 
 					</div>
 
@@ -382,15 +250,14 @@ export default function Filters() {
 							</div>
 						</div>
 
-						<div className={styles.new} ref={newReportSubRef}>
+						<SubWrapper className={styles.new}>
 
 							<button
 								className={clsx(
 									styles.button,
-									'button button--gradient-blue uppercase text-14',
-									newReportSub && styles.open
+									'button button--gradient-blue uppercase text-14'
 								)}
-								onClick={openNewReportSub}
+								data-toggle-sub
 							>
 
 								<Plus />
@@ -403,74 +270,65 @@ export default function Filters() {
 
 							</button>
 
-							<div
-								className={clsx(
-									styles.sub,
-									newReportSub && styles.open
-								)}
-							>
-								<div className={styles.subWrapper}>
+							<Sub className={styles.sub}>
 									
-									<p className='text-14 bold gray-400 uppercase'>
-										Projects
-									</p>
+								<p className='text-14 bold gray-400 uppercase'>
+									Projects
+								</p>
 
+								<button
+									className='text-14 bold'
+								>
+
+									<Folders />
+
+									<span>
+										New Project
+									</span>
+
+								</button>
+
+								<div className={styles.line}></div>
+
+								<p className='text-14 bold gray-400 uppercase'>
+									Reports
+								</p>
+
+								{[
+									{
+										icon: ShoppingCart,
+										text: 'Demand360'
+									},
+									{
+										icon: ChartNoAxesCombined,
+										text: 'Feedback360'
+									},
+									{
+										icon: Search,
+										text: 'Shop360'
+									},
+									{
+										icon: FilePenLine,
+										text: 'Insight360'
+									}
+								].map((item, i) => (
 									<button
 										className='text-14 bold'
-										onClick={closeNewReportSub}
+										key={i}
 									>
 
-										<Folders />
+										<item.icon />
 
 										<span>
-											New Project
+											{item.text}
 										</span>
 
 									</button>
+								))}
 
-									<div className={styles.line}></div>
+							</Sub>
 
-									<p className='text-14 bold gray-400 uppercase'>
-										Reports
-									</p>
-
-									{[
-										{
-											icon: ShoppingCart,
-											text: 'Demand360'
-										},
-										{
-											icon: ChartNoAxesCombined,
-											text: 'Feedback360'
-										},
-										{
-											icon: Search,
-											text: 'Shop360'
-										},
-										{
-											icon: FilePenLine,
-											text: 'Insight360'
-										}
-									].map((item, i) => (
-										<button
-											className='text-14 bold'
-											key={i}
-											onClick={closeFiltersSub}
-										>
-
-											<item.icon />
-
-											<span>
-												{item.text}
-											</span>
-
-										</button>
-									))}
-
-								</div>
-							</div>
-
-						</div>
+						</SubWrapper>
 
 					</div>
 

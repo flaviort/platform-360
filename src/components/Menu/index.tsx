@@ -1,16 +1,17 @@
 'use client'
 
 // libraries
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
 
 // components
 import Avatar from '@/components/Avatar'
+import { SubWrapper, Sub } from '@/components/SubMenu'
 
 // img / svg
 import Logo from '@/assets/svg/logo/logo.svg'
-import { CircleHelp, Mail, Bell, Zap, Folders, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Menu } from 'lucide-react'
+import { CircleHelp, Mail, Bell, Zap, Folders, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Menu, Wallet, Landmark, LogOut, CircleUser } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -105,53 +106,240 @@ export default function TopMenu() {
                                     <Mail />
                                 </button>
 
-                                <button
-                                    className={styles.icon}
-                                    aria-label='Notifications'
-                                    data-balloon-pos='down-center'
-                                >
-                                    <Bell />
-                                </button>
+                                <SubWrapper className={styles.subWrapper}>
+
+                                    <button
+                                        className={styles.icon}
+                                        aria-label='Notifications'
+                                        data-balloon-pos='down-center'
+                                        data-toggle-sub
+                                    >
+                                        <Bell />
+                                    </button>
+
+                                    <Sub className={styles.sub}>
+                                        <div className={clsx(styles.scroll, 'gray-600')}>
+
+                                            <p className='text-18 semi-bold blue'>
+                                                Notifications
+                                            </p>
+
+                                            {[
+                                                {
+                                                    time: '1 hour ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                },
+                                                {
+                                                    time: '1 day ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                },
+                                                {
+                                                    time: '3 days ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                },
+                                                {
+                                                    time: '1 week ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                },
+                                                {
+                                                    time: '1 month ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                },
+                                                {
+                                                    time: '2 months ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                },
+                                                {
+                                                    time: '1 year ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                },
+                                                {
+                                                    time: '2 years ago',
+                                                    text: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit pariatur praesentium modi provident fuga consectetur nisi odio obcaecati adipisci eaque!',
+                                                    link: '#'
+                                                }
+                                            ].map((item, i) => (
+                                                <button key={i}>
+
+                                                    <span className={clsx(styles.date, 'text-12')}>
+                                                        {item.time}
+                                                    </span>
+
+                                                    <span className={clsx(styles.text, 'text-14')}>
+                                                        {limitCharacters(item.text, 100)}
+                                                    </span>
+
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </Sub>
+
+                                </SubWrapper>
 
                             </div>
 
-                            <div className={styles.tokens}>
+                            <SubWrapper className={styles.tokens}>
 
                                 <button
                                     className={clsx(styles.button, 'text-16 semi-bold')}
+                                    data-toggle-sub
                                 >
                                     <Zap className={styles.icon} />
                                     <span className={styles.number}>104</span>
                                     <span className={styles.text}>Tokens</span>
                                 </button>
 
-                            </div>
+                                <Sub className={styles.sub}>
+                                    {[
+                                        {
+                                            icon: Landmark,
+                                            text: 'Edit Payment Method',
+                                            link: '#'
+                                        },
+                                        {
+                                            icon: Wallet,
+                                            text: 'Add more tokens',
+                                            link: '#'
+                                        }
+                                    ].map((item, i) => (
+                                        <button
+                                            className='text-14 bold gray-800'
+                                            key={i}
+                                        >
 
-                            <button className={styles.user}>
+                                            <item.icon />
 
-                                <Avatar
-                                    image={user.image?.src}
-                                    alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
-                                    letter={user.name?.first}
-                                />
+                                            <span>
+                                                {item.text}
+                                            </span>
 
-                                <span className={styles.nameEmail}>
+                                        </button>
+                                    ))}
+                                </Sub>
 
-                                    <span className='text-16 white bold'>
-                                        {user.name.first} {user.name.last && firstChar(user.name?.last) + '.'}
+                            </SubWrapper>
+
+                            <SubWrapper className={styles.user}>
+
+                                <button
+                                    className={styles.button}
+                                    data-toggle-sub
+                                >
+
+                                    <Avatar
+                                        image={user.image?.src}
+                                        alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
+                                        letter={user.name?.first}
+                                    />
+
+                                    <span className={styles.nameEmail}>
+
+                                        <span className='text-16 white bold'>
+                                            {user.name.first} {user.name.last && firstChar(user.name?.last) + '.'}
+                                        </span>
+
+                                        <span
+                                            className='text-14 white'
+                                            //{...(user.email.length > 15 ? { 'aria-label': user.email } : {})}
+                                            //data-balloon-pos='down-right'
+                                        >
+                                            {limitCharacters(user.email, 15)}
+                                        </span>
+
                                     </span>
 
-                                    <span
-                                        className='text-14 white'
-                                        //{...(user.email.length > 15 ? { 'aria-label': user.email } : {})}
-                                        //data-balloon-pos='down-right'
-                                    >
-                                        {limitCharacters(user.email, 15)}
-                                    </span>
+                                </button>
 
-                                </span>
+                                <Sub className={styles.sub}>
 
-                            </button>
+                                    <div className={styles.avatar}>
+
+                                        <Avatar
+                                            image={user.image?.src}
+                                            alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
+                                            letter={user.name?.first}
+                                        />
+
+                                        <span className={styles.nameEmailMobile}>
+
+                                            <span className='text-16 bold'>
+                                                {user.name.first} {user.name.last && firstChar(user.name?.last) + '.'}
+                                            </span>
+
+                                            <span className={clsx(styles.email, 'text-14')}>
+                                                {limitCharacters(user.email, 40)}
+                                            </span>
+
+                                        </span>
+
+                                    </div>
+
+                                    <div className={styles.items}>
+                                        {[
+                                            {
+                                                icon: CircleUser,
+                                                text: 'Account Settings',
+                                                link: '#'
+                                            },
+                                            {
+                                                icon: Landmark,
+                                                text: 'Edit Payment Method',
+                                                link: '#'
+                                            },
+                                            {
+                                                icon: Mail,
+                                                text: 'Messages',
+                                                link: '#'
+                                            },
+                                            {
+                                                icon: Bell,
+                                                text: 'Notifications',
+                                                link: '#'
+                                            },
+                                            {
+                                                icon: CircleHelp,
+                                                text: 'Help',
+                                                link: '#'
+                                            }
+                                        ].map((item, i) => (
+                                            <button
+                                                className='text-14 bold gray-800'
+                                                key={i}
+                                            >
+
+                                                <item.icon />
+
+                                                <span>
+                                                    {item.text}
+                                                </span>
+
+                                            </button>
+                                        ))}
+
+                                        <div className={styles.line}></div>
+
+                                        <button className='text-14 bold gray-800'>
+
+                                            <LogOut />
+
+                                            <span>
+                                                Logout
+                                            </span>
+
+                                        </button>
+
+                                    </div>
+
+                                </Sub>
+
+                            </SubWrapper>
 
                         </div>
 

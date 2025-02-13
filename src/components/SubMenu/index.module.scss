@@ -1,0 +1,27 @@
+.wrapper {
+    position: relative;
+
+    .sub {
+        position: absolute;
+        z-index: 2;
+        top: calc(100% + .25rem);
+        left: 0;
+        background-color: $pure-white;
+        box-shadow: 0 0 1rem 0 rgba($black, .025);
+        border-radius: .25rem;
+        border: var(--1px) solid $gray-200;
+        display: flex;
+        opacity: 0;
+        visibility: hidden;
+        transition: .3s ease-in-out;
+
+        @media #{$mq-sm-max} {
+            min-width: 100%;
+        }
+
+        &.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+}
