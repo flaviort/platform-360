@@ -8,7 +8,10 @@ import { useRouter } from 'next/navigation'
 
 // components
 import AccountWrapper from '@/layouts/Account'
-import { Form, Input, Select, Submit } from '@/components/Form'
+import Form from '@/components/Form/Form'
+import Input from '@/components/Form/Input'
+import Select from '@/components/Form/Select'
+import Submit from '@/components/Form/Submit'
 
 // data / utils / db
 import { pages } from '@/utils/routes'

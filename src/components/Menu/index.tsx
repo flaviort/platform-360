@@ -1,7 +1,7 @@
 'use client'
 
 // libraries
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
 
@@ -11,7 +11,7 @@ import { SubWrapper, Sub } from '@/components/SubMenu'
 
 // img / svg
 import Logo from '@/assets/svg/logo/logo.svg'
-import { CircleHelp, Mail, Bell, Zap, Folders, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Menu, Wallet, Landmark, LogOut, CircleUser } from 'lucide-react'
+import { CircleHelp, Mail, Bell, Zap, X, Folders, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Menu, Wallet, Landmark, LogOut, CircleUser } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -35,6 +35,28 @@ export default function TopMenu() {
     const closeFsMenu = () => {
 		setIsShown(false)
 	}
+
+    useEffect(() => {
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.key === 'Escape' && isShown) {
+                closeFsMenu()
+            }
+        }
+        
+        document.addEventListener('keydown', handleKeyDown)
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [isShown])
+
+    useEffect(() => {
+        if (isShown) {
+            document.body.classList.add('no-scroll')
+        } else {
+            document.body.classList.remove('no-scroll')
+        }
+    }, [isShown])
 
     return (
         <>
@@ -86,6 +108,7 @@ export default function TopMenu() {
                                 <button
                                     className={clsx(styles.icon, styles.menu)}
                                     aria-label='Help'
+                                    onClick={openCloseFsMenu}
                                 >
                                     <Menu />
                                 </button>
@@ -346,6 +369,154 @@ export default function TopMenu() {
                     </div>
 
                 </div>
+            </section>
+
+            <section className={clsx(styles.fsMenu, isShown && styles.open)}>
+
+                <div
+                    className={styles.bg}
+                    onClick={closeFsMenu}
+                ></div>
+
+                <div className={styles.wrapper}>
+
+                    <div className={styles.top}>
+
+                        <p className='semi-bold uppercase blue'>
+                            Menu
+                        </p>
+
+                        <button
+                            className={styles.close}
+                            onClick={closeFsMenu}
+                        >
+                            <X />
+                        </button>
+
+                    </div>
+
+                    <div className={styles.items}>
+
+                        <div className={styles.avatar}>
+
+                            <Avatar
+                                image={user.image?.src}
+                                alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
+                                letter={user.name?.first}
+                            />
+
+                            <span className={styles.nameEmailMobile}>
+
+                                <span className='text-16 bold'>
+                                    {user.name.first} {user.name.last && firstChar(user.name?.last) + '.'}
+                                </span>
+
+                                <span className={clsx(styles.email, 'text-14')}>
+                                    {limitCharacters(user.email, 40)}
+                                </span>
+
+                            </span>
+
+                        </div>
+
+                        <ul className={clsx(styles.menu, 'text-16')}>
+                            {[
+                                {
+                                    name: 'My Reports',
+                                    href: pages.dashboard.my_reports
+                                },
+                                {
+                                    name: 'Solutions',
+                                    href: '#'
+                                },
+                                {
+                                    name: 'Resources',
+                                    href: '#'
+                                }
+                            ].map((item, i) => (
+                                <li key={i}>
+                                    <Link
+                                        href={item.href}
+                                        className='gray-600 semi-bold'
+                                        onClick={closeFsMenu}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <ul className={clsx(styles.menu2, 'text-16')}>
+                            {[
+                                {
+                                    icon: CircleUser,
+                                    name: 'Account Settings',
+                                    href: '#',
+                                    mobile: true
+                                },
+                                {
+                                    icon: Landmark,
+                                    name: 'Edit Payment Method',
+                                    href: '#',
+                                    mobile: true
+                                },
+                                {
+                                    icon: CircleHelp,
+                                    name: 'Help',
+                                    href: '#'
+                                },
+                                {
+                                    icon: Mail,
+                                    name: 'Messages',
+                                    href: '#'
+                                },
+                                {
+                                    icon: Bell,
+                                    name: 'Notifications',
+                                    href: '#'
+                                }
+                            ].map((item, i) => (
+                                <li key={i}>
+                                    <Link
+                                        href={item.href}
+                                        className={clsx(
+                                            'gray-600 semi-bold',
+                                            item.mobile && styles.mobile
+                                        )}
+                                        onClick={closeFsMenu}
+                                    >
+                                        
+                                        <item.icon />
+
+                                        <span>
+                                            {item.name}
+                                        </span>
+
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <button
+                            className={clsx(
+                                styles.logout,
+                                'text-14 bold gray-800'
+                            )}
+                            onClick={closeFsMenu}
+                        >
+
+                            <LogOut />
+
+                            <span>
+                                Logout
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
             </section>
 
         </>

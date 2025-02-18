@@ -7,7 +7,10 @@ import { useState, useEffect, useRef } from 'react'
 
 // components
 import { SubWrapper, Sub } from '@/components/SubMenu'
-import PopupShop360 from '@/components/NewReportPopup'
+import PopupShop360 from '@/components/NewReportPopup/shop360'
+import PopupDemand360 from '@/components/NewReportPopup/demand360'
+import PopupInsight360 from '@/components/NewReportPopup/insight360'
+import PopupFeedback360 from '@/components/NewReportPopup/feedback360'
 
 // img / svg
 import { ListFilter, ChevronDown, Search, Plus, Folders, ShoppingCart, ChartNoAxesCombined, FilePenLine } from 'lucide-react'
@@ -295,12 +298,12 @@ export default function Filters() {
 									Reports
 								</p>
 
-								<PopupShop360
+								<PopupDemand360
 									icon={ShoppingCart}
 									text='Demand360'
 								/>
 
-								<PopupShop360
+								<PopupFeedback360
 									icon={ChartNoAxesCombined}
 									text='Feedback360'
 								/>
@@ -310,7 +313,7 @@ export default function Filters() {
 									text='Shop360'
 								/>
 
-								<PopupShop360
+								<PopupInsight360
 									icon={FilePenLine}
 									text='Insight360'
 								/>

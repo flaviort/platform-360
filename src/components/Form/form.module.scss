@@ -103,6 +103,127 @@
             }
         }
 
+        &.dropdownWrapper {
+            position: relative;
+
+            &.open {
+                .dropdownInnerWrapper {
+                    .input {
+                        border-bottom-left-radius: 0;
+                        border-bottom-right-radius: 0;
+                    }
+
+                    .sideIcon {
+                        svg {
+                            transform: rotate(180deg);
+                        }
+                    }
+                }    
+            }
+
+            .dropdownInnerWrapper {
+                position: relative;
+                z-index: 2;
+
+                .input {
+                    text-align: left;
+                }
+
+                .sideIcon {
+                    color: $gray-400;
+
+                    svg {
+                        transition: .2s ease-in-out;
+                    }
+                }
+            }
+
+            .options {
+                opacity: 0;
+                visibility: hidden;
+                position: absolute;
+                z-index: 1;
+                top: calc(100% - var(--1px));
+                left: 0;
+                width: 100%;
+                max-height: 0;
+                overflow-y: auto;
+                border-bottom-left-radius: .275rem;
+                border-bottom-right-radius: .275rem;
+                transition: .3s ease-in-out;
+                display: flex;
+                flex-direction: column;
+                gap: .5rem;
+                padding: 1rem;
+                background-color: $pure-white;
+                border: 1px solid $gray-200;
+                
+                &.visible {
+                    opacity: 1;
+                    visibility: visible;
+                    max-height: 20rem;
+                }
+
+                .item {
+                    position: relative;
+
+                    input {
+                        position: absolute;
+                        z-index: -99;
+                        opacity: 0;
+                
+                        &:checked {
+                            + .checkboxWrapper {
+                                .check {
+                                    background-color: $blue;
+                                    border-color: $blue;
+                
+                                    svg {
+                                        opacity: 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    .checkboxWrapper {
+                        display: flex;
+                        align-items: center;
+                        gap: .5rem;
+                        cursor: pointer;
+
+                        .check {
+                            position: relative;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 1.375rem;
+                            min-width: 1.375rem;
+                            height: 1.375rem;
+                            padding: .25rem;
+                            border: 1px solid $gray-200;
+                            background-color: $pure-white;
+                            border-radius: .2rem;
+                
+                            svg {
+                                opacity: 0;
+                                width: 100%;
+                                color: $white;
+                            }
+                        }
+                
+                        .text {
+                            line-height: 1.1;
+                
+                            @media #{$mq-md-max} {
+                                font-size: .8rem;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         .input {
             display: block;
             width: 100%;
@@ -113,10 +234,7 @@
             padding: 1rem .75rem;
             -webkit-box-shadow: 0 0 0px 99rem $pure-white inset;
             transition: color .3s ease-in-out;
-
-            @media #{$mq-xl-min} {
-                font-size: .8rem;
-            }
+            font-size: .8rem;
 
             &:focus-visible {
                 outline: .1rem solid $blue;
