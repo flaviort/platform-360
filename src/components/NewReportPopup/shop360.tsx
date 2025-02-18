@@ -102,7 +102,7 @@ export default function PopupShop360({
 							},
 							{
 								name: 'report-retailers 4',
-								label: 'Wallmart'
+								label: 'Walmart'
 							},
 							{
 								name: 'report-retailers 5',

@@ -4,6 +4,7 @@
 import { useRef, useState, useEffect } from 'react'
 import clsx from 'clsx'
 import { useFormContext, RegisterOptions } from 'react-hook-form'
+import React from 'react'
 
 // svg
 import { ChevronDown, Check } from 'lucide-react'
@@ -45,17 +46,27 @@ export default function Dropdown({
         required
     }
 
-    if (!hideValidations) {
-        validations = {
-            required: required && 'This field is required',
-            validate: {
-                limitSelected: (value) => {
-                    //return `You can select up to ${limitSelected} item${limitSelected > 1 ? 's' : ''}.`
-                    return true
-                }
-            }
+    const [selectedCount, setSelectedCount] = useState(0)
+    const [buttonText, setButtonText] = useState<string | JSX.Element>(defaultValue)
+
+    const values = items.map(item => watch(item.name))
+
+    useEffect(() => {
+        const selectedItems = values.filter(Boolean).length
+        setSelectedCount(selectedItems)
+    }, [values])
+    
+    useEffect(() => {
+        if (selectedCount === 0) {
+            setButtonText(defaultValue)
+        } else {
+            setButtonText(
+                <>
+                    <span>{selectedCount}</span> Item{selectedCount > 1 ? 's' : ''} selected
+                </>
+            )
         }
-    }
+    }, [selectedCount, defaultValue])
     
     // fake select dropdown
     const [isDropdownVisible, setIsDropdownVisible] = useState(false)
@@ -79,18 +90,49 @@ export default function Dropdown({
         }
     }, [])
 
+    if (!hideValidations) {
+        validations = {
+            onChange: async (e: React.ChangeEvent<HTMLInputElement>) => {
+                if (limitSelected) {
+                    const isChecked = e.target.checked
+                    if (isChecked && selectedCount >= limitSelected) {
+                        e.preventDefault()
+                        return false
+                    }
+                    setSelectedCount(prev => isChecked ? prev + 1 : prev - 1)
+                }
+                onChange(e)
+                await trigger()
+            },
+            validate: {
+                required: () => {
+                    const selectedItems = values.filter(Boolean).length
+                    return selectedItems > 0 || 'Please select at least one option'
+                },
+                limitSelected: () => {
+                    if (limitSelected && selectedCount > limitSelected) {
+                        return `You can select up to ${limitSelected} item${limitSelected > 1 ? 's' : ''}.`
+                    }
+                    return true
+                }
+            }
+        }
+    }
+
     return (
         <div className={clsx(
             styles.formLine,
             className,
-            hideLabel && styles.noLabel
+            hideLabel && styles.noLabel,
+            !hideValidations && (
+                items.some(item => errors[item.name]) || 
+                errors.required || 
+                errors.limitSelected
+            ) && styles.error
         )}>
 
             {!hideLabel && (
-                <p
-                    className={clsx(styles.label, 'text-16')}
-                    //data-shrink={shouldShrinkLabel ? 'false' : isLabelAlwaysVisible}
-                >
+                <p className={clsx(styles.label, 'text-16')}>
                     {label} {required && <span className='red'>*</span>}
                 </p>
             )}
@@ -114,9 +156,8 @@ export default function Dropdown({
                             selectedValue !== '' && 'invisible'
                         )}
                         onClick={() => setIsDropdownVisible(!isDropdownVisible)}
-                        //onBlur={() => selectedValue === '' && trigger(label)}
                     >
-                        {defaultValue}
+                        {buttonText}
                     </button>
 
                     <div className={styles.sideIcon}>
@@ -136,7 +177,7 @@ export default function Dropdown({
                                 type='checkbox'
                                 className={styles.checkbox}
                                 value={label}
-                                required
+                                disabled={Boolean(!watch(item.name) && limitSelected && selectedCount >= limitSelected)}
                                 {...register(item.name, { ...validations })}
                             />
 
@@ -156,11 +197,20 @@ export default function Dropdown({
                 </div>
             </div>
 
-            {/*!hideValidations && errors && (
-                <p className={styles.errorMsg}>
-                    {String(errors.message)}
-                </p>
-            )*/}
+            {!hideValidations && (
+                <>
+                    {(errors.required || errors.limitSelected || items.some(item => errors[item.name])) && (
+                        <p className={styles.errorMsg}>
+                            {String(
+                                errors.required?.message || 
+                                errors.limitSelected?.message || 
+                                (items.find(item => errors[item.name])?.name && 
+                                    errors[items.find(item => errors[item.name])?.name as string]?.message)
+                            )}
+                        </p>
+                    )}
+                </>
+            )}
 
         </div>
     )

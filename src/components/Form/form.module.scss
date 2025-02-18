@@ -59,6 +59,10 @@
         }
     }
 
+    &:has(.dropdownWrapper) .errorMsg {
+        z-index: 5;
+    }
+
     &.noLabel {
         .lineWrapper {
             .input {
@@ -123,10 +127,20 @@
 
             .dropdownInnerWrapper {
                 position: relative;
-                z-index: 2;
+                z-index: 4;
 
                 .input {
                     text-align: left;
+                    padding: .75rem;
+
+                    span {
+                        display: inline-block;
+                        padding: 0 .325rem;
+                        background-color: $blue;
+                        color: $white;
+                        border-radius: .125rem;
+                        margin-right: .175rem;
+                    }
                 }
 
                 .sideIcon {
@@ -142,7 +156,7 @@
                 opacity: 0;
                 visibility: hidden;
                 position: absolute;
-                z-index: 1;
+                z-index: 3;
                 top: calc(100% - var(--1px));
                 left: 0;
                 width: 100%;
@@ -182,6 +196,13 @@
                                         opacity: 1;
                                     }
                                 }
+                            }
+                        }
+
+                        &:disabled {
+                            + .checkboxWrapper {
+                                opacity: .5;
+                                cursor: not-allowed;
                             }
                         }
                     }

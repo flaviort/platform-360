@@ -7,7 +7,10 @@ import { useRouter } from 'next/navigation'
 
 // components
 import AccountWrapper from '@/layouts/Account'
-import { Checkbox, Form, Input, Submit } from '@/components/Form/Form'
+import Form from '@/components/Form/Form'
+import Input from '@/components/Form/Input'
+import Checkbox from '@/components/Form/Checkbox'
+import Submit from '@/components/Form/Submit'
 
 // data / utils / db
 import { pages } from '@/utils/routes'

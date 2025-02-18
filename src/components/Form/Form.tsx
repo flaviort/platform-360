@@ -38,7 +38,8 @@ export default function Form({
     // form validations
     const methods = useForm({
         criteriaMode: 'all',
-        mode: 'all'
+        mode: 'onChange',
+        reValidateMode: 'onChange'
     })
 
     // local state for any global errors
