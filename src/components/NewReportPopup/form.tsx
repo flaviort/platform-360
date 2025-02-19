@@ -136,6 +136,7 @@ export default function PopupForm({
 									endpoint='/api/dashboard/new-report'
 									onSuccess={() => console.log('sucess')}
 									onError={() => console.log('error')}
+									//hideErrors
 								>
 
 									<div className={styles.top}>

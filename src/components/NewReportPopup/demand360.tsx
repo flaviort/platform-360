@@ -40,6 +40,7 @@ export default function PopupDemand360({
 						placeholder='Type here'
 						required
 						label='Report Name'
+						name='report-name'
 						hideLabel
 						id='report-name'
 						type='text'
@@ -61,6 +62,7 @@ export default function PopupDemand360({
 						defaultValue=''
 						required
 						label='Category'
+						name='category'
 						hideLabel
 						id='report-category'
 					>
@@ -86,6 +88,7 @@ export default function PopupDemand360({
 						defaultValue=''
 						required
 						label='Months'
+						name='months'
 						hideLabel
 						id='report-months'
 					>
@@ -120,6 +123,7 @@ export default function PopupDemand360({
 						defaultValue=''
 						required
 						label='Years'
+						name='years'
 						hideLabel
 						id='report-years'
 					>
@@ -147,6 +151,7 @@ export default function PopupDemand360({
 						placeholder='Type here'
 						required
 						label='Geography'
+						name='geography'
 						hideLabel
 						id='report-geography'
 						type='text'
@@ -168,6 +173,7 @@ export default function PopupDemand360({
 						placeholder='Type here'
 						required
 						label='Goal'
+						name='goal'
 						hideLabel
 						id='report-goal'
 						maxLength={250}

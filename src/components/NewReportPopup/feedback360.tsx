@@ -42,6 +42,7 @@ export default function PopupFeedback360({
 						placeholder='Type here'
 						required
 						label='Report Name'
+						name='report-name'
 						hideLabel
 						id='report-name'
 						type='text'
@@ -63,6 +64,7 @@ export default function PopupFeedback360({
 						placeholder='Type here'
 						required
 						label='Audience'
+						name='audience'
 						hideLabel
 						id='report-audience'
 						type='text'
@@ -84,7 +86,7 @@ export default function PopupFeedback360({
 					<Checkbox
 						type='checkbox'
 						id='report-gender-men'
-						name='Gender'
+						name='gender'
 						label="Men's"
 						required
 					/>
@@ -92,7 +94,7 @@ export default function PopupFeedback360({
 					<Checkbox
 						type='checkbox'
 						id='report-gender-women'
-						name='Gender'
+						name='gender'
 						label="Women's"
 						required
 					/>
@@ -100,7 +102,7 @@ export default function PopupFeedback360({
 					<Checkbox
 						type='checkbox'
 						id='report-gender-kids'
-						name='Gender'
+						name='gender'
 						label="Kids"
 						required
 					/>
@@ -122,6 +124,7 @@ export default function PopupFeedback360({
 						defaultValue=''
 						required
 						label='Age'
+						name='age'
 						hideLabel
 						id='report-age'
 					>
@@ -151,6 +154,7 @@ export default function PopupFeedback360({
 						placeholder='Please specify'
 						required
 						label='Location'
+						name='location'
 						hideLabel
 						id='report-location'
 						type='text'
@@ -172,6 +176,7 @@ export default function PopupFeedback360({
 						placeholder='Please specify'
 						required
 						label='Shopper'
+						name='shopper'
 						hideLabel
 						id='report-shopper'
 						type='text'
@@ -193,6 +198,7 @@ export default function PopupFeedback360({
 						placeholder='Please specify'
 						required
 						label='Category'
+						name='category'
 						hideLabel
 						id='report-category'
 						type='text'
@@ -214,6 +220,7 @@ export default function PopupFeedback360({
 						placeholder='List up to 10'
 						required
 						label='Questions'
+						name='questions'
 						hideLabel
 						id='report-questions'
 						type='text'
@@ -235,6 +242,7 @@ export default function PopupFeedback360({
 						placeholder='Min / Max'
 						required
 						label='Price'
+						name='price'
 						hideLabel
 						id='report-price'
 						type='text'
@@ -256,6 +264,7 @@ export default function PopupFeedback360({
 						placeholder='Click here to upload'
 						required
 						label='Upload Images'
+						name='upload-images'
 						hideLabel
 						id='report-upload-images'
 						type='text'
@@ -277,6 +286,7 @@ export default function PopupFeedback360({
 						placeholder='Type here'
 						required
 						label='Goal'
+						name='goal'
 						hideLabel
 						id='report-goal'
 						maxLength={250}

@@ -46,6 +46,7 @@ export default function ResetPassword() {
 							<Input
 								id='reset-password-password'
 								label='New Password'
+								name='password'
 								type='password'
 								placeholder='Type here'
 								required
@@ -55,6 +56,7 @@ export default function ResetPassword() {
 							<Input
 								id='reset-password-repeat-password'
 								label='Repeat New Password'
+								name='repeat-password'
 								type='password'
 								placeholder='Type here'
 								required

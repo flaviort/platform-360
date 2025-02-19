@@ -4,34 +4,44 @@ import { users } from './users'
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { Email, Password } = body
+        const { email, password } = body
     
-        const user = users.find((u) => u.username === Email)
+        const user = users.find((u) => u.username === email)
 
         if (!user) {
             return new Response(
                 JSON.stringify({ message: 'User not found' }),
-                { status: 401 }
+                {
+                    status: 401,
+                    statusText: 'User not found'
+                }
             )
         }
     
-        if (user.password !== Password) {
+        if (user.password !== password) {
             return new Response(
                 JSON.stringify({ message: 'Incorrect password' }),
-                { status: 401 }
+                {
+                    status: 401,
+                    statusText: 'Incorrect password'
+                }
             )
         }
     
         // success
         return new Response(
-            JSON.stringify({ message: 'Login successful!' }),
+            JSON.stringify({ 
+                message: 'Login successful!',
+                user: {
+                    email: user.username
+                }
+            }),
             { status: 200 }
         )
-        
     } catch (error) {
         return new Response(
             JSON.stringify({ message: 'Bad request' }),
             { status: 400 }
         )
     }
-}  
+}

@@ -12,6 +12,7 @@ import styles from './form.module.scss'
 export interface SelectProps {
     id: string
     label: string
+    name: string
     hideLabel?: boolean
     className?: string
     required?: boolean
@@ -25,6 +26,7 @@ export interface SelectProps {
 export default function Select({
     id,
     label,
+    name,
     hideLabel,
     className,
     required,
@@ -38,7 +40,7 @@ export default function Select({
     const { register, watch, formState: { errors } } = useFormContext()
 
     // watch the input value
-    const inputValue = watch(label, '')
+    const inputValue = watch(name, '')
 
     // track focus state
     const [isFocused, setIsFocused] = useState(false)
@@ -62,7 +64,7 @@ export default function Select({
             styles.formLine,
             className,
             hideLabel && styles.noLabel,
-            !hideValidations && errors[label] && styles.error
+            !hideValidations && errors[name] && styles.error
         )}>
 
             {!hideLabel && (
@@ -82,7 +84,7 @@ export default function Select({
                     className={clsx(styles.input, styles.select)}
                     defaultValue={defaultValue}
                     disabled={disabled || false}
-                    {...register(label, {
+                    {...register(name, {
                         onChange: (e) => onChange && onChange(e),
                         ...validations
                     })}
@@ -96,9 +98,9 @@ export default function Select({
 
             </div>
 
-            {!hideValidations && errors[label] && (
+            {!hideValidations && errors[name] && (
                 <p className={styles.errorMsg}>
-                    {String(errors[label].message)}
+                    {String(errors[name].message)}
                 </p>
             )}
 

@@ -41,6 +41,7 @@ export default function PopupInsight360({
 						placeholder='Type here'
 						required
 						label='Report Name'
+						name='report-name'
 						hideLabel
 						id='report-name'
 						type='text'
@@ -62,6 +63,7 @@ export default function PopupInsight360({
 						defaultValue=''
 						required
 						label='Category'
+						name='category'
 						hideLabel
 						id='report-category'
 					>
@@ -87,6 +89,7 @@ export default function PopupInsight360({
 						placeholder='Please specify'
 						required
 						label='Brands'
+						name='brands'
 						hideLabel
 						id='report-brands'
 						type='text'
@@ -108,7 +111,7 @@ export default function PopupInsight360({
 					<Checkbox
 						type='checkbox'
 						id='report-genders-men'
-						name='Genders'
+						name='genders'
 						label="Men's"
 						required
 					/>
@@ -116,7 +119,7 @@ export default function PopupInsight360({
 					<Checkbox
 						type='checkbox'
 						id='report-genders-women'
-						name='Genders'
+						name='genders'
 						label="Women's"
 						required
 					/>
@@ -124,7 +127,7 @@ export default function PopupInsight360({
 					<Checkbox
 						type='checkbox'
 						id='report-genders-kids'
-						name='Genders'
+						name='genders'
 						label="Kids"
 						required
 					/>
@@ -146,6 +149,7 @@ export default function PopupInsight360({
 						placeholder='Type here'
 						required
 						label='Goal'
+						name='goal'
 						hideLabel
 						id='report-goal'
 						maxLength={250}

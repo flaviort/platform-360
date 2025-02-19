@@ -15,12 +15,21 @@ import Submit from '@/components/Form/Submit'
 // data / utils / db
 import { pages } from '@/utils/routes'
 
+// context
+import { useAuth } from '@/contexts/AuthContext'
+
 // css
 import styles from './index.module.scss'
 
-export default function Login() {
+interface LoginFormData {
+    email: string
+    password: string
+    remember: boolean
+}
 
-	const router = useRouter()
+export default function Login() {
+	const { login, setIsAuthenticated } = useAuth()
+    const router = useRouter()
 
 	return (
 		<AccountWrapper>
@@ -38,44 +47,54 @@ export default function Login() {
 					<Form
 						className={styles.form}
 						endpoint='/api/account/auth'
-						onSuccess={() => router.push(pages.dashboard.my_reports)}
+						onSuccess={async (responseData, formData: LoginFormData) => {
+                            if (responseData.message === 'Login successful!') {
+                                if (formData.remember) {
+                                    localStorage.setItem('auth_token', 'fake_token')
+                                }
+                                
+                                document.cookie = `auth_token=fake_token; path=/; ${formData.remember ? 'max-age=31536000' : ''}`
+                                setIsAuthenticated(true)
+                                router.push(pages.dashboard.my_reports)
+                            }
+                        }}
 						onError={() => {}}
 					>
-
 						<div className={styles.flex}>
-
 							<Input
 								id='login-email'
 								label='Email'
+								name='email'
 								hideValidations
 								type='text'
 								placeholder='Username / Email'
 								maxLength={100}
+								required
 							/>
 
 							<Input
 								id='login-password'
 								label='Password'
+								name='password'
 								hideValidations
 								type='password'
 								placeholder='Password'
+								required
 							/>
 
 							<div className={styles.options}>
-
 								<Checkbox
 									type='checkbox'
 									id='login-remember'
 									label='Remember me'
 									name='remember'
+									checked
 								/>
 
 								<Link href={pages.account.forgot} className={clsx(styles.forgot, 'hover-underline blue text-14')}>
 									Forgot your password?
 								</Link>
-
 							</div>
-
 						</div>
 
 						<Submit
@@ -83,7 +102,6 @@ export default function Login() {
 							text='Login'
 							className={styles.submit}
 						/>
-
 					</Form>
 
 				</div>

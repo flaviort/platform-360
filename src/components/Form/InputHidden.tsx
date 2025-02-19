@@ -2,12 +2,12 @@
 import { useFormContext } from 'react-hook-form'
 
 export interface InputHiddenProps {
-    label: string
+    name: string
     value: string
 }
 
 export default function InputHidden({
-    label,
+    name,
     value
 }: InputHiddenProps) {
 
@@ -19,7 +19,7 @@ export default function InputHidden({
         <input
             type='hidden'
             value={value}
-            {...register(label)}
+            {...register(name)}
         />
     )
 }

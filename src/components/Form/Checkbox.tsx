@@ -64,7 +64,7 @@ export default function Checkbox({
                 type={type}
                 id={id}
                 className={styles.checkbox}
-                checked={checked}
+                defaultChecked={checked}
                 disabled={disabled || false}
                 {...register(name, { ...validations })}
             />

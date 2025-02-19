@@ -11,7 +11,7 @@ import { SubWrapper, Sub } from '@/components/SubMenu'
 
 // img / svg
 import Logo from '@/assets/svg/logo/logo.svg'
-import { CircleHelp, Mail, Bell, Zap, X, Folders, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Menu, Wallet, Landmark, LogOut, CircleUser } from 'lucide-react'
+import { CircleHelp, Mail, Bell, Zap, X, Menu, Wallet, Landmark, LogOut, CircleUser } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -22,6 +22,9 @@ import { firstChar, limitCharacters } from '@/utils/functions'
 
 // db (temporary)
 import { user } from '@/db/db'
+
+// context
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function TopMenu() {
 
@@ -58,6 +61,8 @@ export default function TopMenu() {
         }
     }, [isShown])
 
+    const { logout } = useAuth()
+
     return (
         <>
 
@@ -69,7 +74,7 @@ export default function TopMenu() {
                         <div className={styles.left}>
 
                             <Link
-                                href={pages.dashboard.my_reports}
+                                href={pages.home}
                                 aria-label='Go to homepage'
                                 className={styles.logo}
                             >
@@ -348,7 +353,10 @@ export default function TopMenu() {
 
                                         <div className={styles.line}></div>
 
-                                        <button className='text-14 bold gray-800'>
+                                        <button
+                                            className='text-14 bold gray-800'
+                                            onClick={logout}
+                                        >
 
                                             <LogOut />
 

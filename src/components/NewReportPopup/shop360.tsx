@@ -42,6 +42,7 @@ export default function PopupShop360({
 						placeholder='Type here'
 						required
 						label='Report Name'
+						name='report-name'
 						hideLabel
 						id='report-name'
 						type='text'
@@ -63,6 +64,7 @@ export default function PopupShop360({
 						defaultValue=''
 						required
 						label='Category'
+						name='category'
 						hideLabel
 						id='report-category'
 					>
@@ -131,6 +133,7 @@ export default function PopupShop360({
 						placeholder='Please specify'
 						required
 						label='Brands'
+						name='brands'
 						hideLabel
 						id='report-brands'
 						type='text'
@@ -151,7 +154,7 @@ export default function PopupShop360({
 					<Checkbox
 						type='checkbox'
 						id='report-include-images'
-						name='Inlcude Images'
+						name='include-images'
 						label='Yes'
 					/>
 				</div>
@@ -171,7 +174,7 @@ export default function PopupShop360({
 					<Checkbox
 						type='checkbox'
 						id='report-genders-men'
-						name='Genders'
+						name='genders'
 						label="Men's"
 						required
 					/>
@@ -179,7 +182,7 @@ export default function PopupShop360({
 					<Checkbox
 						type='checkbox'
 						id='report-genders-women'
-						name='Genders'
+						name='genders'
 						label="Women's"
 						required
 					/>
@@ -187,7 +190,7 @@ export default function PopupShop360({
 					<Checkbox
 						type='checkbox'
 						id='report-genders-kids'
-						name='Genders'
+						name='genders'
 						label="Kids"
 						required
 					/>
@@ -209,6 +212,7 @@ export default function PopupShop360({
 						defaultValue=''
 						required
 						label='Year Pulled'
+						name='year-pulled'
 						hideLabel
 						id='report-year-pulled'
 					>
@@ -236,6 +240,7 @@ export default function PopupShop360({
 						defaultValue=''
 						required
 						label='Month Pulled'
+						name='month-pulled'
 						hideLabel
 						id='report-month-pulled'
 					>
@@ -270,7 +275,7 @@ export default function PopupShop360({
 					<Checkbox
 						type='radio'
 						id='report-type-instore'
-						name='Type'
+						name='type'
 						label='Instore'
 						required
 					/>
@@ -278,7 +283,7 @@ export default function PopupShop360({
 					<Checkbox
 						type='radio'
 						id='report-type-online'
-						name='Type'
+						name='type'
 						label='Online'
 						required
 					/>
@@ -286,7 +291,7 @@ export default function PopupShop360({
 					<Checkbox
 						type='radio'
 						id='report-type-both'
-						name='Type'
+						name='type'
 						label='Both'
 						required
 					/>
@@ -308,6 +313,7 @@ export default function PopupShop360({
 						placeholder='Type here'
 						required
 						label='Goal'
+						name='goal'
 						hideLabel
 						id='report-goal'
 						maxLength={250}

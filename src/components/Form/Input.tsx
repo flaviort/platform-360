@@ -14,6 +14,7 @@ import styles from './form.module.scss'
 export interface InputProps {
     id: string
     label: string
+    name: string
     labelAlwaysVisible?: boolean
     hideLabel?: boolean
     type: string
@@ -33,6 +34,7 @@ export interface InputProps {
 export default function Input({
     id,
     label,
+    name,
     labelAlwaysVisible,
     hideLabel,
     type,
@@ -52,7 +54,7 @@ export default function Input({
     const { register, watch, formState: { errors } } = useFormContext()
 
     // watch the input value
-    const inputValue = watch(label, '')
+    const inputValue = watch(name, '')
 
     // track focus state
     const [isFocused, setIsFocused] = useState(false)
@@ -135,7 +137,7 @@ export default function Input({
             styles.formLine,
             className,
             hideLabel && styles.noLabel,
-            !hideValidations && errors[label] && styles.error
+            !hideValidations && errors[name] && styles.error
         )}>
 
             {!hideLabel && (
@@ -158,7 +160,7 @@ export default function Input({
                     disabled={disabled || false}
                     onKeyDown={handleKeyPress}
                     onFocus={() => setIsFocused(true)}
-                    {...register(label, {
+                    {...register(name, {
                         ...validations,
                         onBlur: () => {
                             setIsFocused(false)
@@ -182,9 +184,9 @@ export default function Input({
 
             </div>
 
-            {!hideValidations && errors[label] && (
+            {!hideValidations && errors[name] && (
                 <p className={styles.errorMsg}>
-                    {String(errors[label].message)}
+                    {String(errors[name].message)}
                 </p>
             )}
 

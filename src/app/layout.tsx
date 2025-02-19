@@ -6,6 +6,9 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 // components
 import Guidelines from '@/components/Utils/Guidelines'
 
+// context
+import { AuthProvider } from '@/contexts/AuthContext'
+
 // css
 import '@/assets/css/normalize.min.css'
 import '@/assets/css/bootstrap-grid.min.css'
@@ -65,7 +68,9 @@ export default function RootLayout({
 
 				<div id='portal'></div>
 
-				{children}
+				<AuthProvider>
+					{children}
+				</AuthProvider>
 
 				<Guidelines />
 

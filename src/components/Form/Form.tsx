@@ -13,9 +13,10 @@ export interface FormProps {
     children: React.ReactNode
     endpoint: string
     isFormData?: boolean
-    onSuccess?: (data: any) => void
+    onSuccess?: (data: any, formData?: any) => void 
     onError?: (error: any) => void
     clearOnSubmit?: boolean
+    hideErrors?: boolean
 }
 
 interface FormValues {
@@ -29,7 +30,8 @@ export default function Form({
     isFormData,
     onSuccess,
     onError,
-    clearOnSubmit
+    clearOnSubmit,
+    hideErrors
 }: FormProps) {
     
     // refs
@@ -94,14 +96,14 @@ export default function Form({
         .then((responseData) => {
             if (onSuccess) {
                 setTimeout(() => {
-                    onSuccess(responseData)
-
+                    onSuccess(responseData, data)  // Pass both response data and form data
+            
                     if(form.current) {
                         setTimeout(() => {
                             form?.current?.classList.remove('is-sending')
                             document.dispatchEvent(new Event('formSent'))  
                         }, 600)
-
+            
                         if (clearOnSubmit) {
                             form?.current?.reset()
                             document.dispatchEvent(new Event('formReset'))
@@ -141,7 +143,7 @@ export default function Form({
 
                 {children}
 
-                {globalError && (
+                {!hideErrors && globalError && (
                     <span className={clsx(styles.globalError, 'text-16 red')}>
                         {globalError}
                     </span>

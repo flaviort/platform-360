@@ -45,6 +45,7 @@ export default function ForgotPassword() {
 							<Input
 								id='forgot-password-email'
 								label='Email'
+								name='email'
 								type='email'
 								placeholder='email@email.com'
 								maxLength={100}

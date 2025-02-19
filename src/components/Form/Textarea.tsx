@@ -8,6 +8,7 @@ import styles from './form.module.scss'
 export interface TextareaProps {
     id: string
     label: string
+    name: string
     hideLabel?: boolean
     placeholder?: string
     className?: string
@@ -20,6 +21,7 @@ export interface TextareaProps {
 export default function Textarea({
     id,
     label,
+    name,
     hideLabel,
     placeholder,
     required,
@@ -56,7 +58,7 @@ export default function Textarea({
         <div className={clsx(
             styles.formLine,
             className,
-            !hideValidations && errors[label] && styles.error
+            !hideValidations && errors[name] && styles.error
         )}>
 
             {!hideLabel && (
@@ -70,13 +72,13 @@ export default function Textarea({
                     id={id}
                     placeholder={placeholder}
                     className={clsx(styles.input, styles.textarea)}
-                    {...register(label, validations)}
+                    {...register(name, validations)}
                 />
             </div>
 
-            {!hideValidations && errors[label] && (
+            {!hideValidations && errors[name] && (
                 <p className={styles.errorMsg}>
-                    {String(errors[label].message)}
+                    {String(errors[name].message)}
                 </p>
             )}
 

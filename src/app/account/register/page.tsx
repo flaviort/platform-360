@@ -54,6 +54,7 @@ export default function Register() {
 									<Input
 										id='create-account-first-name'
 										label='First Name'
+										name='first-name'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
@@ -65,6 +66,7 @@ export default function Register() {
 									<Input
 										id='create-account-last-name'
 										label='Last Name'
+										name='last-name'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
@@ -75,6 +77,7 @@ export default function Register() {
 									<Input
 										id='create-account-email'
 										label='Email'
+										name='email'
 										type='email'
 										placeholder='email@email.com'
 										maxLength={100}
@@ -86,6 +89,7 @@ export default function Register() {
 									<Input
 										id='create-account-phone'
 										label='Phone'
+										name='phone'
 										type='tel'
 										placeholder='Phone'
 										maxLength={50}
@@ -96,6 +100,7 @@ export default function Register() {
 									<Select
 										id='create-account-role'
 										label='Role'
+										name='role'
 										defaultValue=''
 										required
 										onChange={(e) => setDifferentArea(e.target.value === 'Other')}
@@ -119,6 +124,7 @@ export default function Register() {
 										<Input
 											id='create-account-area-other'
 											label='Please specify'
+											name='role-other'
 											type='text'
 											placeholder='Type here'
 											maxLength={100}
@@ -131,6 +137,7 @@ export default function Register() {
 									<Input
 										id='create-account-company-name'
 										label='Company Name'
+										name='company-name'
 										type='text'
 										placeholder='Type here'
 										maxLength={100}
@@ -142,6 +149,7 @@ export default function Register() {
 									<Select
 										id='create-account-country'
 										label='Country'
+										name='country'
 										defaultValue=''
 										required
 									>
@@ -161,6 +169,7 @@ export default function Register() {
 									<Input
 										id='create-account-state'
 										label='State'
+										name='state'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
@@ -172,6 +181,7 @@ export default function Register() {
 									<Input
 										id='create-account-city'
 										label='City'
+										name='city'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
@@ -183,6 +193,7 @@ export default function Register() {
 									<Input
 										id='create-account-zip'
 										label='ZIP Code'
+										name='zipcode'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
@@ -195,6 +206,7 @@ export default function Register() {
 							<Input
 								id='create-account-password'
 								label='Password'
+								name='password'
 								type='password'
 								placeholder='Password'
 								required
@@ -204,6 +216,7 @@ export default function Register() {
 							<Input
 								id='create-account-repeat-password'
 								label='Repeat Password'
+								name='repeat-password'
 								type='password'
 								placeholder='Repeat Password'
 								required
