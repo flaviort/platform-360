@@ -36,7 +36,11 @@ export default function AccountWrapper({
 				<div className={clsx(styles.container, 'container')}>
 
 					<div className={styles.top}>
-						<Link href={pages.home} className={styles.logo}>
+						<Link
+							href={pages.home}
+							className={styles.logo}
+							aria-label='Go to homepage'
+						>
 							<Logo />
 						</Link>
 					</div>

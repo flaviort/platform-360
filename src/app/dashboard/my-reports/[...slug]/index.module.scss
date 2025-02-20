@@ -587,7 +587,9 @@
 
             .listGroup {
                 .listGroupTitle {
-                    @include gradient-left-right($blue, $blue-light);
+                    background-color: rgba($gray-200, .5);
+                    border-top: var(--1px) solid $gray-200;
+                    border-bottom: var(--1px) solid $gray-200;
                     padding: 1rem;
                     min-width: 60rem;
 
@@ -618,7 +620,7 @@
                 }
 
                 .nameCol {
-                    padding-left: 1rem;
+
                 }
 
                 .statusCol {

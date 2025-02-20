@@ -5,7 +5,7 @@ import user3 from '@/assets/img/temp/avatar-03.jpg'
 
 export const fakeProjects = [
     {
-        projectGroup: null,
+        projectGroup: 'Lululemon Summer 2025',
         projectName: 'Running Shoes Report',
         status: 'empty',
         category: 'Footwear',
@@ -36,7 +36,7 @@ export const fakeProjects = [
         ]
     },
     {
-        projectGroup: null,
+        projectGroup: 'Project Category',
         projectName: 'Underwear Report',
         status: 'green',
         category: 'Underwear',
@@ -63,8 +63,8 @@ export const fakeProjects = [
         ]
     },
     {
-        projectGroup: null,
-        projectName: '[Ungrouped Report]',
+        projectGroup: 'Lululemon Summer 2025',
+        projectName: 'Fake Report',
         status: 'yellow',
         category: 'Sports',
         date: '11.14.2024',

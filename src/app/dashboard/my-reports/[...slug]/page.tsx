@@ -1,13 +1,12 @@
 // components
 import Breadcrumbs from '@/components/Breadcrumbs'
 import TitlePart from '@/components/TitlePart'
-import List, { ListProps} from './list'
-
-// db
-import { fakeProjects } from '@/db/fake-projects'
 
 // css
 import styles from './index.module.scss'
+
+// utils
+import { pages } from '@/utils/routes'
 
 export default function DashboardMyReports() {
 
@@ -18,21 +17,22 @@ export default function DashboardMyReports() {
 				breadcrumbs={[
 					{
 						name: 'Home',
-						link: '#'
+						link: pages.home
 					},
 					{
 						name: 'My Reports',
+						link: pages.dashboard.my_reports
+					},
+					{
+						name: 'Lululemon Summer 2025',
 						link: '#'
 					}
 				]}
 			/>
 		
 			<TitlePart
-				title='My Reports'
-				description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus.'
+				title='Lululemon Summer 2025'
 			/>
-
-			<List projects={fakeProjects as ListProps['projects']} />
 
 		</main>
 	)

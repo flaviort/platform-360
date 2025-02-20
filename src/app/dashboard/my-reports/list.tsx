@@ -20,6 +20,8 @@ import UxSort from '@/assets/svg/ux/sort.svg'
 
 // css
 import styles from './index.module.scss'
+import { slugify } from '@/utils/functions'
+import { pages } from '@/utils/routes'
 
 export interface ListProps {
     projects: Array<{
@@ -117,7 +119,7 @@ export default function List({
 								<div key={`group-${groupIndex}`} className={styles.listGroup}>
 
 									<div className={styles.listGroupTitle}>
-										<h2 className='text-16 bold gray-700'>
+										<h2 className='text-16 bold white'>
 											{groupName}
 										</h2>
 									</div>
@@ -235,7 +237,10 @@ export function ListItem({
 		<div className={styles.listItem}>
 
 			<div className={styles.nameCol}>
-				<Link href='#' className='text-16 bold blue'>
+				<Link
+					href={pages.dashboard.my_reports + '/' + slugify(item.projectGroup) + '/' + slugify(item.projectName)}
+					className='text-16 bold blue'
+				>
 					{item.projectName}
 				</Link>
 			</div>
@@ -328,7 +333,7 @@ export function ListItem({
 							<div className={styles.subWrapper}>
 
 								<Link
-									href='#'
+									href={pages.dashboard.my_reports + '/' + slugify(item.projectGroup) + '/' + slugify(item.projectName)}
 									className='text-14 bold'
 									onClick={closeOptionsSub}
 								>
