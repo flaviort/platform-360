@@ -21,8 +21,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter()
 
     useEffect(() => {
-        const token = localStorage.getItem('auth_token')
-        setIsAuthenticated(!!token)
+        const localToken = localStorage.getItem('auth_token')
+        const cookieToken = document.cookie.includes('auth_token=')
+        setIsAuthenticated(!!(localToken && cookieToken))
     }, [])
 
     const login = async (email: string, password: string) => {
