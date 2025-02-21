@@ -87,8 +87,8 @@ export default function PopupShop360({
 
 				<div className={styles.input}>
 					<Dropdown
-						defaultValue='Select up to 3...'
-						limitSelected={3}
+						defaultValue='Select up to 5...'
+						limitSelected={5}
 						items={[
 							{
 								name: 'report-retailers 1',

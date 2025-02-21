@@ -6,6 +6,7 @@ const __dirname = path.dirname(__filename)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+	output: 'standalone',
 	sassOptions: {
 		includePaths: [path.join(__dirname, 'src/assets/scss')],
 		additionalData: `@use 'variables.scss' as *;`,
