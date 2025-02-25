@@ -560,7 +560,7 @@
             .listTitle {
                 position: relative;
                 display: grid;
-                grid-template-columns: 2.5fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
+                grid-template-columns: 2.5fr .75fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
                 padding: 1rem 0;
                 border-top: var(--1px) solid $gray-200;
                 border-bottom: var(--1px) solid $gray-200;
@@ -601,7 +601,7 @@
                 position: relative;
                 display: grid;
                 align-items: center;
-                grid-template-columns: 2.5fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
+                grid-template-columns: 2.5fr .75fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
                 padding: 1rem 0;
                 border-top: var(--1px) solid $gray-200;
                 border-bottom: var(--1px) solid $gray-200;
@@ -619,6 +619,40 @@
 
                 .nameCol {
                     padding-left: 1rem;
+                }
+
+                .pdfCol {
+                    button {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 2rem;
+                        min-width: 2rem;
+                        height: 2rem;
+                        padding: .5rem;
+                        color: $gray-500;
+                        transition: .2s ease-in-out;
+                        border-radius: .25rem;
+
+                        &:hover,
+                        &:focus-visible,
+                        &.open {
+                            color: $white;
+                            background-color: $purple;
+                        }
+
+                        &.open {
+                            &:before,
+                            &:after {
+                                opacity: 0;
+                            }
+                        }
+
+                        svg {
+                            width: 100%;
+                            height: auto;
+                        }
+                    }
                 }
 
                 .statusCol {

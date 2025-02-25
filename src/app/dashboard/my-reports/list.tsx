@@ -15,7 +15,7 @@ import usePopoverPosition from '@/components/Utils/Portal/usePopoverPosition'
 import Fancybox from '@/components/Utils/Fancybox'
 
 // img / svg
-import { Ellipsis, ArrowLeft, ArrowRight, FilePenLine, Trash2, LoaderCircle } from 'lucide-react'
+import { Ellipsis, ArrowLeft, ArrowRight, FilePenLine, Trash2, LoaderCircle, FileChartColumn } from 'lucide-react'
 import UxSort from '@/assets/svg/ux/sort.svg'
 
 // css
@@ -73,6 +73,9 @@ export default function List({
 							{[
 								{
 									text: 'Name'
+								},
+								{
+									text: 'PDF'
 								},
 								{
 									text: 'Status'
@@ -243,6 +246,15 @@ export function ListItem({
 				>
 					{item.projectName}
 				</Link>
+			</div>
+
+			<div className={styles.pdfCol}>
+				<button
+					data-balloon-pos='up'
+					aria-label='Download PDF Report'
+				>
+					<FileChartColumn />
+				</button>
 			</div>
 
 			<div className={styles.statusCol}>
