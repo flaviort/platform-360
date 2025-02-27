@@ -1,5 +1,8 @@
+'use client'
+
 // libraries
 import clsx from 'clsx'
+import { useState } from 'react'
 
 // components
 import Breadcrumbs from '@/components/Breadcrumbs'
@@ -18,6 +21,22 @@ import { pages } from '@/utils/routes'
 import { numberOfSkus, topColors, positiveNegative, productPrice, access } from './chart-data'
 
 export default function DashboardMyReports() {
+	
+	const [isCollapsed, setIsCollapsed] = useState(false)
+	const [isHidden, setIsHidden] = useState(false)
+
+	const handleToggleCollapse = () => {
+		setIsCollapsed(prev => !prev)
+		
+		if (!isHidden) {
+			setIsHidden(true)
+		} else {
+			setTimeout(() => {
+				setIsHidden(false)
+			}, 300)
+		}
+	}
+
 	return (
 		<main className={styles.page}>
 
@@ -76,7 +95,11 @@ export default function DashboardMyReports() {
 				</div>
 			</section>
 
-			<section className={styles.middleContent}>
+			<section className={clsx(
+				styles.middleContent,
+				isCollapsed && styles.collapsed,
+				isHidden && styles.hidden
+			)}>
 				<div className='container container--big'>
 					<div className={styles.contentWrapper}>
 
@@ -94,6 +117,8 @@ export default function DashboardMyReports() {
 								type: 'Instore',
 								goal: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus.'
 							}}
+							onToggleCollapse={handleToggleCollapse}
+							isCollapsed={isCollapsed}
 						/>
 
 						<div className={clsx(styles.chartsArea, 'relative')}>
