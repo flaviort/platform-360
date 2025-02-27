@@ -13,16 +13,22 @@ interface AvatarProps {
     alt?: string
     letter?: string
     className?: string
+    showAriaLabel?: boolean
 }
 
 export default function Avatar({
     image,
     alt,
     letter,
-    className
+    className,
+    showAriaLabel
 }: AvatarProps) {
     return (
-        <span className={clsx(styles.component, className)}>
+        <span
+            className={clsx(styles.component, className)}
+            aria-label={showAriaLabel ? alt : undefined}
+            data-balloon-pos={showAriaLabel ? 'up' : undefined}
+        >
             {image ? (
                 <Image
                     src={image || '/images/avatar.png'}

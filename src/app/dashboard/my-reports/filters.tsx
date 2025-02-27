@@ -276,6 +276,7 @@ export default function Filters() {
 
 							<Sub className={styles.sub}>
 									
+								{/*
 								<p className='text-14 bold gray-400 uppercase'>
 									Projects
 								</p>
@@ -293,6 +294,7 @@ export default function Filters() {
 								</button>
 
 								<div className={styles.line}></div>
+								*/}
 
 								<p className='text-14 bold gray-400 uppercase'>
 									Reports

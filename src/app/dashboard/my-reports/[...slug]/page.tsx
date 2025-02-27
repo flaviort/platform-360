@@ -1,8 +1,12 @@
 // libraries
 import clsx from 'clsx'
+
 // components
 import Breadcrumbs from '@/components/Breadcrumbs'
 import TitlePart from '@/components/TitlePart'
+import ChartBox from '@/components/ChartBox'
+import ProjectDetails from './projectDetails'
+import TopButtons from './topButtons'
 
 // css
 import styles from './index.module.scss'
@@ -10,8 +14,10 @@ import styles from './index.module.scss'
 // utils
 import { pages } from '@/utils/routes'
 
-export default function DashboardMyReports() {
+// data
+import { numberOfSkus, topColors, positiveNegative, productPrice, access } from './chart-data'
 
+export default function DashboardMyReports() {
 	return (
 		<main className={styles.page}>
 
@@ -26,35 +32,41 @@ export default function DashboardMyReports() {
 						link: pages.dashboard.my_reports
 					},
 					{
-						name: 'Lululemon Summer 2025',
+						name: 'Nike Summer 2025',
 						link: '#'
 					}
 				]}
 			/>
 		
 			<TitlePart
-				title='Lululemon Summer 2025'
+				title='Nike Summer 2025'
 			/>
 
-			<section className={styles.navigation}>
+			<section className={styles.topNavigation}>
 				<div className='container container--big'>
 					<ul>
 
 						<li>
 							<button className={clsx(styles.active, 'text-16 gray-400 semi-bold')}>
-								Shoe Report
+								Running Shoes
 							</button>
 						</li>
 
 						<li>
 							<button className='text-16 gray-400 semi-bold'>
-								Other Report
+								Test123
 							</button>
 						</li>
 
 						<li>
 							<button className='text-16 gray-400 semi-bold'>
-								Other Report
+								Hoodies & Sweatshirts
+							</button>
+						</li>
+
+						<li>
+							<button className='text-16 gray-400 semi-bold'>
+								Pants
 							</button>
 						</li>
 
@@ -62,23 +74,72 @@ export default function DashboardMyReports() {
 				</div>
 			</section>
 
-			<section className={styles.content}>
+			<section className={styles.middleContent}>
 				<div className='container container--big'>
-					<div className={styles.gridWrapper}>
+					<div className={styles.contentWrapper}>
 
-						<div className={clsx(styles.charts, 'relative')}>
+						<ProjectDetails
+							product='shop360'
+							members={access}
+							summary={{
+								name: 'Shoe Report',
+								category: 'Footwear',
+								retailers: 'Wallmart, Costco, Target',
+								brands: 'Nike, Adidas, New Balance, Puma, Fila',
+								genders: 'All',
+								years: '2012 - 2022',
+								months: 'Jan - Dec',
+								type: 'Instore',
+								goal: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus.'
+							}}
+						/>
+
+						<div className={clsx(styles.chartsArea, 'relative')}>
 
 							<div className={clsx(styles.bg, 'bg-gray-200')}></div>
 
 							<div className='relative z2'>
 
-							</div>
-						</div>
+								<TopButtons />
 
-						<div className={styles.information}>
-							<div className='relative z2'>
+								<div className={styles.allCharts}>
 
+									<ChartBox
+										title='Number of SKUs associated with each retailer'
+										description='Minim dolor in amet nulla laboris enim dolore consequatt...'
+										AIGenerated={true}
+										chart={{
+											horizontal: numberOfSkus
+										}}
+									/>
+
+									<ChartBox
+										title='Top Colors'
+										description='Colors by Numbers of SKUs'
+										chart={{
+											vertical: topColors
+										}}
+									/>
+
+									<ChartBox
+										title='Statistic'
+										description='Minim dolor in amet nulla laboris enim dolore consequatt.'
+										chart={{
+											positiveNegative: positiveNegative
+										}}
+									/>
+
+									<ChartBox
+										title='Top Products'
+										description='Priced at $35 or less'
+										chart={{
+											productPrice: productPrice
+										}}
+									/>
+
+								</div>
 							</div>
+
 						</div>
 
 					</div>

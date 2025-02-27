@@ -1,6 +1,5 @@
 .component {
 	position: relative;
-	overflow: hidden;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -12,4 +11,13 @@
 	color: $white;
 	text-transform: uppercase;
 	font-weight: $medium;
+
+	&:after {
+		text-transform: capitalize;
+		font-size: .5rem;
+	}
+
+	img {
+		border-radius: 50%;
+	}
 }

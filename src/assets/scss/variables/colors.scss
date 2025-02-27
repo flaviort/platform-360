@@ -2,6 +2,7 @@ $transparent:           transparent;
 $pure-white:            #fff;
 $white:                 #F9FAFB;
 
+$gray-50:               #F9FAFB;
 $gray-100:              #F3F4F6;
 $gray-200:              #E5E7EB;
 $gray-300:              #bbb;
@@ -22,6 +23,7 @@ $red:                   #F87171;
 $purple-dark:           #48238F;
 $purple:                #6D28D9;
 $purple-light:          #99CAFF;
+$purple-lighter:        #E9D5FF;
 
 $blue:                  #3691E1;
 $blue-light:            #57B0FF;
@@ -32,6 +34,7 @@ $colors: (
     'pure-white':           $pure-white,
     'white':                $white,
 
+    'gray-50':              $gray-50,
     'gray-100':             $gray-100,
     'gray-200':             $gray-200,
     'gray-300':             $gray-300,
@@ -52,6 +55,7 @@ $colors: (
     'purple-dark':          $purple-dark,
     'purple':               $purple,
     'purple-light':         $purple-light,
+    'purple-lighter':       $purple-lighter,
 
     'blue':                 $blue,
     'blue-light':           $blue-light

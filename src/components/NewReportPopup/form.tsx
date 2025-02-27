@@ -91,6 +91,7 @@ export default function PopupForm({
 			<button
 				className='text-14 bold'
 				onClick={openNewReportPopup}
+				type='button'
 			>
 
 				<Icon />
@@ -158,6 +159,7 @@ export default function PopupForm({
 										<button
 											className={styles.close}
 											onClick={closeNewReportPopup}
+											type='button'
 										>
 											<X />
 										</button>

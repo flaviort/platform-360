@@ -262,7 +262,7 @@ export default function TopMenu() {
                                 >
 
                                     <Avatar
-                                        image={user.image?.src}
+                                        image={user.image}
                                         alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
                                         letter={user.name?.first}
                                     />
@@ -290,7 +290,7 @@ export default function TopMenu() {
                                     <div className={styles.avatar}>
 
                                         <Avatar
-                                            image={user.image?.src}
+                                            image={user.image}
                                             alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
                                             letter={user.name?.first}
                                         />
@@ -408,7 +408,7 @@ export default function TopMenu() {
                         <div className={styles.avatar}>
 
                             <Avatar
-                                image={user.image?.src}
+                                image={user.image}
                                 alt={(user.name?.first && user.name?.first) + (user.name?.last && ' ' + user.name?.last)}
                                 letter={user.name?.first}
                             />

@@ -20,6 +20,8 @@ import UxSort from '@/assets/svg/ux/sort.svg'
 
 // css
 import styles from './index.module.scss'
+
+// utils
 import { slugify } from '@/utils/functions'
 import { pages } from '@/utils/routes'
 

@@ -1,5 +1,5 @@
 .page {
-    .navigation {
+    .topNavigation {
         padding-top: 1rem;
         border-top: var(--1px) solid $gray-200;
         border-bottom: var(--1px) solid $gray-200;
@@ -27,26 +27,346 @@
         }
     }
 
-    .content {
-        .gridWrapper {
-            display: grid;
-            grid-template-columns: 1fr 20rem;
-            min-height: 80vh;
+    .middleContent {
+        @media #{$mq-lg-max} {
+            position: relative;
+            overflow: hidden;
+            border-top: var(--1px) solid $gray-100;
+        }
 
-            .charts {
+        .contentWrapper {
+            display: grid;
+
+            @media #{$mq-lg-min} {
+                grid-template-columns: 1fr 18rem;
+            }
+
+            @media #{$mq-xl-min} {
+                grid-template-columns: 1fr 20rem;
+            }
+
+            .chartsArea {
+                @media #{$mq-lg-min} {
+                    order: 1;
+                }
+
                 .bg {
                     position: absolute;
                     z-index: 0;
                     top: 0;
-                    right: 0;
-                    width: 100vw;
+                    right: -3rem;
+                    width: 150vw;
                     height: 100%;
+
+                    @media #{$mq-lg-min} {
+                        right: 0;
+                    }
+                }
+
+                .topButtons {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-direction: column;
+                    gap: .5rem;
+                    padding-top: 2rem;
+
+                    @media #{$mq-sm-min} {
+                        flex-direction: row;
+                        gap: 1rem;
+                    }
+
+                    @media #{$mq-lg-min} {
+                        padding-right: 2rem;
+                    }
+
+                    .button {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: .5rem;
+                        width: 100%;
+                        border-radius: .25rem;
+                        background-color: rgba($gray-300, .5);
+                        color: $gray-500;
+                        padding: .75rem;
+                        transition: .2s ease-in-out;
+
+                        &:hover,
+                        &:focus-visible {
+                            background-color: $gray-400;
+                            color: $white;
+                        }
+                        
+                        svg {
+                            width: 1rem;
+                            min-width: 1rem;
+                            height: 1rem;
+                        }
+                    }
+
+                    .buttonAI {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        white-space: nowrap;
+                        gap: .5rem;
+                        width: 100%;
+                        border-radius: .25rem;
+                        color: $white;
+                        padding: .75rem 2rem;
+                        @include gradient-left-right($purple-dark, $purple);
+                        transition: .2s ease-in-out;
+
+                        @media #{$mq-sm-min} {
+                            width: fit-content;
+                        }
+
+                        &:hover,
+                        &:focus-visible {
+                            filter: brightness(1.5);
+                        }
+                        
+                        svg {
+                            width: 1rem;
+                            min-width: 1rem;
+                            height: 1rem;
+                        }
+                    }
+                }
+
+                .allCharts {
+                    padding-top: 2rem;
+                    padding-bottom: 3rem;
+                    display: grid;
+                    gap: 1rem;
+
+                    @media #{$mq-lg-min} {
+                        padding-right: 2rem;
+                    }
+
+                    @media #{$mq-2xl-min} {
+                        grid-template-columns: 1fr 1fr;
+                    }
                 }
             }
 
-            .information {
+            .detailsArea {
+                display: flex;
+                flex-direction: column;
+                padding: 1.5rem 0;
 
+                @media #{$mq-lg-min} {
+                    order: 2;
+                    padding: 2rem 0 2rem 2rem;
+                }
+
+                .actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-bottom: 1.5rem;
+
+                    .button {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: .5rem .75rem;
+                        color: $gray-700;
+                        border: var(--1px) solid $gray-300;
+                        transition: .2s ease-in-out;
+                        border-radius: .25rem;
+                        gap: .5rem;
+
+                        &:hover,
+                        &:focus-visible,
+                        &.open {
+                            color: $white;
+                            background-color: $blue;
+                            border-color: $blue;
+                        }
+
+                        &.open {
+                            &:before,
+                            &:after {
+                                opacity: 0;
+                            }
+                        }
+
+                        svg {
+                            width: .875rem;
+                            min-width: .875rem;
+                            height: .875rem;
+                        }
+                    }
+                }
+
+                .details {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.25rem;
+
+                    @media #{$mq-xl-min} {
+                        gap: 2rem;
+                    }
+                    
+                    .item {
+                        display: flex;
+                        flex-direction: column;
+                        gap: .75rem;
+
+                        .logo {
+                            display: flex;
+                            height: 1.1rem;
+
+                            img {
+                                width: auto;
+                                object-fit: contain;
+                                object-position: 0 center;
+                                height: 100%;
+                            }
+                        }
+
+                        .table {
+                            display: grid;
+                            gap: .5rem;
+                            grid-template-columns: 5rem 1fr;
+                        }
+
+                        .goal {
+                            display: block;
+                            margin-top: .5rem;
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+.aiChat {
+    position: fixed;
+	z-index: 9999;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100dvh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background-color: rgba($black, .5);
+	display: flex;
+	align-items: stretch;
+	justify-content: flex-end;
+	padding: .5rem;
+
+	@media #{$mq-sm-min} {
+		padding: 1rem;
+	}
+
+	.bg {
+		position: fixed;
+		z-index: 0;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.wrapper {
+		position: relative;
+		z-index: 2;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		background-color: $white;
+		border-radius: .5rem;
+		border: none;
+		width: 35rem;
+		max-width: 90%;
+        justify-content: space-between;
+
+        .topWrapper {
+            .top {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                width: 100%;
+                gap: 1rem;
+                padding: .75rem 1.25rem;
+                border-bottom: var(--1px) solid $gray-200;
+
+                @media #{$mq-md-min} {
+                    padding: 1.5rem;
+                }
+
+                .close {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 1.25rem;
+                    min-width: 1.25rem;
+                    height: 1.25rem;
+                    color: $gray-600;
+
+                    &:hover,
+                    &:focus-visible {
+                        svg {
+                            transform: rotate(180deg);
+                        }
+                    }
+
+                    svg {
+                        width: 100%;
+                        transition: .3s ease-in-out;
+                    }
+                }
+            }
+
+            .middle {
+                padding: 1.5rem;
+                text-align: center;
+            }
+        }
+
+        .bottom {
+            padding: 1.5rem;
+
+            .inputWrapper {
+                position: relative;
+
+                .input {
+                    display: block;
+                    width: 100%;
+                    padding: 1rem 3rem 1rem 1rem;
+                    border-radius: .25rem;
+                    border: var(--1px) solid $gray-200;
+                    background-color: $white;
+                }
+
+                .send {
+                    position: absolute;
+                    z-index: 2;
+                    top: 50%;
+                    right: .5rem;
+                    transform: translateY(-50%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 2rem;
+                    height: 2rem;
+                    padding: .5rem;
+                    color: $gray-500;
+                    transition: .2s ease-in-out;
+
+                    &:hover,
+                    &:focus-visible {
+                        color: $purple;
+                    }
+
+                    svg {
+                        width: 100%;
+                    }
+                }
+            }
+        }
+    }   
 }

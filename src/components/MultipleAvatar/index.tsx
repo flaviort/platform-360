@@ -11,6 +11,7 @@ import styles from './index.module.scss'
 import { Plus } from 'lucide-react'
 
 interface MultipleAvatarProps {
+    showAriaLabel?: boolean
     avatars: Array<{
         image?: string
         alt?: string
@@ -20,6 +21,7 @@ interface MultipleAvatarProps {
 }
 
 export default function MultipleAvatar({
+    showAriaLabel,
     avatars,
     className
 }: MultipleAvatarProps) {
@@ -31,6 +33,7 @@ export default function MultipleAvatar({
                     image={item.image}
                     alt={item.alt}
                     letter={item.letter}
+                    showAriaLabel={showAriaLabel}
                 />
             ))}
 

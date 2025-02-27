@@ -1,0 +1,20 @@
+.component {
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-bottom: .5rem;
+    }
+
+    .tooltip {
+        background: $white;
+        border: var(--1px) solid $gray-200;
+        border-radius: .25rem;
+        padding: .75rem;
+    }
+
+    .label {
+        //text-shadow: 0 0 .1rem $black;
+    }
+}

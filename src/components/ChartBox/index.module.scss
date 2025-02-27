@@ -1,0 +1,81 @@
+.content {
+    padding: 1rem 1.25rem;
+    border-radius: .5rem;
+    background-color: $pure-white;
+    border: var(--1px) solid rgba($gray-300, .6);
+    height: fit-content;
+
+    @media #{$mq-md-min} {
+        padding: 1.5rem 1.875rem;
+    }
+
+    .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        .left {
+            
+        }
+
+        .right {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+
+            .AIGenerated {
+                background-color: $purple-lighter;
+                padding: .425rem .625rem;
+                border-radius: 1rem;
+                color: $purple;
+                display: flex;
+                align-items: center;
+                gap: .325rem;
+                white-space: nowrap;
+
+                svg {
+                    width: .75rem;
+                    min-width: .75rem;
+                    height: .75rem;
+                }
+            }
+
+            .options {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 2rem;
+                min-width: 2rem;
+                height: 2rem;
+                padding: .5rem;
+                color: $gray-500;
+                border: var(--1px) solid $gray-200;
+                transition: .2s ease-in-out;
+                border-radius: .25rem;
+
+                &:hover,
+                &:focus-visible,
+                &.open {
+                    color: $white;
+                    background-color: $gray-500;
+                }
+
+                &.open {
+                    &:before,
+                    &:after {
+                        opacity: 0;
+                    }
+                }
+
+                svg {
+                    width: 100%;
+                    height: auto;
+                }
+            }
+        }
+    }
+
+    .chart {
+        margin-top: 1.5rem;
+    }
+}
