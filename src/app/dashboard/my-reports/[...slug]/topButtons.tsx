@@ -18,8 +18,44 @@ import styles from './index.module.scss'
 export default function TopButtons() {
 
 	const [aiChat, setAIChat] = useState(false)
+	const [response, setResponse] = useState<any>(null)
+	const [isLoading, setIsLoading] = useState(false)
+
+	const testApiCall = async () => {
+		try {
+			setIsLoading(true)
+			const query = "What are the three maximum prices for athletic shoes on Kohl in 2023?"
+			const response = await fetch(
+				`https://dcx3uf4aq3.us-east-1.awsapprunner.com/v2/products/continue_user_chat?user_id=1234&user_input=${encodeURIComponent(query)}`,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+					}
+				}
+			)
+
+			const rawData = await response.text()
+			console.log('Raw data:', rawData)
+			
+			const data = eval(`(${rawData})`)
+			console.log('Evaluated data:', data)
+			
+			const formattedResponse = {
+				message: data['message'],
+				data: data['data']
+			}
+			console.log('Setting response to:', formattedResponse)
+			
+			setResponse(formattedResponse)
+		} catch (error) {
+			console.error('Error fetching data:', error)
+		} finally {
+			setIsLoading(false)
+		}
+	}
 
 	const openAIChat = () => {
+		testApiCall() // Test the API call when opening the chat
 		setAIChat((prev) => !prev)
 	}
 
@@ -109,9 +145,28 @@ export default function TopButtons() {
 									</div>
 
 									<div className={styles.middle}>
-										<p>
-											Hello AI
-										</p>
+										{isLoading ? (
+											<div className={styles.loading}>
+												<p>Loading...</p>
+											</div>
+										) : response ? (
+											<div className={styles.response} style={{ padding: '20px' }}>
+												<div className={styles.message} style={{ marginBottom: '16px', color: '#333' }}>
+													{response.message}
+												</div>
+												{response.data && (
+													<div className={styles.data} style={{ background: '#f5f5f5', padding: '12px', borderRadius: '8px' }}>
+														<pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+															{JSON.stringify(response.data, null, 2)}
+														</pre>
+													</div>
+												)}
+											</div>
+										) : (
+											<div style={{ padding: '20px', color: '#666' }}>
+												No response yet
+											</div>
+										)}
 									</div>
 
 								</div>
