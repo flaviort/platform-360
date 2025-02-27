@@ -41,14 +41,15 @@ export default function TopButtons() {
 			console.log('Evaluated data:', data)
 			
 			const formattedResponse = {
-				message: data['message'],
-				data: data['data']
+				message: String(data.message || data['message']),
+				data: Array.isArray(data.data || data['data']) ? (data.data || data['data']) : []
 			}
 			console.log('Setting response to:', formattedResponse)
 			
-			setResponse(formattedResponse)
+			setResponse({...formattedResponse})
 		} catch (error) {
 			console.error('Error fetching data:', error)
+			setResponse({ message: "Error processing response", data: [] })
 		} finally {
 			setIsLoading(false)
 		}
