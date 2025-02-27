@@ -44,33 +44,35 @@ export default function DashboardMyReports() {
 
 			<section className={styles.topNavigation}>
 				<div className='container container--big'>
-					<ul>
+					<div className={styles.wrapper}>
+						<ul>
 
-						<li>
-							<button className={clsx(styles.active, 'text-16 gray-400 semi-bold')}>
-								Running Shoes
-							</button>
-						</li>
+							<li>
+								<button className={clsx(styles.active, 'text-16 gray-400 semi-bold')}>
+									Running Shoes
+								</button>
+							</li>
 
-						<li>
-							<button className='text-16 gray-400 semi-bold'>
-								Test123
-							</button>
-						</li>
+							<li>
+								<button className='text-16 gray-400 semi-bold'>
+									Test123
+								</button>
+							</li>
 
-						<li>
-							<button className='text-16 gray-400 semi-bold'>
-								Hoodies & Sweatshirts
-							</button>
-						</li>
+							<li>
+								<button className='text-16 gray-400 semi-bold'>
+									Hoodies & Sweatshirts
+								</button>
+							</li>
 
-						<li>
-							<button className='text-16 gray-400 semi-bold'>
-								Pants
-							</button>
-						</li>
+							<li>
+								<button className='text-16 gray-400 semi-bold'>
+									Pants
+								</button>
+							</li>
 
-					</ul>
+						</ul>
+					</div>
 				</div>
 			</section>
 

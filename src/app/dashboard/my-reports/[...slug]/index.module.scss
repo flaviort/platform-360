@@ -4,24 +4,74 @@
         border-top: var(--1px) solid $gray-200;
         border-bottom: var(--1px) solid $gray-200;
 
-        ul {
-            display: flex;
-            align-items: flex-end;
-            gap: 1.5rem;
+        .wrapper {
+            position: relative;
+            overflow: scroll;
+            width: 100%;
 
-            button {
-                padding-bottom: 1rem;
-                border-bottom: .2rem solid transparent;
+            @media #{$mq-sm-max} {
+                width: calc(100% + .675rem + .75rem);
+            }
 
-                &:hover,
-                &:focus-visible {
-                    color: $gray-600;
-                    border-color: $gray-200;
-                }
+            &::-webkit-scrollbar {
+                height: .1rem;
+            }
+            
+            &::-webkit-scrollbar-track {
+                background: $white;
+            }
+            
+            &::-webkit-scrollbar-thumb {
+                background: $gray-300;
+                border-radius: 0;
+            }
+            
+            &::-webkit-scrollbar-thumb:hover {
+                cursor: grab;
+            }
 
-                &.active {
-                    border-color: $purple;
-                    color: $black;
+            &:before {
+                content: '';
+                position: fixed;
+                z-index: 2;
+                top: 0;
+                right: 0;
+                width: calc(.675rem + .75rem);
+                height: 100%;
+                pointer-events: none;
+                @include gradient-left-right(rgba($white, 0), $white);
+            }
+
+            ul {
+                display: flex;
+                align-items: flex-end;
+                gap: 1.5rem;
+                white-space: nowrap;
+
+                li {
+                    &:last-child {
+                        button {
+                            @media #{$mq-sm-max} {
+                                margin-right: calc(.675rem + .75rem);
+                            }
+                        }
+                    }
+                    
+                    button {
+                        padding-bottom: 1rem;
+                        border-bottom: .2rem solid transparent;
+
+                        &:hover,
+                        &:focus-visible {
+                            color: $gray-600;
+                            border-color: $gray-200;
+                        }
+
+                        &.active {
+                            border-color: $purple;
+                            color: $black;
+                        }
+                    }
                 }
             }
         }
