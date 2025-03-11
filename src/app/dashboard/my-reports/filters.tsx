@@ -315,8 +315,32 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 									onChange={handleSearch}
 								/>
 
-								<button className={styles.icon}>
-									<span className='uppercase text-14 bold'>Search</span>
+								{searchTerm !== '' && (
+									<button
+										type='button'
+										className={clsx(styles.clear, 'text-14 bold button button--solid')}
+										onClick={() => {
+											setSearchTerm('')
+											if (searchRef.current) {
+												searchRef.current.value = ''
+											}
+											onFilterChange(activeFilter, '')
+											closeSearchMobile()
+										}}
+									>
+										<X />
+
+										<span>
+											Clear
+										</span>
+
+									</button>
+								)}
+
+								<button
+									type='button'
+									className={styles.icon}
+								>
 									<Search />
 								</button>
 
