@@ -1,7 +1,9 @@
+'use client'
+
 // components
 import Breadcrumbs from '@/components/Breadcrumbs'
 import TitlePart from '@/components/TitlePart'
-import List, { ListProps} from './list'
+import List, { ListProps } from './list'
 
 // db
 import { fakeProjects } from '@/db/fake-projects'

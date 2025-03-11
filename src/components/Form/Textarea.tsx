@@ -33,9 +33,12 @@ export default function Textarea({
 
     const {
         register,
+        watch,
         formState: {
             errors
-        }
+        },
+        setError,
+        clearErrors
     } = useFormContext() ?? {}
 
     let validations = {}
@@ -51,6 +54,18 @@ export default function Textarea({
                 value: minLength,
                 message: `The message is too short`
             }
+        }
+    }
+
+    const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (maxLength && e.target.value.length > maxLength) {
+            e.target.value = e.target.value.slice(0, maxLength)
+            setError(name, {
+                type: 'maxLength',
+                message: 'Maximum characters exceeded'
+            })
+        } else {
+            clearErrors(name)
         }
     }
 
@@ -72,12 +87,20 @@ export default function Textarea({
                     id={id}
                     placeholder={placeholder}
                     className={clsx(styles.input, styles.textarea)}
+                    onInput={handleInput}
+                    maxLength={maxLength}
                     {...register(name, validations)}
                 />
             </div>
 
+            {maxLength && (
+                <p className={clsx(styles.helper, 'text-12 gray-400')}>
+                    {maxLength - (watch(name)?.length || 0)} / {maxLength} characters
+                </p>
+            )}
+
             {!hideValidations && errors[name] && (
-                <p className={styles.errorMsg}>
+                <p className={clsx(styles.errorMsg, maxLength && styles.hasHelper)}>
                     {String(errors[name].message)}
                 </p>
             )}

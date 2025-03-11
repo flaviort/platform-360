@@ -63,3 +63,8 @@ export const placeholder = (theme = 'dark') => {
 export function firstChar(str: string) {
     return str.charAt(0) || ''
 }
+
+// get all project names
+export function getProjects(projects: any[]) {
+    return Array.from(new Set(projects.map((project: any) => project.projectGroup)))
+}

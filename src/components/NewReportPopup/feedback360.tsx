@@ -1,18 +1,27 @@
-'use client'
-
 // libraries
 import clsx from 'clsx'
 
 // components
 import PopupForm from './form'
-import Input from '@/components/Form/Input'
-import Select from '@/components/Form/Select'
+import ProjectName from './components/ProjectName'
+import ReportName from './components/ReportName'
+import Category from './components/Category'
+import Location from './components/Location'
+import Goal from './components/Goal'
+import InputList from '@/components/Form/InputList'
 import Dropdown from '@/components/Form/Dropdown'
 import Checkbox from '@/components/Form/Checkbox'
-import Textarea from '@/components/Form/Textarea'
+import Price from '@/components/Form/Price'
+import Upload from '@/components/Form/Upload'
 
 // css
 import styles from './index.module.scss'
+
+// db
+import { retailers } from '@/db/retailers'
+
+// functions
+import { slugify } from '@/utils/functions'
 
 interface PopupFeedback360Props {
 	icon: React.ComponentType<any>
@@ -23,51 +32,78 @@ export default function PopupFeedback360({
 	icon: Icon,
 	text
 }: PopupFeedback360Props) {
+
 	return (
 		<PopupForm
 			icon={Icon}
 			text={text}
 		>
 
-			<div className={styles.group}>
+			<ProjectName />
 
-				<div className={styles.label}>
-					<label htmlFor='report-name' className='text-16 semi-bold'>
-						Report Name <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<Input
-						placeholder='Type here'
-						required
-						label='Report Name'
-						name='report-name'
-						hideLabel
-						id='report-name'
-						type='text'
-					/>
-				</div>
-
-			</div>
+			<ReportName />
 
 			<div className={styles.group}>
 
 				<div className={styles.label}>
-					<label htmlFor='report-audience' className='text-16 semi-bold'>
-						Audience <span className='red'>*</span>
+					<label htmlFor='report-audience-size' className='text-16 semi-bold'>
+						Audience Size <span className='red'>*</span>
 					</label>
 				</div>
 
 				<div className={styles.input}>
-					<Input
-						placeholder='Type here'
+					<Dropdown
+						defaultValue='Select one'
+						limitSelected={1}
+						items={[
+							{
+								name: '0-10',
+								label: '0-10'
+							},
+							{
+								name: '10-20',
+								label: '10-20'
+							},
+							{
+								name: '20-30',
+								label: '20-30'
+							},
+							{
+								name: '30-40',
+								label: '30-40'
+							},
+							{
+								name: '40-50',
+								label: '40-50'
+							},
+							{
+								name: '50-60',
+								label: '50-60'
+							},
+							{
+								name: '60-70',
+								label: '60-70'
+							},
+							{
+								name: '70-80',
+								label: '70-80'
+							},
+							{
+								name: '80-90',
+								label: '80-90'
+							},
+							{
+								name: '90-100',
+								label: '90-100'
+							},
+							{
+								name: '100+',
+								label: '100+'
+							}
+						]}
 						required
-						label='Audience'
-						name='audience'
-						hideLabel
-						id='report-audience'
-						type='text'
+						name='audience-size'
+						id='report-audience-size'
 					/>
 				</div>
 
@@ -120,92 +156,74 @@ export default function PopupFeedback360({
 				</div>
 
 				<div className={styles.input}>
-					<Select
-						defaultValue=''
+					<Dropdown
+						defaultValue='Select...'
+						items={[
+							{
+								name: '0-10',
+								label: '0-10'
+							},
+							{
+								name: '10-20',
+								label: '10-20'
+							},
+							{
+								name: '20-30',
+								label: '20-30'
+							},
+							{
+								name: '30-40',
+								label: '30-40'
+							},
+							{
+								name: '40-50',
+								label: '40-50'
+							},
+							{
+								name: '50-60',
+								label: '50-60'
+							},
+							{
+								name: '60+',
+								label: '60+'
+							}
+						]}
 						required
-						label='Age'
 						name='age'
-						hideLabel
 						id='report-age'
-					>
-						<option value=''>Select...</option>
-						<option value='0-10'>0-10</option>
-						<option value='10-20'>10-20</option>
-						<option value='20-30'>20-30</option>
-						<option value='30-40'>30-40</option>
-						<option value='40-50'>40-50</option>
-						<option value='50-60'>50-60</option>
-						<option value='60+'>60+</option>
-					</Select>
-				</div>
-
-			</div>
-
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-location' className='text-16 semi-bold'>
-						Location <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<Input
-						placeholder='Please specify'
-						required
-						label='Location'
-						name='location'
-						hideLabel
-						id='report-location'
-						type='text'
 					/>
 				</div>
 
 			</div>
 
+			<Location />
+
 			<div className={styles.group}>
 
 				<div className={styles.label}>
-					<label htmlFor='report-shopper' className='text-16 semi-bold'>
-						Shopper <span className='red'>*</span>
-					</label>
+					<p className='text-16 semi-bold'>
+						Retailers <span className='red'>*</span>
+					</p>
 				</div>
 
 				<div className={styles.input}>
-					<Input
-						placeholder='Please specify'
+					<Dropdown
+						defaultValue='Select up to 5...'
+						limitSelected={5}
+						items={retailers.map((retailer) => ({
+							name: slugify(retailer),
+							label: retailer
+						}))}
+						searchable
 						required
-						label='Shopper'
-						name='shopper'
-						hideLabel
-						id='report-shopper'
-						type='text'
+						name='retailers'
+						id='report-retailers'
 					/>
 				</div>
 
 			</div>
 
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-category' className='text-16 semi-bold'>
-						Category <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<Input
-						placeholder='Please specify'
-						required
-						label='Category'
-						name='category'
-						hideLabel
-						id='report-category'
-						type='text'
-					/>
-				</div>
-
-			</div>
+			<Category />
 
 			<div className={styles.group}>
 
@@ -216,7 +234,7 @@ export default function PopupFeedback360({
 				</div>
 
 				<div className={styles.input}>
-					<Input
+					<InputList
 						placeholder='List up to 10'
 						required
 						label='Questions'
@@ -224,6 +242,7 @@ export default function PopupFeedback360({
 						hideLabel
 						id='report-questions'
 						type='text'
+						limit={10}
 					/>
 				</div>
 
@@ -238,14 +257,12 @@ export default function PopupFeedback360({
 				</div>
 
 				<div className={styles.input}>
-					<Input
-						placeholder='Min / Max'
+					<Price
 						required
 						label='Price'
 						name='price'
 						hideLabel
 						id='report-price'
-						type='text'
 					/>
 				</div>
 
@@ -255,50 +272,25 @@ export default function PopupFeedback360({
 
 				<div className={styles.label}>
 					<label htmlFor='report-upload-images' className='text-16 semi-bold'>
-						Upload Images <span className='red'>*</span>
+						Upload Images
 					</label>
 				</div>
 
 				<div className={styles.input}>
-					<Input
-						placeholder='Click here to upload'
-						required
-						label='Upload Images'
-						name='upload-images'
-						hideLabel
+					<Upload
 						id='report-upload-images'
-						type='text'
+						name='upload-images'
+						uploadButtonText='Upload Images'
+						multiple
+						maxFileSize={5}
+						accept='image/*'
+						helperText='<p>Max file size: 5MB</p><p>Accepted file types: JPG, PNG, GIF</p>'
 					/>
 				</div>
 
 			</div>
 
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-goal' className='text-16 semi-bold'>
-						Goal <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<Textarea
-						placeholder='Type here'
-						required
-						label='Goal'
-						name='goal'
-						hideLabel
-						id='report-goal'
-						maxLength={250}
-					/>
-
-					<p className={clsx(styles.helper, 'text-12 gray-400')}>
-						Max. 250 characters
-					</p>
-
-				</div>
-
-			</div>
+			<Goal />
 
 		</PopupForm>
 	)

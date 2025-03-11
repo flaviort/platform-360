@@ -1,0 +1,23 @@
+export const brands = [
+    "Nike",
+    "Adidas",
+    "Puma",
+    "New Balance",
+    "Converse",
+    "Vans",
+    "Asics",
+    "Under Armour",
+    "Fila",
+    "Reebok",
+    "Skechers",
+    "Hush Puppies",
+    "Ugg",
+    "Birkenstock",
+    "Teva",
+    "Merrell",
+    "Salomon",
+    "Columbia",
+    "The North Face",
+    "Patagonia",
+    "Arc'teryx"
+]

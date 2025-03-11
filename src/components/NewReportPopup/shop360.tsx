@@ -1,18 +1,26 @@
-'use client'
-
 // libraries
 import clsx from 'clsx'
 
 // components
 import PopupForm from './form'
-import Input from '@/components/Form/Input'
-import Select from '@/components/Form/Select'
+import ProjectName from './components/ProjectName'
+import ReportName from './components/ReportName'
+import Category from './components/Category'
+import Goal from './components/Goal'
 import Dropdown from '@/components/Form/Dropdown'
 import Checkbox from '@/components/Form/Checkbox'
 import Textarea from '@/components/Form/Textarea'
+import DateRange from '@/components/Form/DateRange'
 
 // css
 import styles from './index.module.scss'
+
+// db
+import { retailers } from '@/db/retailers'
+import { brands } from '@/db/brands'
+
+// functions
+import { slugify } from '@/utils/functions'
 
 interface PopupShop360Props {
 	icon: React.ComponentType<any>
@@ -23,59 +31,18 @@ export default function PopupShop360({
 	icon: Icon,
 	text
 }: PopupShop360Props) {
+
 	return (
 		<PopupForm
 			icon={Icon}
 			text={text}
 		>
 
-			<div className={styles.group}>
+			<ProjectName />
 
-				<div className={styles.label}>
-					<label htmlFor='report-name' className='text-16 semi-bold'>
-						Report Name <span className='red'>*</span>
-					</label>
-				</div>
+			<ReportName />
 
-				<div className={styles.input}>
-					<Input
-						placeholder='Type here'
-						required
-						label='Report Name'
-						name='report-name'
-						hideLabel
-						id='report-name'
-						type='text'
-					/>
-				</div>
-
-			</div>
-
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-category' className='text-16 semi-bold'>
-						Category <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<Select
-						defaultValue=''
-						required
-						label='Category'
-						name='category'
-						hideLabel
-						id='report-category'
-					>
-						<option value=''>Select...</option>
-						<option value='Category 1'>Category 1</option>
-						<option value='Category 2'>Category 2</option>
-						<option value='Category 3'>Category 3</option>
-					</Select>
-				</div>
-
-			</div>
+			<Category />
 
 			<div className={styles.group}>
 
@@ -89,32 +56,14 @@ export default function PopupShop360({
 					<Dropdown
 						defaultValue='Select up to 5...'
 						limitSelected={5}
-						items={[
-							{
-								name: 'report-retailers 1',
-								label: 'Costco'
-							},
-							{
-								name: 'report-retailers 2',
-								label: 'Amazon'
-							},
-							{
-								name: 'report-retailers 3',
-								label: 'Target'
-							},
-							{
-								name: 'report-retailers 4',
-								label: 'Walmart'
-							},
-							{
-								name: 'report-retailers 5',
-								label: 'BestBuy'
-							},
-							{
-								name: 'report-retailers 6',
-								label: 'Nancys'
-							}
-						]}
+						items={retailers.map((retailer) => ({
+							name: slugify(retailer),
+							label: retailer
+						}))}
+						searchable
+						required
+						name='retailers'
+						id='report-retailers'
 					/>
 				</div>
 
@@ -129,14 +78,17 @@ export default function PopupShop360({
 				</div>
 
 				<div className={styles.input}>
-					<Input
-						placeholder='Please specify'
+					<Dropdown
+						defaultValue='Select up to 5...'
+						limitSelected={5}
+						items={brands.map((brand) => ({
+							name: slugify(brand),
+							label: brand
+						}))}
+						searchable
 						required
-						label='Brands'
 						name='brands'
-						hideLabel
 						id='report-brands'
-						type='text'
 					/>
 				</div>
 
@@ -202,62 +154,19 @@ export default function PopupShop360({
 			<div className={styles.group}>
 
 				<div className={styles.label}>
-					<label htmlFor='report-year-pulled' className='text-16 semi-bold'>
-						Year Pulled <span className='red'>*</span>
+					<label htmlFor='report-time-period' className='text-16 semi-bold'>
+						Time Period <span className='red'>*</span>
 					</label>
 				</div>
 
 				<div className={styles.input}>
-					<Select
-						defaultValue=''
+					<DateRange
+						name='time-period'
 						required
-						label='Year Pulled'
-						name='year-pulled'
 						hideLabel
-						id='report-year-pulled'
-					>
-						<option value=''>Select...</option>
-						{['2025', '2024', '2023', '2022', '2021', '2020', '2019'].map((item, i) => (
-							<option value={item} key={i}>
-								{item}
-							</option>	
-						))}
-					</Select>
-				</div>
-
-			</div>
-
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-month-pulled' className='text-16 semi-bold'>
-						Month Pulled <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<Select
-						defaultValue=''
-						required
-						label='Month Pulled'
-						name='month-pulled'
-						hideLabel
-						id='report-month-pulled'
-					>
-						<option value=''>Select...</option>
-						<option value='January'>January</option>	
-						<option value='February'>February</option>	
-						<option value='March'>March</option>	
-						<option value='April'>April</option>	
-						<option value='May'>May</option>	
-						<option value='June'>June</option>	
-						<option value='July'>July</option>	
-						<option value='August'>August</option>	
-						<option value='September'>September</option>	
-						<option value='October'>October</option>	
-						<option value='November'>November</option>	
-						<option value='December'>December</option>
-					</Select>
+						startDate='2018-01-01'
+						endDate='2025-03-10'
+					/>
 				</div>
 
 			</div>
@@ -300,32 +209,7 @@ export default function PopupShop360({
 
 			</div>
 
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-goal' className='text-16 semi-bold'>
-						Goal <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<Textarea
-						placeholder='Type here'
-						required
-						label='Goal'
-						name='goal'
-						hideLabel
-						id='report-goal'
-						maxLength={250}
-					/>
-
-					<p className={clsx(styles.helper, 'text-12 gray-400')}>
-						Max. 250 characters
-					</p>
-
-				</div>
-
-			</div>
+			<Goal />
 
 		</PopupForm>
 	)

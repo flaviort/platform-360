@@ -21,14 +21,15 @@ interface PopupFormProps {
 	icon: React.ComponentType<any>
 	text: string
 	children: React.ReactNode
+	onClose?: () => void
 }
 
 export default function PopupForm({
 	icon: Icon,
 	text,
-	children
+	children,
+	onClose
 }: PopupFormProps) {
-
 	const [optionsSub, setOptionsSub] = useState(false)
 	const optionsSubRef = useRef<HTMLDivElement>(null)
 	const popoverRef = useRef<HTMLDivElement>(null)
@@ -41,6 +42,7 @@ export default function PopupForm({
 
 	const closeNewReportPopup = () => {
 		setOptionsSub(false)
+		onClose?.()
 	}
 
 	useEffect(() => {
@@ -87,7 +89,7 @@ export default function PopupForm({
 
 	return (
 		<>
-									
+								
 			<button
 				className='text-14 bold'
 				onClick={openNewReportPopup}

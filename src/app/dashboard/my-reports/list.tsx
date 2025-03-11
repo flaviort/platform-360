@@ -9,13 +9,13 @@ import { useState, useEffect, useRef } from 'react'
 // components
 import Avatar from '@/components/Avatar'
 import MultipleAvatar from '@/components/MultipleAvatar'
-import Filters from './filters'
+import Filters, { ProductFilter } from './filters'
 import Portal from '@/components/Utils/Portal'
 import usePopoverPosition from '@/components/Utils/Portal/usePopoverPosition'
 import Fancybox from '@/components/Utils/Fancybox'
 
 // img / svg
-import { Ellipsis, ArrowLeft, ArrowRight, FilePenLine, Trash2, LoaderCircle, FileChartColumn } from 'lucide-react'
+import { Ellipsis, ArrowLeft, ArrowRight, FilePenLine, Trash2, LoaderCircle, FileChartColumn, Info } from 'lucide-react'
 import UxSort from '@/assets/svg/ux/sort.svg'
 
 // css
@@ -48,8 +48,25 @@ export interface ListProps {
 export default function List({
     projects
 }: ListProps) {
+    const [filteredProjects, setFilteredProjects] = useState(projects)
 
-	const groupedProjects = projects.reduce((acc, item) => {
+    const handleFilterChange = (filter: ProductFilter, search: string) => {
+        let filtered = projects
+
+        if (filter) {
+            filtered = filtered.filter(project => project.product === filter)
+        }
+
+        if (search) {
+            filtered = filtered.filter(project => 
+                project.projectName.toLowerCase().includes(search.toLowerCase())
+            )
+        }
+
+        setFilteredProjects(filtered)
+    }
+
+	const groupedProjects = filteredProjects.reduce((acc, item) => {
 		const groupKey = item.projectGroup ?? 'ungrouped'
 
 		if (!acc[groupKey]) {
@@ -59,12 +76,12 @@ export default function List({
 		acc[groupKey].push(item)
 
 		return acc
-	}, {} as Record<string, typeof projects>)
+	}, {} as Record<string, typeof filteredProjects>)
 
 	return (
 		<>
 
-			<Filters />
+			<Filters onFilterChange={handleFilterChange} />
 
 			<section className={styles.list}>
 				<div className='container container--big pt-smallest'>
@@ -99,9 +116,15 @@ export default function List({
 								}
 							].map((item, i) => (
 								<div key={i}>
-									<button className='gray-400 uppercase text-12'>
-										<span className='bold'>{item.text}</span> <UxSort />
-									</button>
+									<p className='gray-400 uppercase text-12'>
+										
+										<span className='bold'>
+											{item.text}
+										</span>
+
+										{/*<UxSort />*/}
+
+									</p>
 								</div>
 							))}
 
@@ -110,7 +133,13 @@ export default function List({
 
 						</div>
 
-						{Object.entries(groupedProjects).map(([groupName, projects], groupIndex) => {
+						{filteredProjects.length === 0 ? (
+							<div className={styles.noResults}>
+								<p className='text-16 semi-bold gray-500'>
+									No results found
+								</p>
+							</div>
+						) : Object.entries(groupedProjects).map(([groupName, projects], groupIndex) => {
 							if (groupName === 'ungrouped') {
 								return projects.map((item, i) => (
 									<ListItem
@@ -242,12 +271,25 @@ export function ListItem({
 		<div className={styles.listItem}>
 
 			<div className={styles.nameCol}>
+				
 				<Link
 					href={pages.dashboard.my_reports + '/' + slugify(item.projectGroup) + '/' + slugify(item.projectName)}
 					className='text-16 bold blue'
 				>
 					{item.projectName}
 				</Link>
+
+				{item.goal && (
+					<button
+						className='blue'
+						data-balloon-pos='up-left'
+						data-balloon-length='xlarge'
+						aria-label={item.goal}
+					>
+						<Info />
+					</button>
+				)}
+
 			</div>
 
 			<div className={styles.pdfCol}>
@@ -264,15 +306,11 @@ export function ListItem({
 					className={clsx(
 						styles.status,
 						item.status === 'green' && styles.green,
-						item.status === 'yellow' && styles.yellow,
-						item.status === 'red' && styles.red,
 						item.status === 'empty' && styles.empty
 					)}
 					aria-label={clsx(
-						item.status === 'green' && 'Approved',
-						item.status === 'yellow' && 'Processing',
-						item.status === 'red' && 'Rejected',
-						item.status === 'empty' && 'Pending'
+						item.status === 'green' && 'Proccessed',
+						item.status === 'empty' && 'Inactive'
 					)}
                     data-balloon-pos='up'
 				>

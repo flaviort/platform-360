@@ -77,6 +77,43 @@
         }
     }
 
+    &.inputList {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+
+        .lineWrapper {
+            .inputContainer {
+                &.error {
+                    .input {
+                        border-color: $red;
+                        color: $red;
+
+                        &:focus {
+                            outline-color: rgba($red, .5);
+                        }
+                    }
+                }
+
+                .input {
+                    padding-right: 6rem;
+                }
+            }
+        }
+
+        .addButton {
+            padding: .75rem 1.25rem;
+            gap: .5rem;
+            font-size: .675rem;
+
+            svg {
+                min-width: .875rem;
+                width: .875rem;
+                height: .875rem;
+            }
+        }
+    }
+
     .label {
         display: block;
         position: absolute;
@@ -111,6 +148,8 @@
             position: relative;
 
             &.open {
+                z-index: 5;
+
                 .dropdownInnerWrapper {
                     .input {
                         border-bottom-left-radius: 0;
@@ -122,7 +161,11 @@
                             transform: rotate(180deg);
                         }
                     }
-                }    
+                }
+
+                .options {
+                    box-shadow: 0 2rem 2rem rgba($gray-300, .1);
+                }
             }
 
             .dropdownInnerWrapper {
@@ -144,6 +187,7 @@
                 }
 
                 .sideIcon {
+                    pointer-events: none;
                     color: $gray-400;
 
                     svg {
@@ -178,6 +222,51 @@
                     max-height: 20rem;
                 }
 
+                &::-webkit-scrollbar-thumb {
+                    //background: $blue;
+                }
+
+                .search {
+                    position: relative;
+                    display: block;
+                    width: 100%;
+                    margin-bottom: .5rem;
+
+                    .input {
+                        position: relative;
+                        padding: 1rem;
+
+                        &::placeholder {
+                            color: $gray-300;
+                            opacity: 1;
+                        }
+                    }
+
+                    .clear {
+                        position: absolute;
+                        z-index: 2;
+                        top: 50%;
+                        right: 1rem;
+                        transform: translateY(-50%);
+                        display: flex;
+                        align-items: center;
+                        gap: .25rem;
+                        cursor: pointer;
+                        background-color: $gray-400;
+                        color: $white;
+                        border-radius: .125rem;
+                        font-size: .75rem;
+                        line-height: 1;
+                        padding: .35rem .5rem;
+                        
+                        svg {
+                            width: .75rem;
+                            min-width: .75rem;
+                            height: .75rem;
+                        }
+                    }
+                }
+
                 .item {
                     position: relative;
 
@@ -195,6 +284,14 @@
                                     svg {
                                         opacity: 1;
                                     }
+                                }
+                            }
+                        }
+
+                        &:focus-visible {
+                            + .checkboxWrapper {
+                                .check {
+                                    outline: .1rem solid $blue;
                                 }
                             }
                         }
@@ -238,6 +335,182 @@
                 
                             @media #{$mq-md-max} {
                                 font-size: .8rem;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        &.dateRangeWrapper {
+            & :global {
+                .react-datepicker-wrapper {
+                    width: 100%;
+
+                    input {
+                        cursor: pointer;
+                    }
+                }
+
+                .react-datepicker-popper {
+                    z-index: 9;
+                    width: 100%;
+                    font-size: 1rem;
+                    font-family: $font;
+
+                    .react-datepicker__triangle {
+                        fill: $gray-300;
+                        color: $gray-300;
+
+                        path {
+                            stroke: $gray-200;
+                            stroke-width: 1px;
+                        }
+                    }
+
+                    .react-datepicker {
+                        width: 100%;
+                        max-width: 20rem;
+                        border-radius: .275rem;
+                        border: 1px solid $gray-200;
+                        overflow: hidden;
+                        box-shadow: 0 0 2rem rgba($gray-300, .5);
+
+                        .react-datepicker__month-container {
+                            width: 100%;
+
+                            .react-datepicker__header {
+                                padding: 0;
+                                border: none;
+                                border-radius: 0;
+    
+                                .react-datepicker__custom-header {
+                                    display: block;
+                                    padding: 1rem;
+                                    background-color: $gray-200;
+                                    
+                                    .react-datepicker__arrows {
+                                        display: grid;
+                                        grid-template-columns: repeat(4, 1fr);
+                                        align-items: stretch;
+                                        justify-content: space-between;
+                                        gap: .5rem;
+                                        margin-top: .5rem;
+    
+                                        button {
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            width: 100%;
+                                            height: 2rem;
+                                            color: $gray-500;
+                                            background-color: $white;
+                                            border-radius: .25rem;
+                                            border: var(--1px) solid $gray-200;
+                                            transition: .2s ease-in-out;
+
+                                            &:hover,
+                                            &:focus-visible {
+                                                background-color: $blue;
+                                                color: $white;
+                                            }
+
+                                            &:disabled {
+                                                opacity: .25;
+                                            }
+    
+                                            svg {
+                                                width: auto;
+                                                height: .875rem;
+                                            }
+                                        }
+                                    }
+
+                                    .react-datepicker__selects {
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: space-between;
+                                        gap: .5rem;
+                                        width: 100%;
+
+                                        .select-wrapper {
+                                            position: relative;
+                                            width: 100%;
+
+                                            .side-icon {
+                                                pointer-events: none;
+                                                position: absolute;
+                                                z-index: 2;
+                                                top: 50%;
+                                                transform: translateY(-50%);
+                                                right: 1rem;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                min-width: 1rem;
+                                                width: 1rem;
+                                                height: 1rem;
+                                                color: currentColor;
+                                    
+                                                &:focus-visible {
+                                                    outline: .1rem solid $blue;
+                                                }
+                                    
+                                                svg {
+                                                    width: 100%;
+                                                    height: 100%;
+                                                    opacity: .7;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                .react-datepicker__day-names {
+                                    margin: 0;
+                                    border: none;
+                                    background-color: $gray-100;
+                                    padding: .25rem 1rem;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: space-evenly;
+                                }
+                            }
+
+                            .react-datepicker__month {
+                                .react-datepicker__week {
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: space-evenly;
+
+                                    .react-datepicker__day {
+                                        width: 100%;
+                                        margin: .25rem;
+                                        height: 2rem;
+                                        line-height: 2rem;
+                                        border-radius: .25rem;
+
+                                        &--in-range,
+                                        &--in-selecting-range {
+                                            background-color: $blue;
+                                            color: $white;
+                                        }
+
+                                        &--outside-month {
+                                            opacity: .5;
+                                        }
+
+                                        &:hover {
+                                            background-color: $blue-light;
+                                        }
+
+                                        &--disabled {
+                                            opacity: .2;
+                                            color: currentColor;
+                                            pointer-events: none;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -316,6 +589,95 @@
                 opacity: .7;
             }
         }
+
+        .removeButton {
+            position: absolute;
+            z-index: 2;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .175rem;
+            color: $white;
+            background-color: $gray-300;
+            border-radius: .25rem;
+            padding: .275rem .375rem;
+            font-size: .575rem;
+            line-height: 1;
+
+            &:hover,
+            &:focus-visible {
+                background-color: $red;
+                outline: none;
+            }
+
+            svg {
+                width: .75rem;
+                min-width: .75rem;
+                height: .75rem;
+            }
+        }
+
+        .priceWrapper {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+
+            .priceInput {
+                position: relative;
+                width: 100%;
+
+                &.error {
+                    .input {
+                        color: $red;
+                        border-color: $red;
+
+                        &:focus {
+                            outline-color: rgba($red, .5);
+                        }
+                    }
+                }
+
+                .currency {
+                    position: absolute;
+                    z-index: 2;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    left: 1rem;
+                    font-size: .8rem;
+                    color: currentColor;
+                }
+
+                .input {
+                    padding-left: 2.25rem;
+                    appearance: textfield;
+
+                    &::-webkit-outer-spin-button,
+                    &::-webkit-inner-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                    }
+                }
+            }
+
+            .separator {
+                font-size: .8rem;
+                color: currentColor;
+                display: flex;
+                width: 1rem;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                opacity: .5;
+            }
+        }
+    }
+
+    .helper {
+        display: block;
+        margin-top: .5rem;
     }
 
     .errorMsg {
@@ -329,6 +691,53 @@
         padding: .1rem .3rem;
         border-radius: .1rem;
         font-size: .675rem;
+
+        &.hasHelper {
+            bottom: 1.1rem;
+        }
+    }
+
+    &.uploadLine {
+        .file {
+            position: absolute;
+            z-index: -99;
+            opacity: 0;
+
+            &:focus-visible {
+                + label {
+                    filter: brightness(1.1);
+                    outline: -webkit-focus-ring-color auto 1px;
+                }
+            }
+        }
+
+        .fileList {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            margin-bottom: .5rem;
+
+            .fileLine {
+                position: relative;
+
+                .input {
+                    padding-right: 6rem;
+                    line-height: 1;
+                }
+            }
+        }
+
+        .uploadButton {
+            padding: .75rem 1.25rem;
+            gap: .5rem;
+            font-size: .675rem;
+
+            svg {
+                min-width: .875rem;
+                width: .875rem;
+                height: .875rem;
+            }
+        }
     }
 }
 

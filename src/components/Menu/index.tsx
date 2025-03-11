@@ -21,7 +21,7 @@ import { pages } from '@/utils/routes'
 import { firstChar, limitCharacters } from '@/utils/functions'
 
 // db (temporary)
-import { user } from '@/db/db'
+import { user } from '@/db/user'
 
 // context
 import { useAuth } from '@/contexts/AuthContext'

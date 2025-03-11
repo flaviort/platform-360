@@ -3,11 +3,11 @@
 // libraries
 import { useRef, useState, useEffect } from 'react'
 import clsx from 'clsx'
-import { useFormContext, RegisterOptions } from 'react-hook-form'
+import { useFormContext, RegisterOptions, useController } from 'react-hook-form'
 import React from 'react'
 
 // svg
-import { ChevronDown, Check } from 'lucide-react'
+import { ChevronDown, Check, X } from 'lucide-react'
 
 // css
 import styles from './form.module.scss'
@@ -17,7 +17,6 @@ interface DropdownProps {
     hideLabel?: boolean
     required?: boolean
     className?: string
-    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
     defaultValue: string
     hideValidations?: boolean
     items: Array<{
@@ -25,6 +24,10 @@ interface DropdownProps {
         name: string
     }>
     limitSelected?: number
+    searchable?: boolean
+    name: string
+    id: string
+    showHideAll?: boolean
 }
 
 export default function Dropdown({
@@ -32,29 +35,28 @@ export default function Dropdown({
     hideLabel,
     required,
     className,
-    onChange = () => {},
     defaultValue,
     hideValidations,
     items,
-    limitSelected
+    limitSelected,
+    searchable,
+    name,
+    id,
+    showHideAll,
 }: DropdownProps) {
 
-    const { register, watch, trigger, formState: { errors } } = useFormContext()
-
-    let validations: RegisterOptions = {
-        onChange: (e) => onChange(e),
-        required
-    }
+    const { register, watch, trigger, formState: { errors }, setValue, control } = useFormContext()
 
     const [selectedCount, setSelectedCount] = useState(0)
     const [buttonText, setButtonText] = useState<string | JSX.Element>(defaultValue)
+    const [searchValue, setSearchValue] = useState('')
 
-    const values = items.map(item => watch(item.name))
-
+    const groupValue = watch(name) || {}
+    
     useEffect(() => {
-        const selectedItems = values.filter(Boolean).length
+        const selectedItems = Object.values(groupValue).filter(Boolean).length
         setSelectedCount(selectedItems)
-    }, [values])
+    }, [groupValue])
     
     useEffect(() => {
         if (selectedCount === 0) {
@@ -90,33 +92,52 @@ export default function Dropdown({
         }
     }, [])
 
-    if (!hideValidations) {
-        validations = {
-            onChange: async (e: React.ChangeEvent<HTMLInputElement>) => {
-                if (limitSelected) {
-                    const isChecked = e.target.checked
-                    if (isChecked && selectedCount >= limitSelected) {
-                        e.preventDefault()
-                        return false
-                    }
-                    setSelectedCount(prev => isChecked ? prev + 1 : prev - 1)
-                }
-                onChange(e)
-                await trigger()
-            },
+    // Register the group field
+    const { field } = useController({
+        name,
+        control,
+        rules: {
             validate: {
-                required: () => {
-                    const selectedItems = values.filter(Boolean).length
+                required: (value) => {
+                    if (!required) return true
+                    const selectedItems = Object.values(value || {}).filter(Boolean).length
                     return selectedItems > 0 || 'Please select at least one option'
                 },
-                limitSelected: () => {
-                    if (limitSelected && selectedCount > limitSelected) {
-                        return `You can select up to ${limitSelected} item${limitSelected > 1 ? 's' : ''}.`
-                    }
-                    return true
+                limitSelected: (value) => {
+                    if (!limitSelected) return true
+                    const selectedItems = Object.values(value || {}).filter(Boolean).length
+                    return selectedItems <= limitSelected || 
+                        `You can select up to ${limitSelected} item${limitSelected > 1 ? 's' : ''}`
                 }
             }
         }
+    })
+
+    const handleCheckboxChange = (itemName: string, checked: boolean) => {
+        const currentValue = field.value || {}
+        setValue(name, {
+            ...currentValue,
+            [itemName]: checked
+        }, { shouldValidate: true })
+    }
+
+    const handleSelectAll = () => {
+        const filteredItems = items.filter(item => 
+            item.label.toLowerCase().includes(searchValue.toLowerCase())
+        )
+        const itemsToSelect = limitSelected 
+            ? filteredItems.slice(0, limitSelected) 
+            : filteredItems
+            
+        const newValue: Record<string, boolean> = {}
+        itemsToSelect.forEach(item => {
+            newValue[item.name] = true
+        })
+        setValue(name, newValue, { shouldValidate: true })
+    }
+
+    const handleDeselectAll = () => {
+        setValue(name, {}, { shouldValidate: true })
     }
 
     return (
@@ -124,11 +145,7 @@ export default function Dropdown({
             styles.formLine,
             className,
             hideLabel && styles.noLabel,
-            !hideValidations && (
-                items.some(item => errors[item.name]) || 
-                errors.required || 
-                errors.limitSelected
-            ) && styles.error
+            !hideValidations && errors[name] && styles.error
         )}>
 
             {!hideLabel && (
@@ -155,6 +172,7 @@ export default function Dropdown({
                             styles.input,
                             selectedValue !== '' && 'invisible'
                         )}
+                        id={id}
                         onClick={() => setIsDropdownVisible(!isDropdownVisible)}
                     >
                         {buttonText}
@@ -170,15 +188,67 @@ export default function Dropdown({
                     styles.options,
                     isDropdownVisible && styles.visible
                 )}>
-                    {items?.map((item, i) => (
+
+                    {searchable && (
+                        <div className={styles.search}>
+
+                            <input
+                                type='text'
+                                placeholder='Search'
+                                className={styles.input}
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                            />
+
+                            {searchValue && (
+                                <button 
+                                    type='button'
+                                    className={styles.clear}
+                                    onClick={() => setSearchValue('')}
+                                >
+                                    Clear <X />
+                                </button>
+                            )}
+
+                        </div>
+                    )}
+
+                    {showHideAll && (
+                        <div className={styles.selectAll}>
+                            <label className={styles.item}>
+
+                                <input
+                                    type='checkbox'
+                                    className={styles.checkbox}
+                                    checked={selectedCount === (limitSelected || items.length)}
+                                    onChange={(e) => e.target.checked ? handleSelectAll() : handleDeselectAll()}
+                                />
+
+                                <span className={styles.checkboxWrapper}>
+                                    
+                                    <span className={styles.check}>
+                                        <Check />
+                                    </span>
+
+                                    <span className={clsx(styles.text, 'text-16')}>
+                                        {selectedCount === (limitSelected || items.length) ? 'Unselect All' : 'Select All'}
+                                    </span>
+
+                                </span>
+                                
+                            </label>
+                        </div>
+                    )}
+
+                    {items?.filter(item => item.label.toLowerCase().includes(searchValue.toLowerCase())).map((item, i) => (
                         <label className={styles.item} key={i}>
 
                             <input
                                 type='checkbox'
                                 className={styles.checkbox}
-                                value={label}
-                                disabled={Boolean(!watch(item.name) && limitSelected && selectedCount >= limitSelected)}
-                                {...register(item.name, { ...validations })}
+                                checked={field.value?.[item.name] || false}
+                                onChange={(e) => handleCheckboxChange(item.name, e.target.checked)}
+                                disabled={Boolean(!field.value?.[item.name] && limitSelected && selectedCount >= limitSelected)}
                             />
 
                             <span className={styles.checkboxWrapper}>
@@ -194,22 +264,14 @@ export default function Dropdown({
                             </span>
                         </label>
                     ))}
+                    
                 </div>
             </div>
 
-            {!hideValidations && (
-                <>
-                    {(errors.required || errors.limitSelected || items.some(item => errors[item.name])) && (
-                        <p className={styles.errorMsg}>
-                            {String(
-                                errors.required?.message || 
-                                errors.limitSelected?.message || 
-                                (items.find(item => errors[item.name])?.name && 
-                                    errors[items.find(item => errors[item.name])?.name as string]?.message)
-                            )}
-                        </p>
-                    )}
-                </>
+            {!hideValidations && errors[name] && (
+                <p className={styles.errorMsg}>
+                    {String(errors[name]?.message)}
+                </p>
             )}
 
         </div>

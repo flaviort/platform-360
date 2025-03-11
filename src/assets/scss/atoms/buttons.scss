@@ -106,6 +106,17 @@
         }
     }
 
+    &--gradient-purple {
+        @include gradient-left-right($purple-dark, $purple);
+        color: $white;
+        transition: .3s ease-in-out;
+
+        &:hover,
+        &:focus-visible {
+            filter: brightness(1.1);
+        }
+    }
+
     > svg {
         width: 1rem;
         min-width: 1rem;
