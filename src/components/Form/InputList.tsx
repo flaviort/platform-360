@@ -3,7 +3,7 @@
 // libraries
 import clsx from 'clsx'
 import { useState } from 'react'
-import { useFormContext, RegisterOptions } from 'react-hook-form'
+import { useFormContext, RegisterOptions, FieldErrors, FieldErrorsImpl } from 'react-hook-form'
 
 // svg
 import { Plus, X } from 'lucide-react'
@@ -87,13 +87,13 @@ export default function InputList({
 
     // Helper function to check if a specific input has an error
     const hasInputError = (index: number) => {
-        return errors[name] && errors[name][index]
+        return errors[name] && (errors[name] as unknown as FieldErrorsImpl<{ [key: number]: any }>)?.[index]
     }
 
     // Helper function to get error message for a specific input
     const getInputErrorMessage = (index: number) => {
-        if (!errors[name] || !errors[name][index]) return null
-        return errors[name][index].message
+        if (!errors[name] || !(errors[name] as unknown as FieldErrorsImpl<{ [key: number]: any }>)?.[index]) return null
+        return (errors[name] as unknown as FieldErrorsImpl<{ [key: number]: any }>)[index]?.message
     }
 
     let validations: RegisterOptions = {
@@ -172,7 +172,7 @@ export default function InputList({
 
                         {!hideValidations && hasInputError(index) && (
                             <p className={styles.errorMsg}>
-                                {getInputErrorMessage(index)}
+                                {getInputErrorMessage(index) as string}
                             </p>
                         )}
 
