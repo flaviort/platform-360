@@ -6,7 +6,6 @@ export async function GET() {
     try {
         await connectDB()
         const reports = await Report.find()
-        console.log('All reports from DB:', reports)  // Log what we're fetching
         
         return NextResponse.json({
             success: true,

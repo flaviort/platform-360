@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [user, setUser] = useState(null)
     const router = useRouter()
 
     useEffect(() => {
@@ -58,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, login, logout, user }}>
             {children}
         </AuthContext.Provider>
     )

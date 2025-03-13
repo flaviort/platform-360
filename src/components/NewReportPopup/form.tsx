@@ -119,7 +119,6 @@ export default function PopupForm({
             })
 
             const data = await response.json()
-            console.log('All form data:', formData)
             
             if (data.success) {
                 setTimeout(() => {

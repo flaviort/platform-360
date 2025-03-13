@@ -22,7 +22,6 @@ export async function GET() {
         // Get all reports from ReportV2 collection
         await connectDB()
         const reports = await Report.find() as ReportDocument[]
-        console.log('Raw reports from DB:', reports)
         
         // Group reports by project name
         const projects = reports.reduce((acc: any[], report) => {

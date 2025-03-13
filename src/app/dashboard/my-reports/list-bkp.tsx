@@ -77,8 +77,6 @@ export default function List({
 		return acc
 	}, {} as Record<string, typeof filteredProjects>)
 
-	console.log(projects)
-
 	return (
 		<>
 
