@@ -9,6 +9,7 @@ import Category from './components/Category'
 import Goal from './components/Goal'
 import Dropdown from '@/components/Form/Dropdown'
 import Checkbox from '@/components/Form/Checkbox'
+import InputHidden from '@/components/Form/InputHidden'
 
 // css
 import styles from './index.module.scss'
@@ -33,6 +34,11 @@ export default function PopupInsight360({
 			icon={Icon}
 			text={text}
 		>
+
+			<InputHidden
+				name='reportType'
+				value='Insight360'
+			/>
 
 			<ProjectName />
 			

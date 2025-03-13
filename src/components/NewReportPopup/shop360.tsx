@@ -9,8 +9,8 @@ import Category from './components/Category'
 import Goal from './components/Goal'
 import Dropdown from '@/components/Form/Dropdown'
 import Checkbox from '@/components/Form/Checkbox'
-import Textarea from '@/components/Form/Textarea'
 import DateRange from '@/components/Form/DateRange'
+import InputHidden from '@/components/Form/InputHidden'
 
 // css
 import styles from './index.module.scss'
@@ -37,6 +37,11 @@ export default function PopupShop360({
 			icon={Icon}
 			text={text}
 		>
+
+			<InputHidden
+				name='reportType'
+				value='Shop360'
+			/>
 
 			<ProjectName />
 

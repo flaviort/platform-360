@@ -21,20 +21,25 @@ import UxSort from '@/assets/svg/ux/sort.svg'
 import styles from './index.module.scss'
 
 // utils
-import { slugify, formatDate } from '@/utils/functions'
+import { slugify } from '@/utils/functions'
 import { pages } from '@/utils/routes'
 
 export interface ListProps {
     projects: Array<{
-        id: string
-        name: string
-        reports: Array<{
-            id: string
+        project: string
+        reportName: string
+        status: 'empty' | 'green' | 'yellow' | 'red'
+        category: string
+        date: string
+        time: string
+        reportType: 'Shop360' | 'Feedback360' | 'Insight360' | 'Demand360'
+        createdBy: {
+            image?: string
             name: string
-            category: string
-            reportType: 'Shop360' | 'Feedback360' | 'Insight360' | 'Demand360'
-            createdAt: string
-            goal: string
+        }
+        access: Array<{
+            image?: string
+            name: string
         }>
     }>
 }
@@ -42,125 +47,40 @@ export interface ListProps {
 export default function List({
     projects
 }: ListProps) {
-    const [filteredProjects, setFilteredProjects] = useState<ListProps['projects']>(projects)
-    const [isLoading, setIsLoading] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 100
+    const [filteredProjects, setFilteredProjects] = useState(projects)
 
     const handleFilterChange = (filter: ProductFilter, search: string) => {
-        setIsLoading(true)
-        if (!filter && !search) {
-            setFilteredProjects(projects)
-            setIsLoading(false)
-            return
-        }
-
-        let filtered = [...projects]
+        let filtered = projects
 
         if (filter) {
-            filtered = filtered.filter(project => 
-                project.reports.some(report => report.reportType === filter)
-            )
+            filtered = filtered.filter(project => project.reportType === filter)
         }
 
         if (search) {
             filtered = filtered.filter(project => 
-                project.name.toLowerCase().includes(search.toLowerCase()) ||
-                project.reports.some(report => 
-                    report.name.toLowerCase().includes(search.toLowerCase())
-                )
+                project.reportName.toLowerCase().includes(search.toLowerCase())
             )
         }
 
         setFilteredProjects(filtered)
-        setIsLoading(false)
     }
 
-    useEffect(() => {
-        const initializeProjects = async () => {
-            setIsLoading(true)
-            await new Promise(resolve => setTimeout(resolve, 100))
-            setFilteredProjects(projects)
-            setIsLoading(false)
-        }
+	const groupedProjects = filteredProjects.reduce((acc, item) => {
+		const groupKey = item.project ?? 'ungrouped'
 
-        initializeProjects()
-    }, [projects])
-
-	const groupedProjects = filteredProjects.reduce((acc, project) => {
-		if (!acc[project.name]) {
-			acc[project.name] = project.reports
+		if (!acc[groupKey]) {
+		  	acc[groupKey] = []
 		}
+
+		acc[groupKey].push(item)
+
 		return acc
-	}, {} as Record<string, typeof filteredProjects[0]['reports']>)
+	}, {} as Record<string, typeof filteredProjects>)
 
-    // Calculate total number of reports across all projects
-    const totalReports = Object.values(groupedProjects).reduce((total, reports) => 
-        total + reports.length, 0
-    )
-
-    // Calculate total pages
-    const totalPages = Math.ceil(totalReports / itemsPerPage)
-
-    // Calculate start and end index for current page
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-
-    // Function to handle pagination
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(prev => prev + 1)
-        }
-    }
-
-    const handlePrevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(prev => prev - 1)
-        }
-    }
-
-    // Modify the render logic to handle pagination
-    const renderPaginatedProjects = () => {
-        let currentCount = 0
-        const paginatedContent: JSX.Element[] = []
-
-        for (const [projectName, reports] of Object.entries(groupedProjects)) {
-            const projectReports: JSX.Element[] = []
-
-            for (const report of reports) {
-                if (currentCount >= startIndex && currentCount < endIndex) {
-                    projectReports.push(
-                        <ListItem
-                            key={report.id}
-                            item={{
-                                ...report,
-                                project: projectName
-                            }}
-                        />
-                    )
-                }
-                currentCount++
-            }
-
-            if (projectReports.length > 0) {
-                paginatedContent.push(
-                    <div key={projectName} className={styles.listGroup}>
-                        <div className={styles.listGroupTitle}>
-                            <h2 className='text-16 bold white'>
-                                {projectName}
-                            </h2>
-                        </div>
-                        {projectReports}
-                    </div>
-                )
-            }
-        }
-
-        return paginatedContent
-    }
+	console.log(projects)
 
 	return (
-		<div className='pb-smaller pb-lg-smallest'>
+		<>
 
 			<Filters onFilterChange={handleFilterChange} />
 
@@ -214,64 +134,65 @@ export default function List({
 
 						</div>
 
-						{isLoading ? (
-							<div className={styles.noResults}>
-								<p className='text-16 semi-bold gray-500'>
-									<span className='rotation' style={{ '--speed': '.5' } as any}>
-										<LoaderCircle />
-									</span>
-									<span className='ml-2'>Loading projects...</span>
-								</p>
-							</div>
-						) : Object.entries(groupedProjects).length === 0 ? (
+						{filteredProjects.length === 0 ? (
 							<div className={styles.noResults}>
 								<p className='text-16 semi-bold gray-500'>
 									No results found
 								</p>
 							</div>
-						) : renderPaginatedProjects()}
+						) : Object.entries(groupedProjects).map(([groupName, projects], groupIndex) => {
+							return (
+								<div key={`group-${groupIndex}`} className={styles.listGroup}>
+
+									<div className={styles.listGroupTitle}>
+										<h2 className='text-16 bold white'>
+											{groupName}
+										</h2>
+									</div>
+
+									{projects.map((item, i) => (
+										<ListItem
+											key={i}
+											item={item}
+										/>
+									))}
+								</div>
+							)
+						})}
 
 					</div>
 				</div>
 			</section>
 
-			{totalReports > itemsPerPage && (
-				<section className={styles.pagination}>
-					<div className='container container--big pt-smaller pt-md-smallest'>
-						<div className={styles.flex}>
+			<section className={styles.pagination}>
+				<div className='container container--big pt-smaller pt-md-smallest pb-smaller pb-lg-smallest'>
+					<div className={styles.flex}>
 
-							<div className={styles.left}>
+						<div className={styles.left}>
 
-								<p className='text-14 gray-500'>
-									Showing <span>{startIndex + 1}</span>-<span>{Math.min(endIndex, totalReports)}</span> out of <span>{totalReports}</span>
-								</p>
-
-							</div>
-
-							<div className={styles.right}>
-
-								<button 
-									disabled={currentPage === 1}
-									onClick={handlePrevPage}
-								>
-									<ArrowLeft />
-								</button>
-
-								<button 
-									disabled={currentPage === totalPages}
-									onClick={handleNextPage}
-								>
-									<ArrowRight />
-								</button>
-
-							</div>
+							<p className='text-14 gray-500'>
+								Showing <span>1</span>-<span>100</span> out of <span>200</span>
+							</p>
 
 						</div>
-					</div>
-				</section>
-			)}
 
-		</div>
+						<div className={styles.right}>
+
+							<button disabled>
+								<ArrowLeft />
+							</button>
+
+							<button>
+								<ArrowRight />
+							</button>
+
+						</div>
+
+					</div>
+				</div>
+			</section>
+
+		</>
 	)
 }
 
@@ -347,7 +268,7 @@ export function ListItem({
 					href={pages.dashboard.my_reports + '/' + slugify(item.project) + '/' + slugify(item.reportName)}
 					className='text-16 bold blue'
 				>
-					{item.name}
+					{item.reportName}
 				</Link>
 
 				{item.goal && (
@@ -409,7 +330,7 @@ export function ListItem({
 
 			<div className={styles.dateCol}>
 				<p className='text-16'>
-					{formatDate(item.createdAt)}
+					{item.date}<span className={styles.at}> at </span><br />{item.time}
 				</p>
 			</div>
 

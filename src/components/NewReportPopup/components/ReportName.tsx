@@ -9,7 +9,7 @@ export default function ReportName() {
 		<div className={styles.group}>
 
             <div className={styles.label}>
-                <label htmlFor='report-name' className='text-16 semi-bold'>
+                <label htmlFor='reportName' className='text-16 semi-bold'>
                     Report Name <span className='red'>*</span>
                 </label>
             </div>
@@ -19,9 +19,9 @@ export default function ReportName() {
                     placeholder='Type here'
                     required
                     label='Report Name'
-                    name='report-name'
+                    name='reportName'
                     hideLabel
-                    id='report-name'
+                    id='reportName'
                     type='text'
                 />
             </div>

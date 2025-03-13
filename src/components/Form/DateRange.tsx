@@ -2,8 +2,8 @@
 
 // libraries
 import clsx from 'clsx'
-import { useState } from 'react'
 import { useFormContext, useController } from 'react-hook-form'
+import { useEffect } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { getYear, getMonth } from 'date-fns'
@@ -79,6 +79,19 @@ export default function DateRange({
     const range = (start: number, end: number) => {
         return Array.from({ length: end - start + 1 }, (_, i) => start + i)
     }
+
+    // reset component state on form reset
+    useEffect(() => {
+        const handleFormReset = () => {
+            field.onChange([defaultStartDateObj, defaultEndDateObj])
+        }
+
+        document.addEventListener('formReset', handleFormReset)
+
+        return () => {
+            document.removeEventListener('formReset', handleFormReset)
+        }
+    }, [defaultStartDateObj, defaultEndDateObj, field])
 
     return (
         <div className={clsx(

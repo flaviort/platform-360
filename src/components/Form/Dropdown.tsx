@@ -3,7 +3,7 @@
 // libraries
 import { useRef, useState, useEffect } from 'react'
 import clsx from 'clsx'
-import { useFormContext, RegisterOptions, useController } from 'react-hook-form'
+import { useFormContext, useController } from 'react-hook-form'
 import React from 'react'
 
 // svg
@@ -139,6 +139,21 @@ export default function Dropdown({
     const handleDeselectAll = () => {
         setValue(name, {}, { shouldValidate: true })
     }
+
+    // reset component state on form reset
+    useEffect(() => {
+        const handleFormReset = () => {
+            setIsDropdownVisible(false)
+            setSearchValue('')
+            setValue(name, {}, { shouldValidate: true })
+        }
+
+        document.addEventListener('formReset', handleFormReset)
+
+        return () => {
+            document.removeEventListener('formReset', handleFormReset) 
+        }
+    }, [name, setValue])
 
     return (
         <div className={clsx(

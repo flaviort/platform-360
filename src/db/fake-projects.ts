@@ -1,12 +1,12 @@
 export const fakeProjects = [
     {
-        projectGroup: 'Nike Summer 2025',
-        projectName: 'Running Shoes',
+        project: 'Nike Summer 2025',
+        reportName: 'Running Shoes',
         status: 'empty',
         category: 'Footwear',
         date: '11.14.2024',
         time: '16:00',
-        product: 'Shop360',
+        reportType: 'Shop360',
         createdBy: {
             image: "/img/photos/avatar-01.jpg",
             name: 'Jack Erwin'
@@ -32,13 +32,13 @@ export const fakeProjects = [
         goal: 'This is just a small description about the report. It could be used for the user to remember what this report is all about without even openning it.'
     },
     {
-        projectGroup: 'Untitled Project',
-        projectName: 'Underwear',
+        project: 'Untitled Project',
+        reportName: 'Underwear',
         status: 'green',
         category: 'Underwear',
         date: '11.14.2024',
         time: '16:00',
-        product: 'Shop360',
+        reportType: 'Shop360',
         createdBy: {
             image: "/img/photos/avatar-01.jpg",
             name: 'Jack Erwin'
@@ -60,13 +60,13 @@ export const fakeProjects = [
         goal: 'This is just a small description about the report. It could be used for the user to remember what this report is all about without even openning it.'
     },
     {
-        projectGroup: 'Nike Summer 2025',
-        projectName: 'Test123',
+        project: 'Nike Summer 2025',
+        reportName: 'Test123',
         status: 'green',
         category: 'Sports',
         date: '11.14.2024',
         time: '16:00',
-        product: 'Demand360',
+        reportType: 'Demand360',
         createdBy: {
             image: "/img/photos/avatar-01.jpg",
             name: 'Jack Erwin'
@@ -87,13 +87,13 @@ export const fakeProjects = [
         ]
     },
     {
-        projectGroup: 'Nike Summer 2025',
-        projectName: 'Hoodies & Sweatshirts',
+        project: 'Nike Summer 2025',
+        reportName: 'Hoodies & Sweatshirts',
         status: 'green',
         category: 'Sports',
         date: '11.14.2024',
         time: '16:00',
-        product: 'Feedback360',
+        reportType: 'Feedback360',
         createdBy: {
             image: "/img/photos/avatar-01.jpg",
             name: 'Jack Erwin'
@@ -114,13 +114,13 @@ export const fakeProjects = [
         ]
     },
     {
-        projectGroup: 'Nike Summer 2025',
-        projectName: 'Pants',
+        project: 'Nike Summer 2025',
+        reportName: 'Pants',
         status: 'empty',
         category: 'Sports',
         date: '11.16.2024',
         time: '11:30',
-        product: 'Shop360',
+        reportType: 'Shop360',
         createdBy: {
             image: "/img/photos/avatar-01.jpg",
             name: 'Jack Erwin'

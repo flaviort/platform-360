@@ -6,6 +6,7 @@ import Category from './components/Category'
 import Location from './components/Location'
 import Goal from './components/Goal'
 import DateRange from '@/components/Form/DateRange'
+import InputHidden from '@/components/Form/InputHidden'
 
 // css
 import styles from './index.module.scss'
@@ -25,6 +26,11 @@ export default function PopupDemand360({
 			icon={Icon}
 			text={text}
 		>
+			
+			<InputHidden
+				name='reportType'
+				value='Demand360'
+			/>
 
 			<ProjectName />
 

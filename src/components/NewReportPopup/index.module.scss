@@ -149,6 +149,15 @@
 						}
 					}
 				}
+
+				.line {
+					display: block;
+					width: 100%;
+					height: var(--1px);
+					background-color: $gray-200;
+					margin-top: .5rem;
+					margin-bottom: 1.5rem;
+				}
 			}
 
 			.bottom {

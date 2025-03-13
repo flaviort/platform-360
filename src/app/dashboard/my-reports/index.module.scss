@@ -621,6 +621,29 @@
                 }
             }
 
+            .loading {
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: .5rem;
+                padding: 1rem 0;
+                border-top: var(--1px) solid $gray-200;
+                border-bottom: var(--1px) solid $gray-200;
+
+                span {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 2rem;
+                    min-width: 2rem;
+                    height: 2rem;
+
+                    svg {
+                        width: 100%;
+                    }
+                }
+            }
+
             .noResults {
                 position: relative;
                 display: block;

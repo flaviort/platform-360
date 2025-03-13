@@ -22,7 +22,7 @@ interface Region {
 	label: string
 }
 
-export default function Locaiton() {
+export default function Location() {
 	const [selectedLocation, setSelectedLocation] = useState('')
 	const [regions, setRegions] = useState<Region[]>([])
 	const { setValue } = useFormContext()
@@ -30,7 +30,7 @@ export default function Locaiton() {
 	const handleLocationChange = (value: string) => {
 		setSelectedLocation(value)
 		
-		setValue('report-states', {}, { shouldValidate: true })
+		setValue('reportStates', {}, { shouldValidate: true })
 		
 		switch(value) {
 			case 'United States':
@@ -95,8 +95,8 @@ export default function Locaiton() {
 							items={regions}
 							searchable
 							required
-							name='report-states'
-							id='report-states'
+							name='reportStates'
+							id='reportStates'
 						/>
 					</div>
 				</div>

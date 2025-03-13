@@ -274,7 +274,7 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 										className={clsx(styles.clear, 'button button--solid text-16')}
 										onClick={() => handleFilterClick(null)}
 									>
-										Clear
+										Show all
 										<X />
 									</button>
 								)}

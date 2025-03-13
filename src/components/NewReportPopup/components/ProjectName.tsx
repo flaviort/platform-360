@@ -1,7 +1,7 @@
 'use client'
 
-// libraries
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 // components
 import Select from '@/components/Form/Select'
@@ -10,62 +10,97 @@ import Input from '@/components/Form/Input'
 // css
 import styles from '../index.module.scss'
 
-// db
-import { fakeProjects } from '@/db/fake-projects'
-
-// functions
-import { getProjects } from '@/utils/functions'
-
 export default function ProjectName() {
-
-    const projects = getProjects(fakeProjects)
+	const [projects, setProjects] = useState<string[]>([])
 	const [selectedProject, setSelectedProject] = useState('')
+	const { setValue, register } = useFormContext()
+
+	useEffect(() => {
+		const fetchProjects = async () => {
+			try {
+				const response = await fetch('/api/projects')
+				const data = await response.json()
+				
+				if (data.success) {
+					const uniqueProjects = [...new Set(
+						data.data
+							.filter((project: any) => project.name && project.name.trim() !== '')
+							.map((project: any) => project.name)
+					)] as string[]
+					
+					setProjects(uniqueProjects)
+				}
+			} catch (error) {
+				console.error('Error fetching projects:', error)
+			}
+		}
+
+		fetchProjects()
+	}, [])
+
+	const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		const value = e.target.value
+		setSelectedProject(value)
+		
+		if (value === 'New Project') {
+			setValue('selectedProject', '')
+			setValue('projectName', '')
+		} else {
+			setValue('selectedProject', value)
+			setValue('projectName', value)
+		}
+	}
+
+	useEffect(() => {
+		if (selectedProject !== 'New Project' && selectedProject) {
+			setValue('projectName', selectedProject)
+		}
+	}, [selectedProject, setValue])
 
 	return (
-        <>
-		    <div className={styles.group}>
-
+		<>
+			<div className={styles.group}>
+				
 				<div className={styles.label}>
-					<label htmlFor='report-name' className='text-16 semi-bold'>
+					<label htmlFor='selectedProject' className='text-16 semi-bold'>
 						Project <span className='red'>*</span>
 					</label>
 				</div>
 
 				<div className={styles.input}>
 					<Select
-						defaultValue=''
-						required
+						defaultValue={selectedProject || ''}
+						required={!selectedProject || selectedProject !== 'New Project'}
 						label='Project'
-						name='project'
+						name='selectedProject'
 						hideLabel
-						id='report-project'
-						onChange={(e) => setSelectedProject(e.target.value)}
+						id='selectedProject'
+						onChange={handleProjectChange}
 					>
+
+						<option value='' disabled>
+							Select or create one
+						</option>
 						
-                        <option value='' disabled>
-                            Select or create one
-                        </option>
-						
-                        {projects.map((projectGroup) => (
-							<option key={projectGroup} value={projectGroup}>
-								{projectGroup}
+						{projects.map((projectName) => (
+							<option key={projectName} value={projectName}>
+								{projectName}
 							</option>
 						))}
 
 						<option value='New Project'>
-                            New Project
-                        </option>
+							New Project
+						</option>
 
 					</Select>
 				</div>
-
 			</div>
 
 			{selectedProject === 'New Project' && (
 				<div className={styles.group}>
 
 					<div className={styles.label}>
-						<label htmlFor='report-name' className='text-16 semi-bold'>
+						<label htmlFor='projectName' className='text-16 semi-bold'>
 							Project Name <span className='red'>*</span>
 						</label>
 					</div>
@@ -73,17 +108,20 @@ export default function ProjectName() {
 					<div className={styles.input}>
 						<Input
 							placeholder='Type here'
-							required
-							label='New Project Name'
-							name='new-project-name'
+							required={selectedProject === 'New Project'}
+							label='Project Name'
+							name='projectName'
 							hideLabel
-							id='new-project-name'
+							id='projectName'
 							type='text'
+							onChange={(e) => setValue('projectName', e.target.value)}
 						/>
 					</div>
 
 				</div>
 			)}
-        </>
+
+			<div className={styles.line}></div>
+		</>
 	)
 }

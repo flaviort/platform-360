@@ -13,6 +13,7 @@ import Dropdown from '@/components/Form/Dropdown'
 import Checkbox from '@/components/Form/Checkbox'
 import Price from '@/components/Form/Price'
 import Upload from '@/components/Form/Upload'
+import InputHidden from '@/components/Form/InputHidden'
 
 // css
 import styles from './index.module.scss'
@@ -38,6 +39,11 @@ export default function PopupFeedback360({
 			icon={Icon}
 			text={text}
 		>
+
+			<InputHidden
+				name='reportType'
+				value='Feedback360'
+			/>
 
 			<ProjectName />
 

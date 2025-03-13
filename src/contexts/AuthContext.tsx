@@ -7,8 +7,12 @@ import { useRouter } from 'next/navigation'
 // utils
 import { pages } from '@/utils/routes'
 
-interface AuthContextType {
+export type AuthContextType = {
     isAuthenticated: boolean
+    user: {
+        id: string
+        // add other user properties you need
+    } | null
     setIsAuthenticated: (value: boolean) => void
     login: (email: string, password: string) => Promise<boolean>
     logout: () => void
