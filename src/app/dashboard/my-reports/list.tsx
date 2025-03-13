@@ -58,9 +58,16 @@ export default function List({
         let filtered = [...projects]
 
         if (filter) {
+            // Filter projects that have at least one report matching the filter type
             filtered = filtered.filter(project => 
                 project.reports.some(report => report.reportType === filter)
             )
+            
+            // For each project, only keep the reports that match the filter type
+            filtered = filtered.map(project => ({
+                ...project,
+                reports: project.reports.filter(report => report.reportType === filter)
+            }))
         }
 
         if (search) {
@@ -215,13 +222,16 @@ export default function List({
 						</div>
 
 						{isLoading ? (
-							<div className={styles.noResults}>
+							<div className={styles.loading}>
+								
+								<span className='rotation purple' style={{ '--speed': '.5' } as any}>
+									<LoaderCircle />
+								</span>
+
 								<p className='text-16 semi-bold gray-500'>
-									<span className='rotation' style={{ '--speed': '.5' } as any}>
-										<LoaderCircle />
-									</span>
-									<span className='ml-2'>Loading projects...</span>
+									Loading...
 								</p>
+
 							</div>
 						) : Object.entries(groupedProjects).length === 0 ? (
 							<div className={styles.noResults}>
