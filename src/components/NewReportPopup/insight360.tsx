@@ -36,7 +36,7 @@ export default function PopupInsight360({
 		>
 
 			<InputHidden
-				name='reportType'
+				name='product'
 				value='Insight360'
 			/>
 

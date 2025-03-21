@@ -5,9 +5,8 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 
 // components
 import Guidelines from '@/components/Utils/Guidelines'
-
-// context
-import { AuthProvider } from '@/contexts/AuthContext'
+import Providers from '@/components/Providers'
+import GDPR from '@/components/GDPR'
 
 // css
 import '@/assets/css/normalize.min.css'
@@ -68,9 +67,11 @@ export default function RootLayout({
 
 				<div id='portal'></div>
 
-				<AuthProvider>
+				<Providers>
 					{children}
-				</AuthProvider>
+				</Providers>
+
+				<GDPR />
 
 				<Guidelines />
 

@@ -36,7 +36,8 @@ export default function ResetPassword() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/account/reset-password'
+						endpoint='/api/proxy?endpoint=/api/auth/reset-password'
+						method='POST'
 						onSuccess={() => router.push(pages.account.reset_password_success)}
 						onError={() => {}}
 					>

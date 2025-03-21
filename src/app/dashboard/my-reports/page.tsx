@@ -1,13 +1,9 @@
 'use client'
 
-// libraries
-import { useEffect, useState } from 'react'
-
 // components
 import Breadcrumbs from '@/components/Breadcrumbs'
 import TitlePart from '@/components/TitlePart'
-//import List, { ListProps } from './list-bkp'
-import List from './list'
+import List, { ListProps } from './list'
 
 // db
 import { fakeProjects } from '@/db/fake-projects'
@@ -16,25 +12,6 @@ import { fakeProjects } from '@/db/fake-projects'
 import styles from './index.module.scss'
 
 export default function DashboardMyReports() {
-
-	const [projects, setProjects] = useState([])
-
-	useEffect(() => {
-		const fetchProjects = async () => {
-			try {
-				const response = await fetch('/api/projects')
-				const data = await response.json()
-				
-				if (data.success) {
-					setProjects(data.data)
-				}
-			} catch (error) {
-				console.error('Error fetching projects:', error)
-			}
-		}
-
-		fetchProjects()
-	}, [])
 
 	return (
 		<main className={styles.page}>
@@ -54,12 +31,10 @@ export default function DashboardMyReports() {
 		
 			<TitlePart
 				title='My Reports'
-				description='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus.'
+				description='Below are all the reports you have created. You can filter them by product clicking on the logos below or even search for a specific report by typing in the search bar. You can also create new reports by clicking the "+ New" button.'
 			/>
 
-			{/*<List projects={fakeProjects as ListProps['projects']} />*/}
-
-			<List projects={projects} />
+			<List projects={fakeProjects as ListProps['projects']} />
 
 		</main>
 	)

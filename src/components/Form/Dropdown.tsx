@@ -221,7 +221,7 @@ export default function Dropdown({
                                     className={styles.clear}
                                     onClick={() => setSearchValue('')}
                                 >
-                                    Clear <X />
+                                    View All <X />
                                 </button>
                             )}
 

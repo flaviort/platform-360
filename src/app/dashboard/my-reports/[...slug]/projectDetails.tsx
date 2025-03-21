@@ -31,8 +31,7 @@ interface ProjectDetailsProps {
 		retailers: string
 		brands: string
 		genders: string
-		years: string
-		months: string
+		timePeriod: string
 		type: string
 		goal: string
 	}
@@ -169,22 +168,12 @@ export default function ProjectDetails({
 								</div>
 
 								<p className='text-14 gray-700 bold'>
-									Year(s):
+									Time Period:
 								</p>
 
 								<div className={clsx(styles.content, 'text-14 gray-500')}>
 									<p>
-										{summary.years}
-									</p>
-								</div>
-
-								<p className='text-14 gray-700 bold'>
-									Month(s):
-								</p>
-
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.months}
+										{summary.timePeriod}
 									</p>
 								</div>
 

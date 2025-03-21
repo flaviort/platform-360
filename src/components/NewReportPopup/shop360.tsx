@@ -6,10 +6,10 @@ import PopupForm from './form'
 import ProjectName from './components/ProjectName'
 import ReportName from './components/ReportName'
 import Category from './components/Category'
+import TimePeriod from './components/TimePeriod'
 import Goal from './components/Goal'
 import Dropdown from '@/components/Form/Dropdown'
 import Checkbox from '@/components/Form/Checkbox'
-import DateRange from '@/components/Form/DateRange'
 import InputHidden from '@/components/Form/InputHidden'
 
 // css
@@ -39,7 +39,7 @@ export default function PopupShop360({
 		>
 
 			<InputHidden
-				name='reportType'
+				name='product'
 				value='Shop360'
 			/>
 
@@ -156,25 +156,7 @@ export default function PopupShop360({
 
 			</div>
 
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-time-period' className='text-16 semi-bold'>
-						Time Period <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<DateRange
-						name='time-period'
-						required
-						hideLabel
-						startDate='2018-01-01'
-						endDate='2025-03-10'
-					/>
-				</div>
-
-			</div>
+			<TimePeriod />
 
 			<div className={styles.group}>
 

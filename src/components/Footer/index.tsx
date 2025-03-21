@@ -1,7 +1,8 @@
+'use client'
+
 // libraries
 import clsx from 'clsx'
 import Link from 'next/link'
-import Image from 'next/image'
 
 // img / svg
 import Logo from '@/assets/svg/logo/logo.svg'
@@ -12,53 +13,62 @@ import styles from './index.module.scss'
 // utils
 import { pages } from '@/utils/routes'
 
-export default function Footer() {
+// context
+import { useAuth } from '@/contexts/AuthContext'
+
+interface FooterProps {
+    internal?: boolean
+}
+
+export default function Footer({
+    internal
+}: FooterProps) {
+
+    const { isAuthenticated } = useAuth()
+
     return (
-        <footer className={clsx(styles.component, 'bg-gray-600 py-small py-md-smaller')}>
-            <div className='container relative z2'>
+        <footer className={clsx(styles.component, 'bg-gray-100 py-smaller py-md-smallest')} data-footer>
+            <div className={clsx('container', internal && 'container--big')}>
+                <div className={clsx(styles.flex, isAuthenticated && styles.internal)}>
 
-                <div className={clsx(styles.top, 'mb-smaller')}>
+                    <div className={styles.left}>
 
-                    <Link
-                        className={styles.logo}
-                        href={pages.home}
-                    >
-                        <Logo />
-                    </Link>
+                        <Link
+                            className={styles.logo}
+                            href={pages.home}
+                        >
+                            <Logo />
+                        </Link>
 
-                    <ul className={styles.menu}>
-                        {[
-                            {
-                                text: 'Home',
-                                href: '#'
-                            }
-                        ].map((item, i) => (
-                            <li key={i}>
-                                <Link href={item.href} className='hover-underline'>
-                                    {item.text}
+                        <p className='text-16 gray-500'>
+                            Copyright © {new Date().getFullYear()}
+                        </p>
+
+                    </div>
+
+                    <div className={styles.right}>
+                        <ul className={clsx(styles.links, 'text-16 gray-500')}>
+
+                            <li>
+                                <Link href={pages.terms} className='hover-underline'>
+                                    Terms and Conditions
                                 </Link>
                             </li>
-                        ))}
-                    </ul>
 
-                    <Link
-                        href='#'
-                        className={clsx(styles.donate, 'button button--white text-25')}
-                    >
-                        Donate Now
-                    </Link>
+                            <li>
+                                <p className='gray-300 text-12'>
+                                    •
+                                </p>
+                            </li>
 
-                </div>
+                            <li>
+                                <Link href={pages.privacy} className='hover-underline'>
+                                    Privacy Policy
+                                </Link>
+                            </li>
 
-                <div className={clsx(styles.bottom, 'text-16 medium gray-light uppercase')}>
-
-                    <p>
-                        Copyright © {new Date().getFullYear()}
-                    </p>
-
-                    <p>
-                        Registered charity in both Canada (No. 81111 6813 RR0001) and the United States (EIN 30-0545486)
-                    </p>
+                        </ul>
+                    </div>
 
                 </div>
             </div>

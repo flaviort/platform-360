@@ -342,19 +342,28 @@
             }
         }
 
-        &.dateRangeWrapper {
+        &.datePickerWrapper {
+            /*
+            display: grid;
+            gap: .5rem;
+
+            @media #{$mq-md-min} {
+                grid-template-columns: 1fr 1rem 1fr;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+            }
+            */
+
             & :global {
                 .react-datepicker-wrapper {
                     width: 100%;
-
-                    input {
-                        cursor: pointer;
-                    }
+                    cursor: pointer;
                 }
 
                 .react-datepicker-popper {
                     z-index: 9;
-                    width: 100%;
+                    //width: 100%;
                     font-size: 1rem;
                     font-family: $font;
 
@@ -369,12 +378,16 @@
                     }
 
                     .react-datepicker {
-                        width: 100%;
-                        max-width: 20rem;
+                        width: 18rem;
+                        max-width: 100%;
                         border-radius: .275rem;
                         border: 1px solid $gray-200;
                         overflow: hidden;
                         box-shadow: 0 0 2rem rgba($gray-300, .5);
+
+                        @media #{$mq-md-min} {
+                            width: 19rem;
+                        }
 
                         .react-datepicker__month-container {
                             width: 100%;
@@ -437,6 +450,10 @@
                                             position: relative;
                                             width: 100%;
 
+                                            select {
+                                                border-color: $gray-200;
+                                            }
+
                                             .side-icon {
                                                 pointer-events: none;
                                                 position: absolute;
@@ -492,7 +509,7 @@
 
                                         &--in-range,
                                         &--in-selecting-range {
-                                            background-color: $blue;
+                                            background-color: $blue-light;
                                             color: $white;
                                         }
 
@@ -502,6 +519,7 @@
 
                                         &:hover {
                                             background-color: $blue-light;
+                                            color: $white;
                                         }
 
                                         &--disabled {
@@ -509,11 +527,22 @@
                                             color: currentColor;
                                             pointer-events: none;
                                         }
+
+                                        &--selected {
+                                            background-color: $blue;
+                                            color: $white;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                }
+            }
+
+            > p {
+                @media #{$mq-md-max} {
+                    display: none;
                 }
             }
         }

@@ -24,9 +24,11 @@ $purple-dark:           #48238F;
 $purple:                #6D28D9;
 $purple-light:          #99CAFF;
 $purple-lighter:        #E9D5FF;
+$purple-lightest:       #F5F3FF;
 
 $blue:                  #3691E1;
 $blue-light:            #57B0FF;
+$blue-lighter:          #e1f5fe;
 
 // create a color map
 $colors: (
@@ -56,7 +58,9 @@ $colors: (
     'purple':               $purple,
     'purple-light':         $purple-light,
     'purple-lighter':       $purple-lighter,
+    'purple-lightest':      $purple-lightest,
 
     'blue':                 $blue,
-    'blue-light':           $blue-light
+    'blue-light':           $blue-light,
+    'blue-lighter':         $blue-lighter
 );

@@ -10,6 +10,6 @@ export const canadaProvinces = [
     { name: 'ontario', label: 'Ontario' },
     { name: 'prince-edward-island', label: 'Prince Edward Island' },
     { name: 'quebec', label: 'Quebec' },
-    { name: 'saskatchewan', label: 'Saskatchewan' },
+    { name: 'saskatchewan', label: 'Saskatchewan' },    
     { name: 'yukon', label: 'Yukon' }
 ] 

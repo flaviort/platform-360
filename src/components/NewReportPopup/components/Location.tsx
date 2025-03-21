@@ -55,7 +55,7 @@ export default function Location() {
 		    <div className={styles.group}>
 
 				<div className={styles.label}>
-					<label htmlFor='report-location' className='text-16 semi-bold'>
+					<label htmlFor='reportLocation' className='text-16 semi-bold'>
 						Location <span className='red'>*</span>
 					</label>
 				</div>
@@ -67,7 +67,7 @@ export default function Location() {
 						label='Location'
 						name='location'
 						hideLabel
-						id='report-location'
+						id='reportLocation'
 						onChange={(e) => handleLocationChange(e.target.value)}
 					>
 						<option value='' disabled>Select one</option>

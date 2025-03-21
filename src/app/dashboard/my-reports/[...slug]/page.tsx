@@ -111,9 +111,8 @@ export default function DashboardMyReports() {
 								category: 'Footwear',
 								retailers: 'Wallmart, Costco, Target',
 								brands: 'Nike, Adidas, New Balance, Puma, Fila',
-								genders: 'All',
-								years: '2012 - 2022',
-								months: 'Jan - Dec',
+								genders: "Men's",
+								timePeriod: '01/01/2023 - 12/31/2023',
 								type: 'Instore',
 								goal: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus.'
 							}}

@@ -12,11 +12,14 @@ export interface FormProps {
     className?: string
     children: React.ReactNode
     endpoint: string
+    method?: string
+    contentType?: string
     isFormData?: boolean
     onSuccess?: (data: any, formData?: any) => void 
     onError?: (error: any) => void
     clearOnSubmit?: boolean
     hideErrors?: boolean
+    enableConsoleLog?: boolean
 }
 
 interface FormValues {
@@ -27,11 +30,14 @@ export default function Form({
     className,
     children,
     endpoint,
+    method,
+    contentType,
     isFormData,
     onSuccess,
     onError,
     clearOnSubmit,
-    hideErrors
+    hideErrors,
+    enableConsoleLog
 }: FormProps) {
     
     // refs
@@ -62,22 +68,38 @@ export default function Form({
         }
 
         let body
-
-        if(isFormData) {
+        if (contentType === 'application/x-www-form-urlencoded') {
+            const formData = new URLSearchParams()
+            for (const [key, value] of Object.entries(data)) {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value.toString())
+                }
+            }
+            body = formData
+        } else if (isFormData) {
             const formData = new FormData()
-
-            Object.keys(data).forEach(key => {
-                formData.append(key, data[key])
-            })
-
+            for (const [key, value] of Object.entries(data)) {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value)
+                }
+            }
             body = formData
         } else {
             body = JSON.stringify(data)
         }
 
+        if(enableConsoleLog) {
+            console.log('Submitting form data:', data)
+        }
+
         fetch(endpoint, {
-            method: 'post',
-            body: body
+            method: method || 'post',
+            body: body,
+            headers: contentType === 'application/x-www-form-urlencoded' ? {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            } : contentType ? {
+                'Content-Type': contentType
+            } : {}
         })
 
         .then(async (response) => {

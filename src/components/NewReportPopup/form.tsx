@@ -3,7 +3,6 @@
 // libraries
 import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence } from 'motion/react'
-import { useForm, FormProvider, SubmitHandler } from 'react-hook-form'
 import * as motion from 'motion/react-client'
 
 // components
@@ -23,10 +22,6 @@ interface PopupFormProps {
 	text: string
 	children: React.ReactNode
 	onClose?: () => void
-}
-
-interface FormValues {
-    [key: string]: any
 }
 
 export default function PopupForm({
@@ -92,62 +87,9 @@ export default function PopupForm({
 		}
 	}, [optionsSub])
 
-	// refs
-    const form = useRef<HTMLFormElement>(null)
-
-    // Get form methods from react-hook-form
-    const methods = useForm({
-        criteriaMode: 'all',
-        mode: 'onChange',
-        reValidateMode: 'onChange'
-    })
-
-    const onSubmit: SubmitHandler<FormValues> = async (formData) => {
-
-		if (form.current) {
-            (form.current as HTMLElement).classList.add('is-sending')
-            document.dispatchEvent(new Event('formSending'))
-        }
-
-        try {
-            const response = await fetch('/api/reports', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-
-            const data = await response.json()
-            
-            if (data.success) {
-                setTimeout(() => {
-
-					// reset all form fields
-					methods.reset()
-					form?.current?.reset()
-					document.dispatchEvent(new Event('formReset'))
-
-					// remove the sending class
-					form?.current?.classList.remove('is-sending')
-					document.dispatchEvent(new Event('formSent'))
-					
-					// close the popup
-					closeNewReportPopup()
-
-                }, 1000)
-			}
-			
-        } catch (error) {
-            console.error('Error submitting form:', error)
-			form?.current?.classList.remove('is-sending')
-            document.dispatchEvent(new Event('formError'))
-        }
-    }
-
 	return (
 		<>
-
+								
 			<button
 				className='text-14 bold'
 				onClick={openNewReportPopup}
@@ -192,55 +134,56 @@ export default function PopupForm({
 								className={styles.wrapper}
 								style={popoverStyle}
 							>
-								<FormProvider {...methods}>
-									<form
-										onSubmit={methods.handleSubmit(onSubmit)}
-										className={styles.form}
-										ref={form}
-									>
+								<Form
+									className={styles.form}
+									endpoint='/api/dashboard/new-report'
+									onSuccess={() => console.log('sucess')}
+									onError={() => console.log('error')}
+									enableConsoleLog
+									//hideErrors
+								>
 
-										<div className={styles.top}>
+									<div className={styles.top}>
 
-											<div className={styles.left}>
+										<div className={styles.left}>
 
-												<p className='text-25 bold'>
-													New Report
-												</p>
+											<p className='text-25 bold'>
+												New Report
+											</p>
 
-												<ChevronRight />
+											<ChevronRight />
 
-												<p className='text-25 bold purple'>
-													{text}
-												</p>
-
-											</div>
-
-											<button
-												className={styles.close}
-												onClick={closeNewReportPopup}
-												type='button'
-											>
-												<X />
-											</button>
+											<p className='text-25 bold purple'>
+												{text}
+											</p>
 
 										</div>
 
-										<div className={styles.middle}>
+										<button
+											className={styles.close}
+											onClick={closeNewReportPopup}
+											type='button'
+										>
+											<X />
+										</button>
 
-											{children}
+									</div>
 
-										</div>
+									<div className={styles.middle}>
 
-										<div className={styles.bottom}>
-											<Submit
-												style='gradient-blue'
-												text='Create Report'
-												className={styles.submit}
-											/>
-										</div>
+										{children}
 
-									</form>
-								</FormProvider>
+									</div>
+
+									<div className={styles.bottom}>
+										<Submit
+											style='gradient-blue'
+											text='Create Report'
+											className={styles.submit}
+										/>
+									</div>
+
+								</Form>
 							</motion.div>
 						</motion.div>
 					</Portal>

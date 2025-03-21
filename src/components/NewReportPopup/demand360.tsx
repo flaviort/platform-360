@@ -5,7 +5,7 @@ import ReportName from './components/ReportName'
 import Category from './components/Category'
 import Location from './components/Location'
 import Goal from './components/Goal'
-import DateRange from '@/components/Form/DateRange'
+import TimePeriod from './components/TimePeriod'
 import InputHidden from '@/components/Form/InputHidden'
 
 // css
@@ -26,9 +26,9 @@ export default function PopupDemand360({
 			icon={Icon}
 			text={text}
 		>
-			
+
 			<InputHidden
-				name='reportType'
+				name='product'
 				value='Demand360'
 			/>
 
@@ -38,25 +38,7 @@ export default function PopupDemand360({
 
 			<Category />
 
-			<div className={styles.group}>
-
-				<div className={styles.label}>
-					<label htmlFor='report-time-period' className='text-16 semi-bold'>
-						Time Period <span className='red'>*</span>
-					</label>
-				</div>
-
-				<div className={styles.input}>
-					<DateRange
-						name='time-period'
-						required
-						hideLabel
-						startDate='2018-01-01'
-						endDate='2025-03-10'
-					/>
-				</div>
-
-			</div>
+			<TimePeriod />
 
 			<Location />
 

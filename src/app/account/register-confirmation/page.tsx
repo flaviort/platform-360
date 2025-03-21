@@ -21,7 +21,9 @@ export default function RegisterConfirmation() {
 					</h2>
 
 					<p className='text-16'>
-						Thanks for registering! We’ve emailed you a link to confirm your account, please check both your inbox and spam folder. Once you confirm, your account will be ready to use.
+						Thanks for registering! Your account is not active yet as our team is reviewing your information. <br/><br />
+						
+						If everything is in order, we’ll approve your account within 1-3 business days. You’ll receive an email notification once your account is activated.
 					</p>
 
 					<Link
@@ -29,7 +31,7 @@ export default function RegisterConfirmation() {
 						className='button text-16 button--gradient-blue uppercase'
 					>
 						<span className='button__text'>
-							Login	
+							Back
 						</span>
 					</Link>
 

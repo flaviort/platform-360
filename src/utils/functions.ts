@@ -66,7 +66,7 @@ export function firstChar(str: string) {
 
 // get all project names
 export function getProjects(projects: any[]) {
-    return Array.from(new Set(projects.map((project: any) => project.projectGroup)))
+    return Array.from(new Set(projects.map((project: any) => project.project)))
 }
 
 // format date

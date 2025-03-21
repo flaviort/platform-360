@@ -34,6 +34,24 @@
         padding: 1rem 2.5rem;
     }
 
+    &--small {
+        padding: 1rem 2rem;
+
+        @media #{$mq-xl-min} {
+            padding: .75rem 2rem;
+        }   
+    }
+
+    &--smaller {
+        padding: .5rem .75rem;
+        font-weight: $medium;
+        border-radius: .25rem;
+
+        @media #{$mq-xl-min} {
+            padding: .75rem 1rem;
+        }   
+    }
+
     &--hollow {
         background-color: transparent;
         border: var(--1px) solid $gray-800;

@@ -41,7 +41,7 @@ export default function PopupFeedback360({
 		>
 
 			<InputHidden
-				name='reportType'
+				name='product'
 				value='Feedback360'
 			/>
 

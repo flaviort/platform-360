@@ -26,7 +26,7 @@ export default function TitlePart({
                         </h1>
 
                         {description && (
-                            <p className='text-16'>
+                            <p className='text-16 gray-500'>
                                 {description}
                             </p>
                         )}

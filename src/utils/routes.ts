@@ -25,7 +25,7 @@ export const pages = {
 	},
 
 	// terms, privacy, etc
-	terms: '/terms-of-use',
+	terms: '/terms-and-conditions',
 	privacy: '/privacy-policy'
 }
 

@@ -36,7 +36,8 @@ export default function ForgotPassword() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/account/forgot-password'
+						endpoint='/api/proxy?endpoint=/api/auth/forgot-password'
+						method='POST'
 						onSuccess={() => router.push(pages.account.forgot_confirmation)}
 						onError={() => {}}
 					>

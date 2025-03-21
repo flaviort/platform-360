@@ -1,0 +1,40 @@
+.component {
+	position: fixed;
+	z-index: 999999;
+	bottom: 1rem;
+	right: 1rem;
+	width: 30rem;
+	max-width: calc(100% - 2rem);
+	background-color: $pure-white;
+	border-radius: .5rem;
+	padding: 1.5rem;
+	border: var(--1px) solid $gray-200;
+	box-shadow: 0 1rem 2rem 0 rgba(0, 0, 0, .1);
+	
+	.wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: .25rem;
+
+		p {
+			a {
+				font-weight: $bold;
+			}
+		}
+
+		.buttons {
+			display: flex;
+			gap: .5rem;
+			margin-top: .75rem;
+			opacity: .75;
+
+			button {
+				&:hover,
+				&:focus-visible {
+					border-color: $blue;
+					background-color: $blue;
+				}
+			}
+		}
+	}
+}

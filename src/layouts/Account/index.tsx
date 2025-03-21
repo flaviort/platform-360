@@ -53,8 +53,8 @@ export default function AccountWrapper({
 						<ul className={clsx(styles.links, 'text-16 medium gray-500')}>
 
 							<li>
-								<Link href='#' className='hover-underline'>
-									Terms of Use
+								<Link href={pages.terms} className='hover-underline'>
+									Terms and Conditions
 								</Link>
 							</li>
 
@@ -65,7 +65,7 @@ export default function AccountWrapper({
 							</li>
 
 							<li>
-								<Link href='#' className='hover-underline'>
+								<Link href={pages.privacy} className='hover-underline'>
 									Privacy Policy
 								</Link>
 							</li>

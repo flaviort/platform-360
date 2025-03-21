@@ -7,59 +7,92 @@ import { useRouter } from 'next/navigation'
 // utils
 import { pages } from '@/utils/routes'
 
-export type AuthContextType = {
+interface AuthContextType {
     isAuthenticated: boolean
-    user: {
-        id: string
-        // add other user properties you need
-    } | null
     setIsAuthenticated: (value: boolean) => void
     login: (email: string, password: string) => Promise<boolean>
-    logout: () => void
+    logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [user, setUser] = useState(null)
     const router = useRouter()
 
     useEffect(() => {
-        const localToken = localStorage.getItem('auth_token')
-        const cookieToken = document.cookie.includes('auth_token=')
-        setIsAuthenticated(!!(localToken && cookieToken))
+        if (typeof window !== 'undefined') {
+            const localToken = localStorage.getItem('auth_token')
+            const cookieToken = document.cookie.includes('auth_token=')
+            setIsAuthenticated(!!(localToken && cookieToken))
+        }
     }, [])
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await fetch('/api/account/auth', {
+            const formData = new URLSearchParams()
+            formData.append('username', email)
+            formData.append('password', password)
+            formData.append('grant_type', 'password')
+            
+            const response = await fetch('/api/proxy?endpoint=/api/auth/jwt/login', {
                 method: 'POST',
-                body: JSON.stringify({ email, password })
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
             })
 
             if (response.ok) {
-                localStorage.setItem('auth_token', 'fake_token')
+                const data = await response.json()
+                localStorage.setItem('auth_token', data.access_token)
+                document.cookie = `auth_token=${data.access_token}; path=/`
                 setIsAuthenticated(true)
                 return true
             }
 
             return false
-
         } catch (error) {
             return false
         }
     }
 
-    const logout = () => {
-        localStorage.removeItem('auth_token')
-        document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-        setIsAuthenticated(false)
-        router.push(pages.account.login)
+    const logout = async () => {
+        try {
+            const token = localStorage.getItem('auth_token')
+            if (token) {
+                
+                // fire and forget the logout request
+                fetch('/api/proxy?endpoint=/api/auth/jwt/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // silently handle non-200 responses
+                        return
+                    }
+                })
+                .catch(() => {
+                    // silently handle any network errors
+                    return
+                })
+            }
+        } finally {
+            
+            // always clear local tokens and state
+            localStorage.removeItem('auth_token')
+            document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+            setIsAuthenticated(false)
+            router.push(pages.account.login)
+        }
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, login, logout, user }}>
+        <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, login, logout }}>
             {children}
         </AuthContext.Provider>
     )

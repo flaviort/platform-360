@@ -41,8 +41,13 @@ export default function Register() {
 
 					<Form
 						className={styles.form}
-						endpoint='/api/account/register'
-						onSuccess={() => router.push(pages.account.register_confirmation)}
+						endpoint='/api/proxy?endpoint=/api/auth/register'
+						method='POST'
+						onSuccess={(responseData) => {
+							if (responseData.id) {
+								router.push(pages.account.register_confirmation)
+							}
+						}}
 						onError={() => {}}
 					>
 
@@ -221,7 +226,7 @@ export default function Register() {
 								placeholder='Repeat Password'
 								required
 								hidePasswordToggle
-								match='Password'
+								match='password'
 							/>
 
 						</div>

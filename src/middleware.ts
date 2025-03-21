@@ -15,9 +15,25 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/dashboard/my-reports', request.url))
     }
 
+    // Add authorization header to all API requests
+    if (request.nextUrl.pathname.startsWith('/api/') && token) {
+        const requestHeaders = new Headers(request.headers)
+        requestHeaders.set('Authorization', `Bearer ${token.value}`)
+        
+        return NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        })
+    }
+
     return NextResponse.next()
 }
 
 export const config = {
-    matcher: ['/dashboard/:path*', '/account/:path*']
+    matcher: [
+        '/dashboard/:path*',
+        '/account/:path*',
+        '/api/:path*'
+    ],
 } 

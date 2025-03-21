@@ -124,6 +124,13 @@
                             padding: .75rem;
                         }
 
+                        &:hover,
+                        &:focus-visible {
+                            background-color: $gray-100;
+                            border-color: $gray-400;
+                            color: $gray-400;
+                        }
+
                         &[data-open='true'] {
                             background-color: $blue;
                             border-color: $blue;

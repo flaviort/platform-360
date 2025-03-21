@@ -1,3 +1,24 @@
 .page {
-    
+    .flex {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100dvh;
+
+        svg {
+            width: 25rem;
+            max-width: 90%;
+            margin: 0 auto 1rem auto;
+        }
+
+        h1 {
+            display: block;
+            margin: 0 auto 1rem auto;
+        }
+
+        a {
+            margin-top: 2rem;
+        }
+    }
 }

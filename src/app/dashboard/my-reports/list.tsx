@@ -26,25 +26,32 @@ import { pages } from '@/utils/routes'
 
 export interface ListProps {
     projects: Array<{
-        id: string
-        name: string
+        project: string
         reports: Array<{
-            id: string
-            name: string
+            reportName: string
+            status: 'empty' | 'green'
             category: string
-            reportType: 'Shop360' | 'Feedback360' | 'Insight360' | 'Demand360'
             createdAt: string
-            goal: string
-        }>
-    }>
+            product: 'Shop360' | 'Feedback360' | 'Insight360' | 'Demand360'
+			createdBy: {
+				image?: string
+				name: string
+			}
+			access: Array<{
+				image?: string
+				name: string
+			}>
+			goal: string
+		}>
+	}>
 }
 
 export default function List({
     projects
 }: ListProps) {
-    const [filteredProjects, setFilteredProjects] = useState<ListProps['projects']>(projects)
-    const [isLoading, setIsLoading] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
+    const [filteredProjects, setFilteredProjects] = useState(projects)
+	const [isLoading, setIsLoading] = useState(true)
+	const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 100
 
     const handleFilterChange = (filter: ProductFilter, search: string) => {
@@ -60,23 +67,23 @@ export default function List({
         if (filter) {
             // Filter projects that have at least one report matching the filter type
             filtered = filtered.filter(project => 
-                project.reports.some(report => report.reportType === filter)
+                project.reports.some(report => report.product === filter)
             )
             
             // For each project, only keep the reports that match the filter type
             filtered = filtered.map(project => ({
                 ...project,
-                reports: project.reports.filter(report => report.reportType === filter)
+                reports: project.reports.filter(report => report.product === filter)
             }))
         }
 
         if (search) {
-            filtered = filtered.filter(project => 
-                project.name.toLowerCase().includes(search.toLowerCase()) ||
-                project.reports.some(report => 
-                    report.name.toLowerCase().includes(search.toLowerCase())
+            filtered = filtered.map(project => ({
+                ...project,
+                reports: project.reports.filter(report => 
+                    report.reportName.toLowerCase().includes(search.toLowerCase())
                 )
-            )
+            })).filter(project => project.reports.length > 0)
         }
 
         setFilteredProjects(filtered)
@@ -94,14 +101,16 @@ export default function List({
         initializeProjects()
     }, [projects])
 
-	const groupedProjects = filteredProjects.reduce((acc, project) => {
-		if (!acc[project.name]) {
-			acc[project.name] = project.reports
+	const groupedProjects = filteredProjects.reduce((acc, item) => {
+		const groupKey = item.project
+		if (!acc[groupKey]) {
+		  	acc[groupKey] = []
 		}
+		acc[groupKey].push(...item.reports)
 		return acc
-	}, {} as Record<string, typeof filteredProjects[0]['reports']>)
+	}, {} as Record<string, typeof filteredProjects[number]['reports']>)
 
-    // Calculate total number of reports across all projects
+	// Calculate total number of reports across all projects
     const totalReports = Object.values(groupedProjects).reduce((total, reports) => 
         total + reports.length, 0
     )
@@ -134,11 +143,11 @@ export default function List({
         for (const [projectName, reports] of Object.entries(groupedProjects)) {
             const projectReports: JSX.Element[] = []
 
-            for (const report of reports) {
+            for (const [index, report] of reports.entries()) {
                 if (currentCount >= startIndex && currentCount < endIndex) {
                     projectReports.push(
                         <ListItem
-                            key={report.id}
+                            key={index}
                             item={{
                                 ...report,
                                 project: projectName
@@ -153,11 +162,14 @@ export default function List({
                 paginatedContent.push(
                     <div key={projectName} className={styles.listGroup}>
                         <div className={styles.listGroupTitle}>
+
                             <h2 className='text-16 bold white'>
                                 {projectName}
                             </h2>
                         </div>
+
                         {projectReports}
+
                     </div>
                 )
             }
@@ -167,7 +179,7 @@ export default function List({
     }
 
 	return (
-		<div className='pb-smaller pb-lg-smallest'>
+		<div className='pb-small pb-md-smaller'>
 
 			<Filters onFilterChange={handleFilterChange} />
 
@@ -286,7 +298,9 @@ export default function List({
 }
 
 interface ListItemProps {
-	item: any
+	item: ListProps['projects'][number]['reports'][number] & {
+		project: string
+	}
 }
 
 export function ListItem({
@@ -354,10 +368,10 @@ export function ListItem({
 			<div className={styles.nameCol}>
 				
 				<Link
-					href={pages.dashboard.my_reports + '/' + slugify(item.project) + '/' + slugify(item.reportName)}
+					href={pages.dashboard.my_reports + '/' + slugify('#') + '/' + slugify(item.reportName)}
 					className='text-16 bold blue'
 				>
-					{item.name}
+					{item.reportName}
 				</Link>
 
 				{item.goal && (
@@ -383,7 +397,6 @@ export function ListItem({
 			</div>
 
 			<div className={styles.statusCol}>
-				{/*
 				<p
 					className={clsx(
 						styles.status,
@@ -397,17 +410,6 @@ export function ListItem({
                     data-balloon-pos='up'
 				>
 					{item.status}
-				</p>
-				*/}
-				<p
-					className={clsx(
-						styles.status,
-						styles.green
-					)}
-					aria-label='Proccessed'
-                    data-balloon-pos='up'
-				>
-					green
 				</p>
 			</div>
 
@@ -425,13 +427,12 @@ export function ListItem({
 
 			<div className={styles.productCol}>
 				<p className='text-16'>
-					{item.reportType}
+					{item.product}
 				</p>
 			</div>
 
 			<div className={styles.createdByCol}>
 				
-				{/*
 				<Avatar
 					image={item.createdBy.image}
 					alt={item.createdBy.name}
@@ -440,47 +441,15 @@ export function ListItem({
 				<p className='text-16'>
 					{item.createdBy.name}
 				</p>
-				*/}
-
-				<Avatar
-					image='/img/photos/avatar-01.jpg'
-					alt='Flavio R.T.'
-				/>
-
-				<p className='text-16'>
-					Flavio R.T.
-				</p>
 
 			</div>
 
 			<div className={styles.accessCol}>
-				{/*
 				<MultipleAvatar
 					avatars={item.access.map((item: any) => ({
 						image: item.image,
 						alt: item.name
 					}))}
-				/>
-				*/}
-				<MultipleAvatar
-					avatars={[
-						{
-							image: "/img/photos/avatar-01.jpg",
-							alt: 'Jack Erwin'
-						},
-						{
-							image: "/img/photos/avatar-02.jpg",
-							alt: 'Sandra Doe'
-						},
-						{
-							image: "/img/photos/avatar-03.jpg",
-							alt: 'Peter Pan'
-						},
-						{
-							image: "/img/photos/avatar-01.jpg",
-							alt: 'Flavio Roberto'
-						}
-					]}
 				/>
 			</div>
 			
@@ -510,8 +479,9 @@ export function ListItem({
 						>
 							<div className={styles.subWrapper}>
 
+								{/*
 								<Link
-									href={pages.dashboard.my_reports + '/' + slugify(item.project) + '/' + slugify(item.reportName)}
+									href={pages.dashboard.my_reports + '/' + slugify('#') + '/' + slugify(item.reportName)}
 									className='text-14 bold'
 									onClick={closeOptionsSub}
 								>
@@ -523,6 +493,7 @@ export function ListItem({
 									</span>
 
 								</Link>
+								*/}
 
 								<Fancybox
 									options={{

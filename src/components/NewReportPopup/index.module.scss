@@ -144,6 +144,28 @@
 							}
 						}
 
+						&.timePeriod {
+							display: grid;
+							gap: .5rem;
+							margin-bottom: 1rem;
+
+							@media #{$mq-sm-min} {
+								grid-template-columns: 1fr 1rem 1fr;
+								align-items: center;
+								gap: 1rem;
+							}
+
+							> div {
+								margin-bottom: 0;
+							}
+
+							> p {
+								@media #{$mq-sm-max} {
+									display: none;
+								}
+							}
+						}
+
 						.helper {
 							margin-top: -.5rem;
 						}
