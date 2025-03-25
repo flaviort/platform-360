@@ -43,6 +43,7 @@ export default function Register() {
 						className={styles.form}
 						endpoint='/api/proxy?endpoint=/api/auth/register'
 						method='POST'
+						contentType='application/json'
 						onSuccess={(responseData) => {
 							if (responseData.id) {
 								router.push(pages.account.register_confirmation)
@@ -59,7 +60,7 @@ export default function Register() {
 									<Input
 										id='create-account-first-name'
 										label='First Name'
-										name='first-name'
+										name='first_name'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
@@ -71,7 +72,7 @@ export default function Register() {
 									<Input
 										id='create-account-last-name'
 										label='Last Name'
-										name='last-name'
+										name='last_name'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
@@ -129,7 +130,7 @@ export default function Register() {
 										<Input
 											id='create-account-area-other'
 											label='Please specify'
-											name='role-other'
+											name='role_other'
 											type='text'
 											placeholder='Type here'
 											maxLength={100}
@@ -142,7 +143,7 @@ export default function Register() {
 									<Input
 										id='create-account-company-name'
 										label='Company Name'
-										name='company-name'
+										name='company_name'
 										type='text'
 										placeholder='Type here'
 										maxLength={100}
@@ -221,7 +222,7 @@ export default function Register() {
 							<Input
 								id='create-account-repeat-password'
 								label='Repeat Password'
-								name='repeat-password'
+								name='repeat_password'
 								type='password'
 								placeholder='Repeat Password'
 								required

@@ -312,7 +312,7 @@ export default function TopMenu() {
                                                 {
                                                     icon: CircleUser,
                                                     text: 'Account Settings',
-                                                    link: '#'
+                                                    link: pages.account.settings
                                                 },
                                                 {
                                                     icon: Landmark,
@@ -335,9 +335,10 @@ export default function TopMenu() {
                                                     link: '#'
                                                 }
                                             ].map((item, i) => (
-                                                <button
+                                                <Link
                                                     className='text-14 bold gray-800'
                                                     key={i}
+                                                    href={item.link}
                                                 >
 
                                                     <item.icon />
@@ -346,7 +347,7 @@ export default function TopMenu() {
                                                         {item.text}
                                                     </span>
 
-                                                </button>
+                                                </Link>
                                             ))}
 
                                             <div className={styles.line}></div>
@@ -460,7 +461,7 @@ export default function TopMenu() {
                                     {
                                         icon: CircleUser,
                                         name: 'Account Settings',
-                                        href: '#',
+                                        href: pages.account.settings,
                                         mobile: true
                                     },
                                     {

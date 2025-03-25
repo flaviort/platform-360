@@ -568,6 +568,11 @@
                 opacity: 0;
             }
 
+            &:disabled {
+                opacity: .5;
+                cursor: not-allowed;
+            }
+
             &.select {
                 cursor: pointer;
                 padding: .75rem;

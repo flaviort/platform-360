@@ -161,8 +161,8 @@ export default function List({
             if (projectReports.length > 0) {
                 paginatedContent.push(
                     <div key={projectName} className={styles.listGroup}>
+						
                         <div className={styles.listGroupTitle}>
-
                             <h2 className='text-16 bold white'>
                                 {projectName}
                             </h2>

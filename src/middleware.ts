@@ -4,7 +4,8 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
     const token = request.cookies.get('auth_token')
-    const isAuthPage = request.nextUrl.pathname.startsWith('/account')
+    const isAuthPage = request.nextUrl.pathname.startsWith('/account') && 
+        !request.nextUrl.pathname.startsWith('/account/settings')
     const isDashboardPage = request.nextUrl.pathname.startsWith('/dashboard')
 
     if (isDashboardPage && !token) {

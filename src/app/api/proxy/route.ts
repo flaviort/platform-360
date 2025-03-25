@@ -55,6 +55,8 @@ export async function POST(request: Request) {
                 errorMessage = 'Invalid email or password'
             } else if (data.detail === 'LOGIN_USER_NOT_VERIFIED') {
                 errorMessage = 'Please verify your email before logging in'
+            } else if (data.detail === 'REGISTER_USER_ALREADY_EXISTS') {
+                errorMessage = 'This email is already registered. Please use a different email'
             } else if (Array.isArray(data.detail)) {
                 errorMessage = data.detail[0]?.msg || 'Validation error'
             }

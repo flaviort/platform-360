@@ -28,7 +28,8 @@ export interface InputProps {
     disabled?: boolean
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
-    match?: string;
+    match?: string
+    defaultValue?: string
 }
 
 export default function Input({
@@ -48,7 +49,8 @@ export default function Input({
     disabled,
     onChange = () => {},
     onKeyDown,
-    match
+    match,
+    defaultValue
 }: InputProps) {
 
     const { register, watch, formState: { errors } } = useFormContext()
@@ -160,6 +162,7 @@ export default function Input({
                     disabled={disabled || false}
                     onKeyDown={handleKeyPress}
                     onFocus={() => setIsFocused(true)}
+                    defaultValue={defaultValue}
                     {...register(name, {
                         ...validations,
                         onBlur: () => {

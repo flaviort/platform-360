@@ -17,6 +17,7 @@ export const pages = {
 		forgot_confirmation: '/account/forgot-password-confirmation',
 		reset_password: '/account/reset-password',
 		reset_password_success: '/account/reset-password-success',
+		settings: '/account/settings'
 	},
 
 	// dashboard
