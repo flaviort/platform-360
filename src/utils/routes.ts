@@ -25,6 +25,11 @@ export const pages = {
 		my_reports: '/dashboard/my-reports',
 	},
 
+	// admin
+	admin: {
+		dashboard: '/admin/dashboard'
+	},
+
 	// terms, privacy, etc
 	terms: '/terms-and-conditions',
 	privacy: '/privacy-policy'

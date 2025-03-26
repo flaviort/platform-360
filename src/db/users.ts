@@ -1,0 +1,72 @@
+export const users = [
+    {
+        registerDate: '2025-01-01',
+        firstName: 'Flávio',
+        lastName: 'Troszczanczuk',
+        email: 'flavioczuk@gmail.com',
+        phone: '+55 41 99698-0730',
+        role: 'Assistant to the Regional Manager',
+        companyName: 'Senz',
+        country: 'Brazil',
+        state: 'Paraná',
+        city: 'Curitiba',
+        zipcode: '81010370',
+        isActive: true
+    },
+    {
+        registerDate: '2024-03-02',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane.smith@example.com',
+        phone: '+1234567890',
+        role: 'CEO',
+        companyName: 'Amazon',
+        country: 'United States',
+        state: 'California',
+        city: 'Los Angeles',
+        zipcode: '90038',
+        isActive: false
+    },
+    {
+        registerDate: '2024-05-06',
+        firstName: 'Michael',
+        lastName: 'Johnson',
+        email: 'michael.johnson@example.com',
+        phone: '+1234567890',
+        role: 'Sales Manager',
+        companyName: 'Adidas',
+        country: 'United States',
+        state: 'California',
+        city: 'Los Angeles',
+        zipcode: '90038',
+        isActive: false
+    },
+    {
+        registerDate: '2024-07-08',
+        firstName: 'Emily',
+        lastName: 'Williams',
+        email: 'emily.williams@example.com',
+        phone: '+1234567890',
+        role: 'Attendant',
+        companyName: 'Puma',
+        country: 'United States',
+        state: 'California',
+        city: 'Los Angeles',
+        zipcode: '90038',
+        isActive: false
+    },
+    {
+        registerDate: '2024-09-10',
+        firstName: 'Daniel',
+        lastName: 'Brown',
+        email: 'daniel.brown@example.com',
+        phone: '+1234567890',
+        role: 'Designer',
+        companyName: 'Airbnb',
+        country: 'United States',
+        state: 'California',
+        city: 'Los Angeles',
+        zipcode: '90038',
+        isActive: false
+    }
+]

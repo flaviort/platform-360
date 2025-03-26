@@ -14,9 +14,11 @@ import Logo from '@/assets/svg/logo/logo.svg'
 import { pages } from '@/utils/routes'
 
 export default function AccountWrapper({
-	children
+	children,
+	hideBottomLinks = false
 }: {
 	children: React.ReactNode
+	hideBottomLinks?: boolean
 }) {
 	return (
 		<main className={styles.component}>
@@ -50,27 +52,29 @@ export default function AccountWrapper({
 					</div>
 
 					<div className={styles.bottom}>
-						<ul className={clsx(styles.links, 'text-16 medium gray-500')}>
+						{!hideBottomLinks && (
+							<ul className={clsx(styles.links, 'text-16 medium gray-500')}>
 
-							<li>
-								<Link href={pages.terms} className='hover-underline'>
-									Terms and Conditions
-								</Link>
-							</li>
+								<li>
+									<Link href={pages.terms} className='hover-underline'>
+										Terms and Conditions
+									</Link>
+								</li>
 
-							<li>
-								<p className='gray-300 text-12'>
-									•
-								</p>
-							</li>
+								<li>
+									<p className='gray-300 text-12'>
+										•
+									</p>
+								</li>
 
-							<li>
-								<Link href={pages.privacy} className='hover-underline'>
-									Privacy Policy
-								</Link>
-							</li>
+								<li>
+									<Link href={pages.privacy} className='hover-underline'>
+										Privacy Policy
+									</Link>
+								</li>
 
-						</ul>
+							</ul>
+						)}
 					</div>
 
 				</div>

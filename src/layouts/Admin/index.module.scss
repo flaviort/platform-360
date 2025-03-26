@@ -1,0 +1,71 @@
+@use 'sass:color';
+
+.page {
+	.topMenu {
+		position: relative;
+		z-index: 90;
+		width: 100%;
+		padding: 1.25rem 0;
+		background-color: $purple-dark;
+
+		@media #{$mq-sm-min} {
+			padding: 1.5rem 0;
+		}
+
+		.flex {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1.5rem;
+
+			.left {
+				display: flex;
+				align-items: center;
+				gap: 2.5rem;
+
+				.logo {
+					display: flex;
+					width: 12rem;
+					max-width: 100%;
+					transition: .3s ease-in-out;
+
+					@media #{$mq-md-min} {
+						width: 13rem;
+					}
+
+					@media #{$mq-sm-max} {
+						max-width: 13rem;
+						width: 100%;
+					}
+		
+					&:hover,
+					&:focus-visible {
+						opacity: .7;
+					}
+		
+					svg {
+						width: 100%;
+						height: auto;
+					}
+				}
+			}
+
+			.right {
+				display: flex;
+				align-items: center;
+
+				button {
+					@media #{$mq-sm-max} {
+						padding: .75rem;
+					}
+
+					span {
+						@media #{$mq-sm-max} {
+							display: none;
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -65,12 +65,12 @@ export default function List({
         let filtered = [...projects]
 
         if (filter) {
-            // Filter projects that have at least one report matching the filter type
+            // filter projects that have at least one report matching the filter type
             filtered = filtered.filter(project => 
                 project.reports.some(report => report.product === filter)
             )
             
-            // For each project, only keep the reports that match the filter type
+            // for each project, only keep the reports that match the filter type
             filtered = filtered.map(project => ({
                 ...project,
                 reports: project.reports.filter(report => report.product === filter)
@@ -110,19 +110,19 @@ export default function List({
 		return acc
 	}, {} as Record<string, typeof filteredProjects[number]['reports']>)
 
-	// Calculate total number of reports across all projects
+	// calculate total number of reports across all projects
     const totalReports = Object.values(groupedProjects).reduce((total, reports) => 
         total + reports.length, 0
     )
 
-    // Calculate total pages
+    // calculate total pages
     const totalPages = Math.ceil(totalReports / itemsPerPage)
 
-    // Calculate start and end index for current page
+    // calculate start and end index for current page
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
 
-    // Function to handle pagination
+    // handle pagination
     const handleNextPage = () => {
         if (currentPage < totalPages) {
             setCurrentPage(prev => prev + 1)
@@ -135,7 +135,7 @@ export default function List({
         }
     }
 
-    // Modify the render logic to handle pagination
+    // modify the render logic to handle pagination
     const renderPaginatedProjects = () => {
         let currentCount = 0
         const paginatedContent: JSX.Element[] = []
