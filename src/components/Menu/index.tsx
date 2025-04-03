@@ -265,14 +265,14 @@ export default function TopMenu() {
 
                                         <Avatar
                                             image={userData?.image}
-                                            alt={userData?.name ? `${userData.name.first || ''} ${userData.name.last || ''}`.trim() : userData?.email || ''}
-                                            letter={userData?.name?.first?.[0] || userData?.email?.[0]?.toUpperCase()}
+                                            alt={(userData?.first_name && userData?.last_name) ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : userData?.email || ''}
+                                            letter={userData?.first_name?.[0] || userData?.email?.[0]?.toUpperCase()}
                                         />
 
                                         <span className={styles.nameEmail}>
 
                                             <span className='text-16 white bold'>
-                                                {userData?.name?.first || userData?.email?.split('@')[0]} {userData?.name?.last && `${userData.name.last[0]}.`}
+                                                {userData?.first_name || userData?.email?.split('@')[0]} {userData?.last_name && `${userData.last_name[0]}.`}
                                             </span>
 
                                             <span className='text-14 white'>
@@ -289,14 +289,14 @@ export default function TopMenu() {
 
                                             <Avatar
                                                 image={userData?.image}
-                                                alt={userData?.name ? `${userData.name.first || ''} ${userData.name.last || ''}`.trim() : userData?.email || ''}
-                                                letter={userData?.name?.first?.[0] || userData?.email?.[0]?.toUpperCase()}
+                                                alt={(userData?.first_name && userData?.last_name) ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : userData?.email || ''}
+                                                letter={userData?.first_name?.[0] || userData?.email?.[0]?.toUpperCase()}
                                             />
 
                                             <span className={styles.nameEmailMobile}>
 
                                                 <span className='text-16 bold'>
-                                                    {userData?.name?.first || userData?.email?.split('@')[0]} {userData?.name?.last && `${userData.name.last[0]}.`}
+                                                    {userData?.first_name || userData?.email?.split('@')[0]} {userData?.last_name && `${userData.last_name[0]}.`}
                                                 </span>
 
                                                 <span className={clsx(styles.email, 'text-14')}>
@@ -411,14 +411,14 @@ export default function TopMenu() {
 
                                 <Avatar
                                     image={userData?.image}
-                                    alt={userData?.name ? `${userData.name.first || ''} ${userData.name.last || ''}`.trim() : userData?.email || ''}
-                                    letter={userData?.name?.first?.[0] || userData?.email?.[0]?.toUpperCase()}
+                                    alt={(userData?.first_name && userData?.last_name) ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : userData?.email || ''}
+                                    letter={userData?.first_name?.[0] || userData?.email?.[0]?.toUpperCase()}
                                 />
 
                                 <span className={styles.nameEmailMobile}>
 
                                     <span className='text-16 bold'>
-                                        {userData?.name?.first || userData?.email?.split('@')[0]} {userData?.name?.last && `${userData.name.last[0]}.`}
+                                        {userData?.first_name || userData?.email?.split('@')[0]} {userData?.last_name && `${userData.last_name[0]}.`}
                                     </span>
 
                                     <span className={clsx(styles.email, 'text-14')}>

@@ -1,0 +1,24 @@
+.component {
+	position: relative;
+	overflow: hidden;
+	
+
+	.flex {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+
+		svg {
+			display: flex;
+			width: 2rem;
+			min-width: 2rem;
+			height: 2rem;
+			animation: spin 1s linear infinite;
+		}
+	}
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}

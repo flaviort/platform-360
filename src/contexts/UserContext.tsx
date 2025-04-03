@@ -6,14 +6,22 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 interface UserData {
     id?: string
     email: string
-    name?: {
-        first?: string
-        last?: string
-    }
-    image?: string
+    password: string
     is_active: boolean
     is_superuser: boolean
     is_verified: boolean
+    
+    first_name?: string
+    last_name?: string
+    phone?: string
+    role?: string
+    company_name?: string
+    country?: string
+    state?: string
+    city?: string
+    zip_code?: string
+
+    image?: string
 }
 
 interface UserContextType {
@@ -40,11 +48,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
             if (response.ok) {
                 const data = await response.json()
-                setUserData({
-                    ...data,
-                    name: {},
-                    image: undefined
-                })
+                setUserData({ ...data })
             }
         } catch (error) {
             console.error('Error fetching user data:', error)

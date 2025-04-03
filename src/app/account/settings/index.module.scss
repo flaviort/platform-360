@@ -94,5 +94,30 @@
             display: block;
             border-top: var(--1px) solid $gray-200;
         }
+
+        form {
+            &:global {
+                &.is-sending {
+                    .form-fields {
+                        opacity: .5;
+                        pointer-events: none;
+                    }
+                }
+            }
+        }
+
+        form {
+            & :global {
+                .form-fields {
+                    transition: .3s ease-in-out;
+                }
+            }
+        }
+
+        .submit {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
     }
 }

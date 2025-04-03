@@ -312,13 +312,13 @@ export function ListItem({
 
 				{user.email && (
 					<p className='text-16'>
-						<span className={styles.mobile}>Email: </span>{user.email && <Link href={email(user.email)} className='hover-underline purple'>{user.email}</Link> }
+						<span className={styles.mobile}>Email: </span>{user.email && <Link href={email(user.email)} className='hover-underline blue'>{user.email}</Link> }
 					</p>
 				)}
 
 				{user.phone && (
 					<p className='text-16'>
-						<span className={styles.mobile}>Phone: </span>{user.phone && <Link href={phone(user.phone)} className='hover-underline purple'>{user.phone}</Link> }
+						<span className={styles.mobile}>Phone: </span>{user.phone && <Link href={phone(user.phone)} className='hover-underline blue'>{user.phone}</Link> }
 					</p>
 				)}
 

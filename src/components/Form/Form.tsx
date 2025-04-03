@@ -20,6 +20,7 @@ export interface FormProps {
     clearOnSubmit?: boolean
     hideErrors?: boolean
     enableConsoleLog?: boolean
+    beforeSubmit?: (data: any) => any
 }
 
 interface FormValues {
@@ -37,7 +38,8 @@ export default function Form({
     onError,
     clearOnSubmit,
     hideErrors,
-    enableConsoleLog
+    enableConsoleLog,
+    beforeSubmit
 }: FormProps) {
     
     // refs
@@ -55,7 +57,6 @@ export default function Form({
 
     // submit function
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
-
         // clear any old error messages
         setGlobalError('')
 
@@ -67,84 +68,116 @@ export default function Form({
             document.dispatchEvent(new Event('formSending'))
         }
 
-        let body
-        if (contentType === 'application/x-www-form-urlencoded') {
-            const formData = new URLSearchParams()
-            for (const [key, value] of Object.entries(data)) {
-                if (value !== undefined && value !== null) {
-                    formData.append(key, value.toString())
+        try {
+            // process form data before submission if beforeSubmit is provided
+            const processedData = beforeSubmit ? beforeSubmit(data) : data
+
+            // If beforeSubmit returned false, stop submission
+            if (processedData === false) {
+                if (form.current) {
+                    form.current.classList.remove('is-sending')
+                    document.dispatchEvent(new Event('formError'))
                 }
-            }
-            body = formData
-        } else if (isFormData) {
-            const formData = new FormData()
-            for (const [key, value] of Object.entries(data)) {
-                if (value !== undefined && value !== null) {
-                    formData.append(key, value)
-                }
-            }
-            body = formData
-        } else {
-            body = JSON.stringify(data)
-        }
-
-        if(enableConsoleLog) {
-            console.log('Submitting form data:', data)
-        }
-
-        fetch(endpoint, {
-            method: method || 'post',
-            body: body,
-            headers: contentType === 'application/x-www-form-urlencoded' ? {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            } : contentType ? {
-                'Content-Type': contentType
-            } : {}
-        })
-
-        .then(async (response) => {
-            if (!response.ok) {
-                // if the response is not ok, we try to parse the error message
-                const errBody = await response.json().catch(() => ({}))
-                const message = errBody.message || 'Something went wrong'
-                throw new Error(message)
+                return
             }
 
-            // if response is ok, parse the JSON
-            return response.json()
-        })
-
-        // if success
-        .then((responseData) => {
-            if (onSuccess) {
-                setTimeout(() => {
-                    onSuccess(responseData, data)  // Pass both response data and form data
+            let body
             
-                    if(form.current) {
-                        setTimeout(() => {
-                            form?.current?.classList.remove('is-sending')
-                            document.dispatchEvent(new Event('formSent'))  
-                        }, 600)
-            
-                        if (clearOnSubmit) {
-                            form?.current?.reset()
-                            document.dispatchEvent(new Event('formReset'))
-                        }
+            if (contentType === 'application/x-www-form-urlencoded') {
+                const formData = new URLSearchParams()
+                for (const [key, value] of Object.entries(processedData)) {
+                    if (value !== undefined && value !== null) {
+                        formData.append(key, value.toString())
                     }
-                }, fakeTimer)
+                }
+                body = formData
+            } else if (isFormData) {
+                const formData = new FormData()
+                for (const [key, value] of Object.entries(processedData)) {
+                    if (value !== undefined && value !== null) {
+                        const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value)
+                        formData.append(key, stringValue)
+                    }
+                }
+                body = formData
+            } else {
+                body = JSON.stringify(processedData)
             }
-        })
 
-        // if error
-        .catch(error => {
+            if(enableConsoleLog) {
+                console.log('Submitting form data:', processedData)
+            }
+
+            fetch(endpoint, {
+                method: method || 'post',
+                body: body,
+                headers: contentType === 'application/x-www-form-urlencoded' ? {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                } : contentType ? {
+                    'Content-Type': contentType
+                } : {}
+            })
+
+            .then(async (response) => {
+                if (!response.ok) {
+                    // if the response is not ok, we try to parse the error message
+                    const errBody = await response.json().catch(() => ({}))
+                    const message = errBody.message || 'Something went wrong'
+                    throw new Error(message)
+                }
+
+                // if response is ok, parse the JSON
+                return response.json()
+            })
+
+            // if success
+            .then((responseData) => {
+                if (onSuccess) {
+                    setTimeout(() => {
+                        onSuccess(responseData, processedData)  // Pass both response data and form data
+                
+                        if(form.current) {
+                            setTimeout(() => {
+                                form?.current?.classList.remove('is-sending')
+                                document.dispatchEvent(new Event('formSent'))  
+                            }, 600)
+                
+                            if (clearOnSubmit) {
+                                form?.current?.reset()
+                                document.dispatchEvent(new Event('formReset'))
+                            }
+                        }
+                    }, fakeTimer)
+                }
+            })
+
+            // if error
+            .catch(error => {
+                setTimeout(() => {
+                    //console.error('Error:', error)
+                    setGlobalError(error.message)
+                }, fakeTimer)
+
+                if (onError) {
+                    setTimeout(() => {
+                        onError(error)
+
+                        if (form.current) {
+                            form.current.classList.remove('is-sending')
+                            document.dispatchEvent(new Event('formError'))
+                        }
+                    }, fakeTimer)
+                }
+            })
+        } catch (error) {
+            // If an error occurs, set global error and call onError
             setTimeout(() => {
-                //console.error('Error:', error)
-                setGlobalError(error.message)
+                setGlobalError(error instanceof Error ? error.message : 'An error occurred')
             }, fakeTimer)
 
             if (onError) {
                 setTimeout(() => {
-                    onError(error)
+                    onError(error instanceof Error ? error : new Error('An error occurred'))
 
                     if (form.current) {
                         form.current.classList.remove('is-sending')
@@ -152,7 +185,7 @@ export default function Form({
                     }
                 }, fakeTimer)
             }
-        })
+        }
     }
 
     return (

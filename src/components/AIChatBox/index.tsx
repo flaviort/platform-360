@@ -444,8 +444,8 @@ export default function AIChatBox({
                                                             <div className={styles.messageIcon}>
                                                                 <Avatar
                                                                     image={userData?.image}
-                                                                    alt={userData?.name ? `${userData.name.first || ''} ${userData.name.last || ''}`.trim() : userData?.email || ''}
-                                                                    letter={userData?.name?.first?.[0] || userData?.email?.[0]?.toUpperCase()}
+                                                                    alt={userData?.first_name ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() : userData?.email || ''}
+                                                                    letter={userData?.first_name?.[0] || userData?.email?.[0]?.toUpperCase()}
                                                                 />
                                                             </div>
                                                         ) : (

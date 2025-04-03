@@ -46,6 +46,7 @@ export const social = {
 // contact
 export const contact = {
 	phone: '(000) 000-0000',
+	noReply: 'noreply@platform360.ai',
 	email: 'info@platform360.ai',
 	address: '',
 	gmaps: ''

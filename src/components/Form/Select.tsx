@@ -17,6 +17,7 @@ export interface SelectProps {
     className?: string
     required?: boolean
     hideValidations?: boolean
+    labelAlwaysVisible?: boolean
     defaultValue?: string
     onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
     children: React.ReactNode,
@@ -31,6 +32,7 @@ export default function Select({
     className,
     required,
     hideValidations,
+    labelAlwaysVisible,
     defaultValue,
     onChange = () => {},
     children,
@@ -59,6 +61,8 @@ export default function Select({
     // determine whether the label should shrink based on focus or input value
     const shouldShrinkLabel = isFocused || inputValue !== ''
 
+    const isLabelAlwaysVisible = labelAlwaysVisible ? false : true
+
     return (
         <div className={clsx(
             styles.formLine,
@@ -71,7 +75,7 @@ export default function Select({
                 <label
                     className={clsx(styles.label, 'text-16')}
                     htmlFor={id}
-                    data-shrink={shouldShrinkLabel ? 'false' : 'true'}
+                    data-shrink={shouldShrinkLabel ? 'false' : isLabelAlwaysVisible}
                 >
                     {label} {required && <span className='red'>*</span>}
                 </label>

@@ -16,6 +16,8 @@ import Submit from '@/components/Form/Submit'
 // data / utils / db
 import { pages } from '@/utils/routes'
 import { countries } from '@/utils/countries'
+import { sendEmail } from '@/utils/email'
+import RegisterEmail from '@/components/Emails/RegisterEmail'
 
 // css
 import styles from './index.module.scss'
@@ -23,8 +25,40 @@ import styles from './index.module.scss'
 export default function Register() {
 
 	const [differentArea, setDifferentArea] = useState(false)
+	const [testEmailSent, setTestEmailSent] = useState(false)
+	const [emailError, setEmailError] = useState<string | null>(null)
 
 	const router = useRouter()
+
+	const sendAutomatedEmail = async (email: string, firstName: string) => {
+		try {
+			setEmailError(null)
+			const emailContent = RegisterEmail({ firstName })
+			const response = await sendEmail({
+				to: email,
+				from: 'noreply@platform360.ai',
+				subject: emailContent.subject,
+				body_html: emailContent.body_html,
+				body_text: emailContent.body_text
+			})
+
+			if (!response.success) {
+				throw new Error(response.error || 'Failed to send welcome email')
+			}
+
+			setTestEmailSent(true)
+			return response.message
+		} catch (error) {
+			console.error('Error sending welcome email:', error)
+			setEmailError(error instanceof Error ? error.message : 'Failed to send email')
+			throw error
+		}
+	}
+
+	// send test email
+	const sendTestEmail = async () => {
+		await sendAutomatedEmail('flavioczuk@gmail.com', 'Test User')
+	}
 
 	return (
 		<AccountWrapper>
@@ -39,17 +73,67 @@ export default function Register() {
 						Please fill in all the fields below
 					</p>
 
+					{/* this is for testing purposes only */}
+					{process.env.NODE_ENV === 'development' && (
+						<div className={clsx(styles.testEmail, 'bg-gray-100 p-1 mt-1')}>
+							<button 
+								onClick={sendTestEmail}
+								className='text-14 blue hover-underline'
+							>
+								Send Test Email
+							</button>
+
+							{testEmailSent && (
+								<p className='text-14 green mt-half'>
+									Test email sent successfully!
+								</p>
+							)}
+
+							{emailError && (
+								<p className='text-14 red mt-half'>
+									Error: {emailError}
+								</p>
+							)}
+
+						</div>
+					)}
+
 					<Form
 						className={styles.form}
 						endpoint='/api/proxy?endpoint=/api/auth/register'
 						method='POST'
 						contentType='application/json'
-						onSuccess={(responseData) => {
+						onSuccess={async (responseData, formData) => {
 							if (responseData.id) {
-								router.push(pages.account.register_confirmation)
+								try {
+									// send welcome email
+									await sendAutomatedEmail(
+										formData.email,
+										formData.first_name || 'there'
+									)
+									router.push(pages.account.register_confirmation)
+								} catch (error) {
+									// In development, just log the error and continue
+									if (process.env.NODE_ENV === 'development') {
+										console.log('Email sending failed in development mode:', error)
+										router.push(pages.account.register_confirmation)
+									} else {
+										// In production, show error but don't block registration
+										setEmailError('Registration successful but we could not send the welcome email. Please check your email settings.')
+										router.push(pages.account.register_confirmation)
+									}
+								}
 							}
 						}}
 						onError={() => {}}
+						beforeSubmit={(data) => {
+							// if role is "Other", use role_other value as role
+							if (data.role === 'Other' && data.role_other) {
+								data.role = data.role_other
+								delete data.role_other
+							}
+							return data
+						}}
 					>
 
 						<div className={styles.flex}>
@@ -199,7 +283,7 @@ export default function Register() {
 									<Input
 										id='create-account-zip'
 										label='ZIP Code'
-										name='zipcode'
+										name='zip_code'
 										type='text'
 										placeholder='Type here'
 										maxLength={50}
