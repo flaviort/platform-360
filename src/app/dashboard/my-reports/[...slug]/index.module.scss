@@ -1,5 +1,6 @@
 .page {
     .topNavigation {
+        overflow: hidden;
         padding-top: 1rem;
         border-top: var(--1px) solid $gray-200;
         border-bottom: var(--1px) solid $gray-200;
@@ -250,7 +251,8 @@
                 .allCharts {
                     padding-top: 2rem;
                     padding-bottom: 3rem;
-                    display: grid;
+                    display: flex;
+                    flex-wrap: wrap;
                     gap: 1rem;
 
                     @media #{$mq-lg-min} {
@@ -258,7 +260,7 @@
                     }
 
                     @media #{$mq-2xl-min} {
-                        grid-template-columns: 1fr 1fr;
+                        
                     }
                 }
             }

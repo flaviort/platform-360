@@ -14,46 +14,76 @@ import styles from './index.module.scss'
 // utils
 import { email, phone } from '@/utils/functions'
 
-// fake db
-import { users } from '@/db/users'
-
-export interface ListProps {
-    users: Array<{
-		registerDate: string
-        firstName: string
-        lastName: string
-		email: string
-		phone: string
-		role: string
-		companyName: string
-		country: string
-		state: string
-		city: string
-		zipcode: string
-		isActive: boolean
-	}>
+export interface User {
+    id: string
+    email: string
+    is_active: boolean
+    is_superuser: boolean
+    is_verified: boolean
+    first_name: string
+    last_name: string
+    phone: string
+    role: string
+    company_name: string
+    country: string
+    state: string
+    city: string
+    zip_code: string
+    created_at: string
 }
 
 export default function List() {
 	const [isLoading, setIsLoading] = useState(true)
+	const [error, setError] = useState<string | null>(null)
+	const [users, setUsers] = useState<User[]>([])
 	const [currentPage, setCurrentPage] = useState(1)
 	const itemsPerPage = 100
 	const [updatingUsers, setUpdatingUsers] = useState<{[key: string]: boolean}>({})
 
-	// Sort users by registerDate (newest first)
-	const sortedUsers = [...users].sort((a, b) => {
-		return new Date(b.registerDate).getTime() - new Date(a.registerDate).getTime()
-	})
-
+	// Fetch users from API
 	useEffect(() => {
-		const initializeUsers = async () => {
-			setIsLoading(true)
-			await new Promise(resolve => setTimeout(resolve, 100))
-			setIsLoading(false)
+		const fetchUsers = async () => {
+			try {
+				setIsLoading(true)
+				setError(null)
+				const token = localStorage.getItem('auth_token')
+				
+				if (!token) {
+					window.location.href = '/account/login'
+					return
+				}
+
+				const response = await fetch('/api/proxy?endpoint=/api/users', {
+					headers: {
+						'Authorization': `Bearer ${token}`
+					}
+				})
+				
+				if (!response.ok) {
+					if (response.status === 401) {
+						window.location.href = '/account/login'
+						return
+					}
+					throw new Error('Failed to fetch users')
+				}
+
+				const data = await response.json()
+				setUsers(data)
+			} catch (error) {
+				console.error('Error fetching users:', error)
+				setError('Failed to load users. Please try again later.')
+			} finally {
+				setIsLoading(false)
+			}
 		}
 
-		initializeUsers()
+		fetchUsers()
 	}, [])
+
+	// Sort users by created_at (newest first)
+	const sortedUsers = [...users].sort((a, b) => {
+		return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+	})
 
 	// calculate total number of users
 	const totalUsers = sortedUsers.length
@@ -86,26 +116,42 @@ export default function List() {
 		try {
 			setUpdatingUsers(prev => ({ ...prev, [userId]: true }))
 			
-			// this will be replaced with actual API call when ready
-			await new Promise(resolve => setTimeout(resolve, 500))
-			console.log(`Toggle user ${userId} active status to: ${newStatus}`)
+			const token = localStorage.getItem('auth_token')
+			if (!token) {
+				window.location.href = '/account/login'
+				return
+			}
+
+			const response = await fetch('/api/proxy?endpoint=/api/users/activate', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: userId
+				})
+			})
 			
-			// TODO: replace with actual API call
-			// const response = await fetch(`/api/proxy?endpoint=/api/users/${userId}`, {
-			//     method: 'PATCH',
-			//     headers: {
-			//         'Content-Type': 'application/json'
-			//     },
-			//     body: JSON.stringify({
-			//         is_active: newStatus
-			//     })
-			// })
-			
-			// if (!response.ok) throw new Error('Failed to update user status')
+			if (!response.ok) {
+				if (response.status === 401) {
+					window.location.href = '/account/login'
+					return
+				}
+				throw new Error('Failed to activate user')
+			}
+
+			// Update local state
+			setUsers(prevUsers => 
+				prevUsers.map(user => 
+					user.id === userId 
+						? { ...user, is_active: true }
+						: user
+				)
+			)
 
 		} catch (error) {
-			console.error('Error updating user status:', error)
-			// you might want to add error handling UI here
+			console.error('Error activating user:', error)
 		} finally {
 			setUpdatingUsers(prev => ({ ...prev, [userId]: false }))
 		}
@@ -147,15 +193,18 @@ export default function List() {
 
 						{isLoading ? (
 							<div className={styles.loading}>
-								
 								<span className='rotation purple' style={{ '--speed': '.5' } as any}>
 									<LoaderCircle />
 								</span>
-
 								<p className='text-16 semi-bold gray-500'>
 									Loading...
 								</p>
-
+							</div>
+						) : error ? (
+							<div className={styles.error}>
+								<p className='text-16 semi-bold red'>
+									{error}
+								</p>
 							</div>
 						) : sortedUsers.length === 0 ? (
 							<div className={styles.noResults}>
@@ -163,8 +212,13 @@ export default function List() {
 									No users found
 								</p>
 							</div>
-						) : currentUsers.map((user: any, i: number) => (
-							<ListItem key={i} user={user} />
+						) : currentUsers.map((user) => (
+							<ListItem 
+								key={user.id} 
+								user={user} 
+								onToggleActive={handleToggleActive}
+								isUpdating={updatingUsers[user.id]}
+							/>
 						))}
 
 					</div>
@@ -175,17 +229,13 @@ export default function List() {
 				<section className={styles.pagination}>
 					<div className='container container--big pt-smaller pt-md-smallest'>
 						<div className={styles.flex}>
-
 							<div className={styles.left}>
-
 								<p className='text-14 gray-500'>
 									Showing <span>{startIndex + 1}</span>-<span>{Math.min(endIndex, totalUsers)}</span> out of <span>{totalUsers}</span>
 								</p>
-
 							</div>
 
 							<div className={styles.right}>
-
 								<button 
 									disabled={currentPage === 1}
 									onClick={handlePrevPage}
@@ -199,38 +249,33 @@ export default function List() {
 								>
 									<ArrowRight />
 								</button>
-
 							</div>
-
 						</div>
 					</div>
 				</section>
 			)}
-
 		</div>
 	)
 }
 
-export function ListItem({
-	user
-}: {
-	user: ListProps['users'][number]
-}) {
-	const [isActive, setIsActive] = useState(user.isActive)
-	const [isUpdating, setIsUpdating] = useState(false)
+interface ListItemProps {
+	user: User
+	onToggleActive: (userId: string, newStatus: boolean) => Promise<void>
+	isUpdating: boolean
+}
 
+export function ListItem({
+	user,
+	onToggleActive,
+	isUpdating
+}: ListItemProps) {
 	const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		
 		const newStatus = e.target.checked
-		setIsUpdating(true)
-		try {
-			// This will be replaced with actual API call
-			await new Promise(resolve => setTimeout(resolve, 500))
-			setIsActive(newStatus)
-		} catch (error) {
-			// Revert on error
-			setIsActive(!newStatus)
-		} finally {
-			setIsUpdating(false)
+
+		// only allow activation, not deactivation
+		if (newStatus) {
+			await onToggleActive(user.id, newStatus)
 		}
 	}
 
@@ -244,23 +289,23 @@ export function ListItem({
 				</p>
 
 				<label
-					htmlFor={`isActive-${user.email}`}
+					htmlFor={`isActive-${user.id}`}
 					className={clsx(
 						styles.checkbox,
-						isUpdating && styles.updating
+						isUpdating && styles.updating,
+						user.is_active && styles.disabled
 					)}
 				>
 					
 					<input
 						type="checkbox"
-						id={`isActive-${user.email}`}
-						checked={isActive}
+						id={`isActive-${user.id}`}
+						checked={user.is_active}
 						onChange={handleChange}
-						disabled={isUpdating}
+						disabled={isUpdating || user.is_active}
 					/>
 
 					<span className={styles.checkboxToggle}>
-
 						<span className={styles.circle}>
 							{isUpdating && (
 								<span className='rotation gray-400' style={{ '--speed': '.5' } as any}>
@@ -276,7 +321,6 @@ export function ListItem({
 						<span className={clsx('text-14', styles.no)}>
 							No
 						</span>
-
 					</span>
 
 				</label>
@@ -284,51 +328,46 @@ export function ListItem({
 			</div>
 
 			<div className={styles.item}>
-				{user.registerDate && (
-					<p className='text-16'>
-						<span className={styles.mobile}>Register Date: </span>{user.registerDate}
-					</p>
-				)}
+				<p className='text-16'>
+					<span className={styles.mobile}>Register Date: </span>
+					{new Date(user.created_at).toLocaleDateString()}
+				</p>
 			</div>
 			
-		
 			<div className={styles.item}>
-
-				{user.firstName && (
+				{user.first_name && (
 					<p className='text-16'>
-						<span className={styles.mobile}>First Name: </span>{user.firstName}
+						<span className={styles.mobile}>First Name: </span>{user.first_name}
 					</p>
 				)}
 
-				{user.lastName && (
+				{user.last_name && (
 					<p className='text-16'>
-						<span className={styles.mobile}>Last Name: </span>{user.lastName}
+						<span className={styles.mobile}>Last Name: </span>{user.last_name}
 					</p>
 				)}
-
 			</div>
 
 			<div className={styles.item}>
-
 				{user.email && (
 					<p className='text-16'>
-						<span className={styles.mobile}>Email: </span>{user.email && <Link href={email(user.email)} className='hover-underline blue'>{user.email}</Link> }
+						<span className={styles.mobile}>Email: </span>
+						<Link href={email(user.email)} className='hover-underline blue'>{user.email}</Link>
 					</p>
 				)}
 
 				{user.phone && (
 					<p className='text-16'>
-						<span className={styles.mobile}>Phone: </span>{user.phone && <Link href={phone(user.phone)} className='hover-underline blue'>{user.phone}</Link> }
+						<span className={styles.mobile}>Phone: </span>
+						<Link href={phone(user.phone)} className='hover-underline blue'>{user.phone}</Link>
 					</p>
 				)}
-
 			</div>
 
 			<div className={styles.item}>
-
-				{user.companyName && (
+				{user.company_name && (
 					<p className='text-16'>
-						<span className={styles.mobile}>Company: </span>{user.companyName}
+						<span className={styles.mobile}>Company: </span>{user.company_name}
 					</p>
 				)}
 
@@ -337,11 +376,9 @@ export function ListItem({
 						<span className={styles.mobile}>Role: </span>{user.role}
 					</p>
 				)}
-
 			</div>
 
 			<div className={styles.item}>
-
 				{user.country && (
 					<p className='text-16'>
 						<span className={styles.mobile}>Country: </span>{user.country}
@@ -354,14 +391,12 @@ export function ListItem({
 					</p>
 				)}
 
-				{user.zipcode && (
+				{user.zip_code && (
 					<p className='text-16'>
-						<span className={styles.mobile}>Zipcode: </span>{user.zipcode}
+						<span className={styles.mobile}>Zipcode: </span>{user.zip_code}
 					</p>
 				)}
-
 			</div>
-
 		</div>
 	)
 }

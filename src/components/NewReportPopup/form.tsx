@@ -1,6 +1,7 @@
 'use client'
 
 // libraries
+import clsx from 'clsx'
 import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence } from 'motion/react'
 import * as motion from 'motion/react-client'
@@ -8,7 +9,7 @@ import * as motion from 'motion/react-client'
 // components
 import Portal from '@/components/Utils/Portal'
 import usePopoverPosition from '@/components/Utils/Portal/usePopoverPosition'
-import Form from '@/components/Form/Form'
+import FormReport from '@/components/Form/FormReport'
 import Submit from '@/components/Form/Submit'
 
 // svg
@@ -22,13 +23,19 @@ interface PopupFormProps {
 	text: string
 	children: React.ReactNode
 	onClose?: () => void
+	onSuccess?: (data: any) => void
+	onError?: (error: any) => void
+	className?: string
 }
 
 export default function PopupForm({
 	icon: Icon,
 	text,
 	children,
-	onClose
+	onClose,
+	onSuccess,
+	onError,
+	className
 }: PopupFormProps) {
 	const [optionsSub, setOptionsSub] = useState(false)
 	const optionsSubRef = useRef<HTMLDivElement>(null)
@@ -91,7 +98,7 @@ export default function PopupForm({
 		<>
 								
 			<button
-				className='text-14 bold'
+				className={clsx('text-14 bold', className)}
 				onClick={openNewReportPopup}
 				type='button'
 			>
@@ -134,19 +141,14 @@ export default function PopupForm({
 								className={styles.wrapper}
 								style={popoverStyle}
 							>
-								<Form
+								<FormReport
 									className={styles.form}
-									endpoint='/api/dashboard/new-report'
-									onSuccess={() => console.log('sucess')}
-									onError={() => console.log('error')}
+									onSuccess={onSuccess}
+									onError={onError}
 									enableConsoleLog
-									//hideErrors
 								>
-
 									<div className={styles.top}>
-
 										<div className={styles.left}>
-
 											<p className='text-25 bold'>
 												New Report
 											</p>
@@ -156,7 +158,6 @@ export default function PopupForm({
 											<p className='text-25 bold purple'>
 												{text}
 											</p>
-
 										</div>
 
 										<button
@@ -166,13 +167,10 @@ export default function PopupForm({
 										>
 											<X />
 										</button>
-
 									</div>
 
 									<div className={styles.middle}>
-
 										{children}
-
 									</div>
 
 									<div className={styles.bottom}>
@@ -182,8 +180,7 @@ export default function PopupForm({
 											className={styles.submit}
 										/>
 									</div>
-
-								</Form>
+								</FormReport>
 							</motion.div>
 						</motion.div>
 					</Portal>

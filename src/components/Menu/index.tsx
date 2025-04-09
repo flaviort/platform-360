@@ -11,7 +11,7 @@ import { SubWrapper, Sub } from '@/components/SubMenu'
 
 // img / svg
 import Logo from '@/assets/svg/logo/logo.svg'
-import { CircleHelp, Mail, Bell, Zap, X, Menu, Wallet, Landmark, LogOut, CircleUser } from 'lucide-react'
+import { CircleHelp, Mail, Bell, Zap, X, Menu, Wallet, Landmark, LogOut, CircleUser, Settings } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -82,6 +82,7 @@ export default function TopMenu() {
 
                             {isAuthenticated && (
                                 <ul className={clsx(styles.menu, 'text-16')}>
+
                                     {[
                                         {
                                             name: 'My Reports',
@@ -102,6 +103,15 @@ export default function TopMenu() {
                                             </Link>
                                         </li>
                                     ))}
+
+                                    <li>
+                                        {userData?.is_superuser && (
+                                            <Link href={pages.admin.dashboard} className='white semi-bold'>
+                                                Admin Dashboard
+                                            </Link>
+                                        )}
+                                    </li>
+
                                 </ul>
                             )}
 
@@ -454,6 +464,19 @@ export default function TopMenu() {
                                         </Link>
                                     </li>
                                 ))}
+
+                                {userData?.is_superuser && (
+                                    <li>
+                                        <Link
+                                            href={pages.admin.dashboard}
+                                            className={clsx('gray-600 semi-bold')}
+                                            onClick={closeFsMenu}
+                                        >
+                                            Admin Dashboard
+                                        </Link>
+                                    </li>
+                                )}
+
                             </ul>
 
                             <ul className={clsx(styles.menu2, 'text-16')}>

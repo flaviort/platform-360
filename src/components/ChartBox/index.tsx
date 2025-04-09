@@ -1,3 +1,6 @@
+// libraries
+import clsx from 'clsx'
+
 // components
 import HorizontalBars from '@/components/Reports/Charts/HorizontalBars'
 import VerticalBars from '@/components/Reports/Charts/VerticalBars'
@@ -5,7 +8,7 @@ import PositiveNegativeBars from '@/components/Reports/Charts/PositiveNegativeBa
 import ProductPrice from '@/components/Reports/NonCharts/ProductPrice'
 
 // svg
-import { Ellipsis, Sparkle } from 'lucide-react'
+import { Sparkle } from 'lucide-react'
 
 // styles
 import styles from './index.module.scss'
@@ -15,6 +18,7 @@ interface ChartBoxProps {
     title: string
     description: string
     AIGenerated?: boolean
+    boxSize: 'half' | 'full'
     chart: {
         horizontal?: Array<{
             name: string
@@ -22,9 +26,12 @@ interface ChartBoxProps {
             color: string
         }>
         vertical?: Array<{
-            name: string
+            label: string
             value: number
-            color: string
+        }>
+        verticalGrouped?: Array<{
+            label: string
+            value: number
         }>
         positiveNegative?: Array<{
             name: string
@@ -43,10 +50,15 @@ export default function ChartBox({
     title,
     description,
     AIGenerated,
+    boxSize = 'half',
     chart
 }: ChartBoxProps) {
     return (
-        <div className={styles.content}>
+        <div className={clsx(
+            styles.component,
+            boxSize === 'full' && styles.full,
+            boxSize === 'half' && styles.half
+        )}>
 
             <div className={styles.header}>
 
@@ -80,11 +92,13 @@ export default function ChartBox({
                         </div>
                     )}
 
+                    {/*
                     <button
                         className={styles.options}
                     >
                         <Ellipsis />
                     </button>
+                    */}
 
                 </div>
 

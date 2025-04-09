@@ -1,9 +1,11 @@
+// phone
 export function phone(str: string) {
 	return (
 		'tel:' + str.replace(/[^0-9]/g, '')
 	)
 }
 
+// email
 export function email(str: string) {
 	return (
 		'mailto:' + str

@@ -7,23 +7,20 @@ import { useState, useEffect, useRef } from 'react'
 
 // components
 import { SubWrapper, Sub } from '@/components/SubMenu'
-import PopupShop360 from '@/components/NewReportPopup/shop360'
-import PopupDemand360 from '@/components/NewReportPopup/demand360'
-import PopupInsight360 from '@/components/NewReportPopup/insight360'
-import PopupFeedback360 from '@/components/NewReportPopup/feedback360'
+import NewReportButton from './newReportButton'
 
 // img / svg
-import { ChevronDown, Search, Plus, ShoppingCart, ChartNoAxesCombined, FilePenLine, X } from 'lucide-react'
-import demand360 from '@/assets/img/logos/demand-360.png'
-import feedback360 from '@/assets/img/logos/feedback-360.png'
-import insight360 from '@/assets/img/logos/insight-360.png'
+import { ChevronDown, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, X } from 'lucide-react'
 import shop360 from '@/assets/img/logos/shop-360.png'
+import demand360 from '@/assets/img/logos/demand-360.png'
+import insight360 from '@/assets/img/logos/insight-360.png'
+import feedback360 from '@/assets/img/logos/feedback-360.png'
 
 // css
 import styles from './index.module.scss'
 
 // Add a type for the product filter
-export type ProductFilter = 'Demand360' | 'Feedback360' | 'Shop360' | 'Insight360' | null
+export type ProductFilter = 'Shop360' | 'Demand360' | 'Insight360' | 'Feedback360' | null
 
 // Add props interface to receive the filter handler
 interface FiltersProps {
@@ -102,52 +99,6 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 				<div className={styles.flex}>
 
 					<div className={styles.left}>
-
-						{/*
-						<SubWrapper className={styles.filters}>
-
-							<button
-								className={clsx(
-									styles.filtersButton,
-									'button button--hollow-light text-16'
-								)}
-								data-toggle-sub
-							>
-
-								<ListFilter />
-
-								<span className='medium'>
-									Filters
-								</span>
-
-								<ChevronDown />
-
-							</button>
-
-							<Sub className={styles.sub}>
-								{[
-									{
-										text: 'Filter option 1'
-									},
-									{
-										text: 'Filter option 2'
-									},
-									{
-										text: 'Filter option 3'
-									}
-								].map((item, i) => (
-									<button
-										className='text-14 bold'
-										key={i}
-									>
-										{item.text}
-									</button>
-								))}
-							</Sub>
-
-						</SubWrapper>
-						*/}
-
 						<SubWrapper className={styles.products}>
 
 							<button
@@ -170,19 +121,19 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 								{[
 									{
 										icon: ShoppingCart,
-										text: 'Demand360' as ProductFilter
-									},
-									{
-										icon: ChartNoAxesCombined,
-										text: 'Feedback360' as ProductFilter
-									},
-									{
-										icon: Search,
 										text: 'Shop360' as ProductFilter
 									},
 									{
-										icon: FilePenLine,
+										icon: ChartNoAxesCombined,
+										text: 'Demand360' as ProductFilter
+									},
+									{
+										icon: Search,
 										text: 'Insight360' as ProductFilter
+									},
+									{
+										icon: FilePenLine,
+										text: 'Feedback360' as ProductFilter
 									}
 								].map((item, i) => (
 									<button
@@ -232,24 +183,24 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 							<div className={styles.list}>
 								{[
 									{
-										image: demand360.src,
-										name: 'Demand360' as ProductFilter,
-										width: 365
-									},
-									{
-										image: feedback360.src,
-										name: 'Feedback360' as ProductFilter,
-										width: 420
-									},
-									{
 										image: shop360.src,
 										name: 'Shop360' as ProductFilter,
 										width: 355
 									},
 									{
+										image: demand360.src,
+										name: 'Demand360' as ProductFilter,
+										width: 365
+									},
+									{
 										image: insight360.src,
 										name: 'Insight360' as ProductFilter,
 										width: 315
+									},
+									{
+										image: feedback360.src,
+										name: 'Feedback360' as ProductFilter,
+										width: 420
 									}
 								].map((item, i) => (
 									<button
@@ -282,12 +233,17 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 							</div>
 							
 						</SubWrapper>
-
 					</div>
 
 					<div className={styles.right}>
 
-						<div className={styles.search} ref={searchMobileRef}>
+						<div
+							className={clsx(
+								styles.search,
+								searchMobile && styles.open
+							)}
+							ref={searchMobileRef}
+						>
 
 							<button
 								className={clsx(
@@ -347,75 +303,7 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 							</div>
 						</div>
 
-						<SubWrapper className={styles.new}>
-
-							<button
-								className={clsx(
-									styles.button,
-									'button button--gradient-blue uppercase text-14'
-								)}
-								data-toggle-sub
-							>
-
-								<Plus />
-
-								<span>
-									New
-								</span>
-
-								<ChevronDown />
-
-							</button>
-
-							<Sub className={styles.sub}>
-									
-								{/*
-								<p className='text-14 bold gray-400 uppercase'>
-									Projects
-								</p>
-
-								<button
-									className='text-14 bold'
-								>
-
-									<Folders />
-
-									<span>
-										New Project
-									</span>
-
-								</button>
-
-								<div className={styles.line}></div>
-								*/}
-
-								<p className='text-14 bold gray-400 uppercase'>
-									Reports
-								</p>
-
-								<PopupDemand360
-									icon={ShoppingCart}
-									text='Demand360'
-								/>
-
-								<PopupFeedback360
-									icon={ChartNoAxesCombined}
-									text='Feedback360'
-								/>
-
-								<PopupShop360
-									icon={Search}
-									text='Shop360'
-								/>
-
-								<PopupInsight360
-									icon={FilePenLine}
-									text='Insight360'
-								/>
-
-							</Sub>
-
-						</SubWrapper>
+						<NewReportButton />
 
 					</div>
 

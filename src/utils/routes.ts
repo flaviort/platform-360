@@ -12,6 +12,7 @@ export const pages = {
 	account: {
 		login: '/account/login',
 		register: '/account/register',
+		register_pending: '/account/register-pending',
 		register_confirmation: '/account/register-confirmation',
 		forgot: '/account/forgot-password',
 		forgot_confirmation: '/account/forgot-password-confirmation',

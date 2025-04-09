@@ -28,6 +28,7 @@ interface UserContextType {
     userData: UserData | null
     setUserData: (data: UserData | null) => void
     fetchUserData: () => Promise<void>
+    updateUserData: (data: Partial<UserData>) => void
 }
 
 const UserContext = createContext<UserContextType | null>(null)
@@ -54,6 +55,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
             console.error('Error fetching user data:', error)
         }
     }
+    
+    const updateUserData = (data: Partial<UserData>) => {
+        if (userData) {
+            setUserData({ ...userData, ...data })
+        }
+    }
 
     useEffect(() => {
         // Check if we're in the browser
@@ -66,7 +73,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }, [])
 
     return (
-        <UserContext.Provider value={{ userData, setUserData, fetchUserData }}>
+        <UserContext.Provider value={{ userData, setUserData, fetchUserData, updateUserData }}>
             {children}
         </UserContext.Provider>
     )

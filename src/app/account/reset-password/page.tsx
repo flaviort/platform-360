@@ -54,7 +54,7 @@ function ResetPasswordForm() {
 	}
 
 	return (
-		<AccountWrapper>
+		<AccountWrapper hideBottomLinks>
 			<div className={styles.page}>
 				<div className={styles.whiteBlock}>
 
@@ -108,7 +108,7 @@ function ResetPasswordForm() {
 								placeholder='Type here'
 								required
 								hidePasswordToggle
-								match='New Password'
+								match='password'
 							/>
 						</div>
 
@@ -130,10 +130,6 @@ function ResetPasswordForm() {
 
 					</Form>
 				</div>
-
-				<p className={clsx(styles.bottomText, 'text-18')}>
-					Remember your password? <Link href={pages.account.login} className='hover-underline blue medium'>Sign in</Link>
-				</p>
 
 			</div>
 		</AccountWrapper>

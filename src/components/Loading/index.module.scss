@@ -1,0 +1,21 @@
+.component {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: 2rem 0;
+
+    span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        min-width: 2rem;
+        height: 2rem;
+
+        svg {
+            width: 100%;
+        }
+    }
+}

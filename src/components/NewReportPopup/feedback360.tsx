@@ -1,19 +1,19 @@
 // libraries
 import clsx from 'clsx'
+import { useRouter } from 'next/navigation'
 
 // components
 import PopupForm from './form'
-import ProjectName from './components/ProjectName'
-import ReportName from './components/ReportName'
-import Category from './components/Category'
-import Location from './components/Location'
-import Goal from './components/Goal'
+import ProjectName from './fields/ProjectName'
+import ReportName from './fields/ReportName'
+import Category from './fields/Category'
+import Location from './fields/Location'
+import Goal from './fields/Goal'
 import InputList from '@/components/Form/InputList'
 import Dropdown from '@/components/Form/Dropdown'
 import Checkbox from '@/components/Form/Checkbox'
 import Price from '@/components/Form/Price'
 import Upload from '@/components/Form/Upload'
-import InputHidden from '@/components/Form/InputHidden'
 
 // css
 import styles from './index.module.scss'
@@ -21,36 +21,80 @@ import styles from './index.module.scss'
 // db
 import { retailers } from '@/db/retailers'
 
-// functions
-import { slugify } from '@/utils/functions'
+// utils
+import { slugify } from '@/utils/functions'	
+import { createReport, CreateReportData, getProjectAndCategoryIds } from '@/utils/reports'
 
 interface PopupFeedback360Props {
 	icon: React.ComponentType<any>
 	text: string
+	className?: string
 }
 
 export default function PopupFeedback360({
 	icon: Icon,
-	text
+	text,
+	className
 }: PopupFeedback360Props) {
+	const router = useRouter()
+
+	const handleSuccess = async (data: any) => {
+		try {
+			// get project and category IDs
+			const { projectId, categoryId } = await getProjectAndCategoryIds({
+				selectedProject: data.selectedProject,
+				newProjectName: data.newProjectName,
+				category: data.category
+			})
+
+			// transform form data to match API format
+			const reportData: CreateReportData = {
+				name: data.reportName,
+				product_type: 'Feedback360',
+				category_id: categoryId,
+				status: true,
+				goal: data.goal,
+				project_id: projectId,
+				audience_size: data.audienceSize,
+				age: data.age,
+				genders: data.genders,
+				retailers: Object.keys(data.retailers || {}),
+				questions: data.questions,
+				price: data.price
+			}
+
+			console.log('Creating report with data:', reportData)
+			const report = await createReport(reportData)
+			
+			// Redirect to the report page
+			const projectName = data.selectedProject === 'New Project' ? data.newProjectName : data.selectedProject
+			const reportName = data.reportName
+			router.push(`/dashboard/my-reports/${slugify(projectName)}/${slugify(reportName)}`)
+		} catch (error) {
+			console.error('Failed to create report:', error)
+			throw error // Re-throw to be handled by handleError
+		}
+	}
+
+	const handleError = (error: any) => {
+		console.error('Form submission error:', error)
+		// You might want to show this error to the user in the UI
+		// For example, using a toast notification or error message component
+	}
 
 	return (
 		<PopupForm
 			icon={Icon}
 			text={text}
+			onSuccess={handleSuccess}
+			onError={handleError}
+			className={className}
 		>
-
-			<InputHidden
-				name='product'
-				value='Feedback360'
-			/>
-
 			<ProjectName />
 
 			<ReportName />
 
 			<div className={styles.group}>
-
 				<div className={styles.label}>
 					<label htmlFor='report-audience-size' className='text-16 semi-bold'>
 						Audience Size <span className='red'>*</span>
@@ -112,11 +156,9 @@ export default function PopupFeedback360({
 						id='report-audience-size'
 					/>
 				</div>
-
 			</div>
 
 			<div className={styles.group}>
-
 				<div className={styles.label}>
 					<label className='text-16 semi-bold'>
 						Gender <span className='red'>*</span>
@@ -124,7 +166,6 @@ export default function PopupFeedback360({
 				</div>
 
 				<div className={clsx(styles.input, styles.checkboxes)}>
-
 					<Checkbox
 						type='checkbox'
 						id='report-gender-men'
@@ -148,13 +189,10 @@ export default function PopupFeedback360({
 						label="Kids"
 						required
 					/>
-
 				</div>
-
 			</div>
 
 			<div className={styles.group}>
-
 				<div className={styles.label}>
 					<label htmlFor='report-age' className='text-16 semi-bold'>
 						Age <span className='red'>*</span>
@@ -199,13 +237,11 @@ export default function PopupFeedback360({
 						id='report-age'
 					/>
 				</div>
-
 			</div>
 
 			<Location />
 
 			<div className={styles.group}>
-
 				<div className={styles.label}>
 					<p className='text-16 semi-bold'>
 						Retailers <span className='red'>*</span>
@@ -226,13 +262,11 @@ export default function PopupFeedback360({
 						id='report-retailers'
 					/>
 				</div>
-
 			</div>
 
 			<Category />
 
 			<div className={styles.group}>
-
 				<div className={styles.label}>
 					<label htmlFor='report-questions' className='text-16 semi-bold'>
 						Questions <span className='red'>*</span>
@@ -251,11 +285,9 @@ export default function PopupFeedback360({
 						limit={10}
 					/>
 				</div>
-
 			</div>
 
 			<div className={styles.group}>
-
 				<div className={styles.label}>
 					<label htmlFor='report-price' className='text-16 semi-bold'>
 						Price <span className='red'>*</span>
@@ -271,11 +303,9 @@ export default function PopupFeedback360({
 						id='report-price'
 					/>
 				</div>
-
 			</div>
 
 			<div className={styles.group}>
-
 				<div className={styles.label}>
 					<label htmlFor='report-upload-images' className='text-16 semi-bold'>
 						Upload Images
@@ -293,11 +323,9 @@ export default function PopupFeedback360({
 						helperText='<p>Max file size: 5MB</p><p>Accepted file types: JPG, PNG, GIF</p>'
 					/>
 				</div>
-
 			</div>
 
 			<Goal />
-
 		</PopupForm>
 	)
 }

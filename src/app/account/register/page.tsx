@@ -74,6 +74,7 @@ export default function Register() {
 					</p>
 
 					{/* this is for testing purposes only */}
+					{/*
 					{process.env.NODE_ENV === 'development' && (
 						<div className={clsx(styles.testEmail, 'bg-gray-100 p-1 mt-1')}>
 							<button 
@@ -97,6 +98,7 @@ export default function Register() {
 
 						</div>
 					)}
+					*/}
 
 					<Form
 						className={styles.form}
@@ -111,16 +113,17 @@ export default function Register() {
 										formData.email,
 										formData.first_name || 'there'
 									)
-									router.push(pages.account.register_confirmation)
+									router.push(pages.account.register_pending)
 								} catch (error) {
-									// In development, just log the error and continue
+
+									// in development, just log the error and continue
 									if (process.env.NODE_ENV === 'development') {
 										console.log('Email sending failed in development mode:', error)
-										router.push(pages.account.register_confirmation)
+										router.push(pages.account.register_pending)
 									} else {
-										// In production, show error but don't block registration
+										// in production, show error but don't block registration
 										setEmailError('Registration successful but we could not send the welcome email. Please check your email settings.')
-										router.push(pages.account.register_confirmation)
+										router.push(pages.account.register_pending)
 									}
 								}
 							}

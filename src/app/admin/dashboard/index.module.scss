@@ -1,279 +1,287 @@
-.page {
-    .list {
+.list {
+    position: relative;
+    overflow: hidden;
+        
+    &:after {
+        content: '';
+        position: absolute;
+        z-index: 2;
+        bottom: 0;
+        right: 0;
+        width: 1.075rem;
+        height: .5rem;
+        background-color: $white;
+
+        @media #{$mq-xs-min} {
+            width: calc((100vw - 92%) / 2 + .75rem);
+        }
+
+        @media #{$mq-lg-min} {
+            content: none;
+        }
+    }
+
+    .listWrapper {
         position: relative;
-        overflow: hidden;
-            
-        &:after {
-            content: '';
-            position: absolute;
-            z-index: 2;
-            bottom: 0;
-            right: 0;
-            width: 1.075rem;
-            height: .5rem;
-            background-color: $white;
+        padding-bottom: 1rem;
 
-            @media #{$mq-xs-min} {
-                width: calc((100vw - 92%) / 2 + .75rem);
-            }
+        @media #{$mq-md-min} {
+            overflow-x: scroll;
+        }
 
-            @media #{$mq-lg-min} {
-                content: none;
+        @media #{$mq-lg-max} {
+            width: calc(100% + 3rem);
+            padding-right: 2.75rem;
+        }
+
+        @media #{$mq-md-max} {
+            width: 100%;
+            padding-right: 0;
+        }
+
+        &::-webkit-scrollbar {
+            height: .25rem;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background: $gray-200;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background: $purple;
+            border-radius: .25rem;
+        }
+        
+        &::-webkit-scrollbar-thumb:hover {
+            cursor: grab;
+        }
+
+        > * {
+            &:last-child {
+                &.listItem {
+                    border-bottom: none;
+                }
+
+                &.listGroup {
+                    .listItem {
+                        &:last-child {
+                            border-bottom: none;
+                        }
+                    }
+                }
             }
         }
 
-        .listWrapper {
+        .listTitle {
             position: relative;
-            padding-bottom: 1rem;
-
-            @media #{$mq-md-min} {
-                overflow-x: scroll;
-            }
-
-            @media #{$mq-lg-max} {
-                width: calc(100% + 3rem);
-                padding-right: 2.75rem;
-            }
+            display: grid;
+            grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem;
+            padding: 1rem 0;
+            border-top: var(--1px) solid $gray-200;
+            border-bottom: var(--1px) solid $gray-200;
+            min-width: 60rem;
+            margin-bottom: calc(var(--1px) * -1);
 
             @media #{$mq-md-max} {
-                width: 100%;
-                padding-right: 0;
+                display: none;
+            }
+        }
+
+        .loading {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: 1rem 0;
+            border-top: var(--1px) solid $gray-200;
+            border-bottom: var(--1px) solid $gray-200;
+
+            span {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 2rem;
+                min-width: 2rem;
+                height: 2rem;
+
+                svg {
+                    width: 100%;
+                }
+            }
+        }
+
+        .noResults {
+            position: relative;
+            display: block;
+            padding: 1rem 0;
+            border-top: var(--1px) solid $gray-200;
+            border-bottom: var(--1px) solid $gray-200;
+        }
+
+        .listItem {
+            position: relative;
+            display: block;
+            background-color: $pure-white;
+            padding: 1rem;
+            border-radius: .5rem;
+            margin-bottom: .5rem;
+            border: var(--1px) solid $gray-200;
+
+            @media #{$mq-md-min} {
+                background-color: transparent;
+                display: grid;
+                align-items: center;
+                grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem;
+                padding: 1rem 0;
+                transition: .1s ease-in-out;
+                min-width: fit-content;
+                border-radius: 0;
+                border: none;
+                border-top: var(--1px) solid $gray-200;
+                border-bottom: var(--1px) solid $gray-200;
+                margin-bottom: 0;
             }
 
-            &::-webkit-scrollbar {
-                height: .25rem;
-            }
-            
-            &::-webkit-scrollbar-track {
-                background: $gray-200;
-            }
-            
-            &::-webkit-scrollbar-thumb {
-                background: $purple;
-                border-radius: .25rem;
-            }
-            
-            &::-webkit-scrollbar-thumb:hover {
-                cursor: grab;
-            }
-
-            > * {
-                &:last-child {
-                    &.listItem {
-                        border-bottom: none;
-                    }
-
-                    &.listGroup {
-                        .listItem {
-                            &:last-child {
-                                border-bottom: none;
-                            }
-                        }
-                    }
+            &:hover,
+            &:focus-visible {
+                @media #{$mq-md-min} {
+                    background-color: $gray-100;
                 }
             }
 
-            .listTitle {
-                position: relative;
-                display: grid;
-                grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem;
-                padding: 1rem 0;
-                border-top: var(--1px) solid $gray-200;
-                border-bottom: var(--1px) solid $gray-200;
-                min-width: 60rem;
-                margin-bottom: calc(var(--1px) * -1);
+            .mobile {
+                font-weight: $bold;
 
-                @media #{$mq-md-max} {
+                @media #{$mq-md-min} {
                     display: none;
                 }
             }
+            
+            .item {
+                @media #{$mq-md-max} {
+                    display: block;
+                    margin-bottom: .5rem;
+                }
 
-            .loading {
-                position: relative;
-                display: flex;
-                align-items: center;
-                gap: .5rem;
-                padding: 1rem 0;
-                border-top: var(--1px) solid $gray-200;
-                border-bottom: var(--1px) solid $gray-200;
+                > * {
+                    @media #{$mq-md-max} {
+                        display: grid;
+                        grid-template-columns: 6.5rem 1fr;
+                    }
 
-                span {
+                    * {
+                        word-break: break-word;
+                    }
+                }
+            }
+
+            .checkboxWrapper {
+                align-self: center;
+
+                @media #{$mq-md-max} {
                     display: flex;
                     align-items: center;
-                    justify-content: center;
-                    width: 2rem;
-                    min-width: 2rem;
-                    height: 2rem;
-
-                    svg {
-                        width: 100%;
-                    }
-                }
-            }
-
-            .noResults {
-                position: relative;
-                display: block;
-                padding: 1rem 0;
-                border-top: var(--1px) solid $gray-200;
-                border-bottom: var(--1px) solid $gray-200;
-            }
-
-            .listItem {
-                position: relative;
-                display: block;
-                background-color: $pure-white;
-                padding: 1rem;
-                border-radius: .5rem;
-                margin-bottom: .5rem;
-                border: var(--1px) solid $gray-200;
-
-                @media #{$mq-md-min} {
-                    background-color: transparent;
-                    display: grid;
-                    align-items: center;
-                    grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem;
-                    padding: 1rem 0;
-                    transition: .1s ease-in-out;
-                    min-width: fit-content;
-                    border-radius: 0;
-                    border: none;
-                    border-top: var(--1px) solid $gray-200;
+                    justify-content: space-between;
                     border-bottom: var(--1px) solid $gray-200;
-                    margin-bottom: 0;
+                    padding-bottom: 1rem;
+                    margin-bottom: 1rem;
                 }
 
-                &:hover,
-                &:focus-visible {
-                    @media #{$mq-md-min} {
-                        background-color: $gray-100;
-                    }
-                }
+                .checkbox {
+                    position: relative;
+                    width: fit-content;
+                    display: block;
 
-                .mobile {
-                    font-weight: $bold;
-
-                    @media #{$mq-md-min} {
-                        display: none;
-                    }
-                }
-                
-                .item {
-                    @media #{$mq-md-max} {
-                        display: block;
-                        margin-bottom: .5rem;
-                    }
-
-                    > * {
-                        @media #{$mq-md-max} {
-                            display: grid;
-                            grid-template-columns: 6.5rem 1fr;
-                        }
+                    &.disabled {
+                        cursor: not-allowed;
 
                         * {
-                            word-break: break-word;
+                            pointer-events: none;
                         }
                     }
-                }
 
-                .checkboxWrapper {
-                    align-self: center;
+                    input {
+                        position: absolute;
+                        z-index: -1;
+                        opacity: 0;
 
-                    @media #{$mq-md-max} {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        border-bottom: var(--1px) solid $gray-200;
-                        padding-bottom: 1rem;
-                        margin-bottom: 1rem;
-                    }
+                        &:checked {
+                            + .checkboxToggle {
+                                background-color: $blue;
 
-                    .checkbox {
-                        position: relative;
-
-                        input {
-                            position: absolute;
-                            z-index: -1;
-                            opacity: 0;
-
-                            &:checked {
-                                + .checkboxToggle {
-                                    background-color: $blue;
-
-                                    .circle {
-                                        transform: translateX(2rem);
-                                    }
-
-                                    .yes {
-                                        opacity: 1;
-                                    }
-
-                                    .no {
-                                        opacity: 0;
-                                    }
+                                .circle {
+                                    transform: translateX(2rem);
                                 }
-                            }
-                        }
 
-                        .checkboxToggle {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            background-color: $gray-400;
-                            color: $white;
-                            border-radius: 10rem;
-                            width: 4rem;
-                            height: 2rem;
-                            cursor: pointer;
-                            padding: 0 .625rem;
-                            transition: .3s ease-in-out;
+                                .yes {
+                                    opacity: 1;
+                                }
 
-                            .circle {
-                                position: absolute;
-                                z-index: 2;
-                                top: .25rem;
-                                left: .25rem;
-                                width: 1.5rem;
-                                height: 1.5rem;
-                                border-radius: 50%;
-                                background-color: $white;
-                                transition: .3s ease-in-out;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-
-                                span {
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    width: 80%;
-                                    height: 80%;
-                                    aspect-ratio: 1;
+                                .no {
                                     opacity: 0;
                                 }
                             }
+                        }
+                    }
 
-                            .yes {
+                    .checkboxToggle {
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        background-color: $gray-400;
+                        color: $white;
+                        border-radius: 10rem;
+                        width: 4rem;
+                        height: 2rem;
+                        cursor: pointer;
+                        padding: 0 .625rem;
+                        transition: .3s ease-in-out;
+
+                        .circle {
+                            position: absolute;
+                            z-index: 2;
+                            top: .25rem;
+                            left: .25rem;
+                            width: 1.5rem;
+                            height: 1.5rem;
+                            border-radius: 50%;
+                            background-color: $white;
+                            transition: .3s ease-in-out;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+
+                            span {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                width: 80%;
+                                height: 80%;
+                                aspect-ratio: 1;
                                 opacity: 0;
-                                transition: .3s ease-in-out;
-                            }
-
-                            .no {
-                                opacity: 1;
-                                transition: .3s ease-in-out;
                             }
                         }
 
-                        &.updating {
-                            opacity: 0.5;
-                            pointer-events: none;
-                            
-                            .checkboxToggle {
-                                .circle {
-                                    span {
-                                        opacity: 1;
-                                    }
+                        .yes {
+                            opacity: 0;
+                            transition: .3s ease-in-out;
+                        }
+
+                        .no {
+                            opacity: 1;
+                            transition: .3s ease-in-out;
+                        }
+                    }
+
+                    &.updating {
+                        opacity: 0.5;
+                        pointer-events: none;
+                        
+                        .checkboxToggle {
+                            .circle {
+                                span {
+                                    opacity: 1;
                                 }
                             }
                         }
@@ -282,67 +290,67 @@
             }
         }
     }
+}
 
-    .pagination {
-        .flex {
-            border-top: var(--1px) solid $gray-400;
-            padding-top: 1rem;
+.pagination {
+    .flex {
+        border-top: var(--1px) solid $gray-400;
+        padding-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+
+        .left {
+
+        }
+
+        .right {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
+            gap: .5rem;
 
-            .left {
-
+            @media #{$mq-lg-min} {
+                padding-right: 1rem;
             }
 
-            .right {
+            button {
                 display: flex;
                 align-items: center;
-                gap: .5rem;
+                justify-content: center;
+                width: 2rem;
+                min-width: 2rem;
+                height: 2rem;
+                padding: .25rem;
+                color: $gray-600;
+                transition: .3s ease-in-out;
 
-                @media #{$mq-lg-min} {
-                    padding-right: 1rem;
+                &:disabled {
+                    color: $gray-400!important;
+                    pointer-events: none!important;
                 }
 
-                button {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 2rem;
-                    min-width: 2rem;
-                    height: 2rem;
-                    padding: .25rem;
-                    color: $gray-600;
-                    transition: .3s ease-in-out;
+                &:hover,
+                &:focus {
+                    color: $blue;
+                }
 
-                    &:disabled {
-                        color: $gray-400!important;
-                        pointer-events: none!important;
-                    }
-
+                &:first-child {
                     &:hover,
-                    &:focus {
-                        color: $blue;
+                    &:focus-visible {
+                        transform: translateX(-.25rem);
                     }
+                }
 
-                    &:first-child {
-                        &:hover,
-                        &:focus-visible {
-                            transform: translateX(-.25rem);
-                        }
+                &:last-child {
+                    &:hover,
+                    &:focus-visible {
+                        transform: translateX(.25rem);
                     }
+                }
 
-                    &:last-child {
-                        &:hover,
-                        &:focus-visible {
-                            transform: translateX(.25rem);
-                        }
-                    }
-
-                    svg {
-                        width: 100%;
-                    }
+                svg {
+                    width: 100%;
                 }
             }
         }

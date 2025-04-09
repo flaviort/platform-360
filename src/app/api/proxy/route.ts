@@ -13,7 +13,15 @@ export async function POST(request: Request) {
 
     try {
         const contentType = request.headers.get('Content-Type')
+        const authorization = request.headers.get('Authorization')
         let body
+
+        // Log request details for debugging
+        console.log('Proxy request:', {
+            endpoint: targetEndpoint,
+            contentType,
+            hasAuthorization: !!authorization
+        })
 
         if (contentType === 'application/x-www-form-urlencoded') {
             const formData = await request.formData()
@@ -26,19 +34,29 @@ export async function POST(request: Request) {
             body = await request.json().catch(() => ({}))
         }
 
+        // Log request body for debugging
+        console.log('Request body:', body)
+
         const response = await fetch(
             `${backendUrl}${targetEndpoint}`,
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': contentType || 'application/json',
-                    'Authorization': request.headers.get('Authorization') || ''
+                    'Authorization': authorization || ''
                 },
                 body: typeof body === 'string' ? body : 
                       body instanceof URLSearchParams ? body.toString() : 
                       JSON.stringify(body)
             }
         )
+
+        // Log response details for debugging
+        console.log('Backend response:', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries())
+        })
 
         // Special handling for logout endpoint which might not return JSON
         if (targetEndpoint === '/api/auth/jwt/logout') {
@@ -71,7 +89,28 @@ export async function POST(request: Request) {
             )
         }
 
-        const data = await response.json().catch(() => ({}))
+        // Try to get response as text first
+        const responseText = await response.text()
+        console.log('Response text:', responseText)
+
+        // Try to parse as JSON
+        let data
+        try {
+            data = JSON.parse(responseText)
+        } catch (parseError) {
+            console.error('Failed to parse response as JSON:', parseError)
+            // If it's not JSON, return it as a text response
+            return new Response(
+                JSON.stringify({ 
+                    message: 'Invalid response format from server',
+                    raw: responseText
+                }),
+                { 
+                    status: response.status,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            )
+        }
         
         // Handle specific error cases
         if (!response.ok) {
@@ -107,7 +146,8 @@ export async function POST(request: Request) {
         console.error('Proxy error:', error)
         return new Response(
             JSON.stringify({ 
-                message: 'An error occurred while processing your request'
+                message: 'An error occurred while processing your request',
+                error: error instanceof Error ? error.message : 'Unknown error'
             }),
             { status: 500 }
         )

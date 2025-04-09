@@ -61,20 +61,6 @@ export default function ForgotPassword() {
 						Enter your email and we will send you a link to reset your password.
 					</p>
 
-					{process.env.NODE_ENV === 'development' && resetToken && (
-						<div className={clsx(styles.testEmail, 'bg-gray-100 p-1 mt-1')}>
-							<p className='text-14 gray-700'>
-								Reset Link:
-							</p>
-							<Link 
-								href={`/account/reset-password?token=${resetToken}`}
-								className='text-14 blue hover-underline block break-all'
-							>
-								{`${window.location.origin}/account/reset-password?token=${resetToken}`}
-							</Link>
-						</div>
-					)}
-
 					<Form
 						className={styles.form}
 						endpoint='/api/proxy?endpoint=/api/auth/forgot-password'
@@ -85,14 +71,12 @@ export default function ForgotPassword() {
 							
 							// The API returns null for successful requests
 							if (responseData === null) {
-								// For testing purposes, use a test token
-								const testToken = 'test-token-123'
-								setResetToken(testToken)
-								return
+								router.push(pages.account.forgot_confirmation)
 							}
 							
 							// If we get here, the response wasn't null, so try to extract the token
 							const token = responseData.reset_token || responseData.token || responseData
+
 							if (!token || typeof token !== 'string') {
 								throw new Error('Invalid token format received from API')
 							}
@@ -142,6 +126,7 @@ export default function ForgotPassword() {
 				<p className={clsx(styles.bottomText, 'text-18')}>
 					Remember your password? <Link href={pages.account.login} className='hover-underline blue medium'>Sign in</Link>
 				</p>
+
 			</div>
 		</AccountWrapper>
 	)

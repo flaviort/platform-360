@@ -530,6 +530,52 @@
             }
         }
 
+        .noResults {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0 1rem 0;
+
+            .image {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 16rem;
+                height: 16rem;
+                border-radius: 50%;
+                background-color: $gray-100;
+                padding: 4rem;
+                margin-bottom: 1rem;
+
+                svg {
+                    width: 100%;
+                }
+            }
+
+            .text {
+                text-align: center;
+
+                > span {
+                    display: block;
+                    margin: .25rem auto;
+                }
+            }
+
+            .buttons {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                align-items: center;
+                gap: .5rem;
+                margin-top: 1.5rem;
+
+                .button {
+                    width: 100%;
+                }
+            }
+        }
+
         .listWrapper {
             position: relative;
             padding-bottom: 1rem;
@@ -591,7 +637,7 @@
             .listTitle {
                 position: relative;
                 display: grid;
-                grid-template-columns: 2.5fr .75fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
+                grid-template-columns: 2.5fr .75fr 1fr 1.25fr 1.825fr 1.25fr 1.75fr 1fr 0.35fr;
                 padding: 1rem 0;
                 border-top: var(--1px) solid $gray-200;
                 border-bottom: var(--1px) solid $gray-200;
@@ -621,49 +667,61 @@
                     @include gradient-left-right($blue, $blue-light);
                     padding: 1rem;
                     min-width: 60rem;
-
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    
                     @media #{$mq-sm-min} {
                         min-width: 60rem;
                     }
-                }
-            }
+                    
+                    h2 {
+                        margin-right: auto;
+                    }
+                    
+                    .projectActions {
+                        position: relative;
+                        
+                        .ellipsis {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 2rem;
+                            height: 2rem;
+                            border-radius: .275rem;
+                            color: $white;
+                            transition: .3s ease-in-out;
+                            
+                            &:hover {
+                                background: rgba($white, 0.1);
+                            }
+                            
+                            &.open {
+                                background: rgba($white, 0.2);
+                            }
 
-            .loading {
-                position: relative;
-                display: flex;
-                align-items: center;
-                gap: .5rem;
-                padding: 1rem 0;
-                border-top: var(--1px) solid $gray-200;
-                border-bottom: var(--1px) solid $gray-200;
-
-                span {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 2rem;
-                    min-width: 2rem;
-                    height: 2rem;
-
-                    svg {
-                        width: 100%;
+                            svg {
+                                width: 1rem;
+                            }
+                        }
                     }
                 }
             }
 
-            .noResults {
-                position: relative;
-                display: block;
-                padding: 1rem 0;
-                border-top: var(--1px) solid $gray-200;
-                border-bottom: var(--1px) solid $gray-200;
+            .noReportsItem {
+                padding: 1rem;
+                min-width: 60rem;
+
+                @media #{$mq-sm-min} {
+                    min-width: 60rem;
+                }
             }
 
             .listItem {
                 position: relative;
                 display: grid;
                 align-items: center;
-                grid-template-columns: 2.5fr .75fr 1fr 1.25fr 1.25fr 1.25fr 1.75fr 1fr 0.35fr;
+                grid-template-columns: 2.5fr .75fr 1fr 1.25fr 1.825fr 1.25fr 1.75fr 1fr 0.35fr;
                 padding: 1rem 0;
                 border-top: var(--1px) solid $gray-200;
                 border-bottom: var(--1px) solid $gray-200;

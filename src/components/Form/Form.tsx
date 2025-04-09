@@ -119,15 +119,26 @@ export default function Form({
             })
 
             .then(async (response) => {
+                // First get the response as text
+                const responseText = await response.text()
+                console.log('Response text:', responseText)
+
+                // Try to parse as JSON
+                let data
+                try {
+                    data = JSON.parse(responseText)
+                } catch (parseError) {
+                    console.error('Failed to parse response as JSON:', parseError)
+                    throw new Error('Invalid response format from server')
+                }
+
                 if (!response.ok) {
-                    // if the response is not ok, we try to parse the error message
-                    const errBody = await response.json().catch(() => ({}))
-                    const message = errBody.message || 'Something went wrong'
+                    // if the response is not ok, use the parsed error message
+                    const message = data.message || 'Something went wrong'
                     throw new Error(message)
                 }
 
-                // if response is ok, parse the JSON
-                return response.json()
+                return data
             })
 
             // if success
@@ -152,9 +163,8 @@ export default function Form({
             })
 
             // if error
-            .catch(error => {
+            .catch((error) => {
                 setTimeout(() => {
-                    //console.error('Error:', error)
                     setGlobalError(error.message)
                 }, fakeTimer)
 

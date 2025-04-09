@@ -33,7 +33,7 @@ import { useUser } from '@/contexts/UserContext'
 import styles from './index.module.scss'
 
 export default function AccountSettings() {
-    const { userData } = useUser()
+    const { userData, updateUserData } = useUser()
     
     const [accountSuccess, setAccountSuccess] = useState(false)
     const [passwordSuccess, setPasswordSuccess] = useState(false)
@@ -102,6 +102,9 @@ export default function AccountSettings() {
                                 contentType='application/json'
                                 onSuccess={(responseData) => {
                                     setAccountSuccess(true)
+                                    if (responseData && typeof responseData === 'object') {
+                                        updateUserData(responseData)
+                                    }
                                 }}
                                 onError={(error) => {
                                     console.error('Update failed:', error)
