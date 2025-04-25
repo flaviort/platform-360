@@ -2,9 +2,12 @@
 import clsx from 'clsx'
 
 // components
+import Colors from '@/components/Reports/Charts/Colors'
+import SkuAnalysis from '@/components/Reports/Charts/SkuAnalysis'
+import PriceDistribution from '@/components/Reports/Charts/PriceDistribution'
+
 import HorizontalBars from '@/components/Reports/Charts/HorizontalBars'
 import VerticalBars from '@/components/Reports/Charts/VerticalBars'
-import Colors from '@/components/Reports/Charts/Colors'
 import PositiveNegativeBars from '@/components/Reports/Charts/PositiveNegativeBars'
 import ProductPrice from '@/components/Reports/NonCharts/ProductPrice'
 
@@ -22,6 +25,20 @@ interface ChartBoxProps {
     AIChatChart?: boolean
     boxSize: 'half' | 'full'
     chart: {
+        colors?: Array<{
+            color: string
+            count: number
+        }>
+        skuAnalysis?: Array<{
+            company: string
+            count: number
+        }>
+        priceDistribution?: Array<{
+            brand: string
+            price: number
+        }>
+
+
         horizontal?: Array<{
             name: string
             value: number
@@ -30,10 +47,6 @@ interface ChartBoxProps {
         vertical?: Array<{
             label: string
             value: number
-        }>
-        colors?: Array<{
-            color: string
-            count: number
         }>
         verticalGrouped?: Array<{
             label: string
@@ -110,6 +123,18 @@ export default function ChartBox({
             </div>
 
             <div className={styles.chart}>
+
+                {chart.colors && (
+                    <Colors data={chart.colors} />
+                )}
+
+                {chart.skuAnalysis && (
+                    <SkuAnalysis data={chart.skuAnalysis} />
+                )}
+
+                {chart.priceDistribution && (
+                    <PriceDistribution data={chart.priceDistribution} />
+                )}
                 
                 {chart.horizontal && (
                     <HorizontalBars data={chart.horizontal} />
@@ -117,10 +142,6 @@ export default function ChartBox({
 
                 {chart.vertical && (
                     <VerticalBars data={chart.vertical} />
-                )}
-
-                {chart.colors && (
-                    <Colors data={chart.colors} />
                 )}
 
                 {chart.positiveNegative && (

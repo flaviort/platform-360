@@ -26,6 +26,7 @@ interface PopupFormProps {
 	onSuccess?: (data: any) => void
 	onError?: (error: any) => void
 	className?: string
+	loadingMessages: string | string[]
 }
 
 export default function PopupForm({
@@ -35,13 +36,62 @@ export default function PopupForm({
 	onClose,
 	onSuccess,
 	onError,
-	className
+	className,
+	loadingMessages = 'Processing...'
 }: PopupFormProps) {
 	const [optionsSub, setOptionsSub] = useState(false)
+	const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+	const [isMessageVisible, setIsMessageVisible] = useState(true)
+	const [isSubmitting, setIsSubmitting] = useState(false)
 	const optionsSubRef = useRef<HTMLDivElement>(null)
 	const popoverRef = useRef<HTMLDivElement>(null)
+	const messageArray = Array.isArray(loadingMessages) ? loadingMessages : [loadingMessages]
 
 	const popoverStyle = usePopoverPosition(optionsSubRef, optionsSub)
+
+	// Rotating through multiple loading messages when form is submitting
+	useEffect(() => {
+		if (!isSubmitting || !Array.isArray(loadingMessages) || loadingMessages.length <= 1) return
+
+		const fadeOutTimeout = setTimeout(() => {
+			setIsMessageVisible(false)
+		}, 3700)
+
+		const changeMessageTimeout = setTimeout(() => {
+			setCurrentMessageIndex(prevIndex => 
+				prevIndex === messageArray.length - 1 ? 0 : prevIndex + 1
+			)
+			setIsMessageVisible(true)
+		}, 4000)
+
+		return () => {
+			clearTimeout(fadeOutTimeout)
+			clearTimeout(changeMessageTimeout)
+		}
+	}, [currentMessageIndex, loadingMessages, isSubmitting])
+
+	// Listen for form submission events
+	useEffect(() => {
+		const handleFormSubmitStart = () => {
+			setIsSubmitting(true)
+			setCurrentMessageIndex(0)
+			setIsMessageVisible(true)
+		}
+
+		const handleFormSubmitEnd = () => {
+			setIsSubmitting(false)
+		}
+
+		document.addEventListener('formSending', handleFormSubmitStart)
+		document.addEventListener('formSent', handleFormSubmitEnd)
+		document.addEventListener('formError', handleFormSubmitEnd)
+
+		return () => {
+			document.removeEventListener('formSending', handleFormSubmitStart)
+			document.removeEventListener('formSent', handleFormSubmitEnd)
+			document.removeEventListener('formError', handleFormSubmitEnd)
+		}
+	}, [])
 
 	const openNewReportPopup = () => {
 		setOptionsSub((prev) => !prev)
@@ -85,6 +135,16 @@ export default function PopupForm({
 			document.body.classList.remove('no-scroll')
 		}
 	}, [optionsSub])
+
+	// Wrapped success handler to reset state
+	const wrappedOnSuccess = (data: any) => {
+		onSuccess?.(data)
+	}
+
+	// Wrapped error handler to reset state
+	const wrappedOnError = (error: any) => {
+		onError?.(error)
+	}
 
 	return (
 		<>
@@ -135,8 +195,8 @@ export default function PopupForm({
 							>
 								<FormReport
 									className={styles.form}
-									onSuccess={onSuccess}
-									onError={onError}
+									onSuccess={wrappedOnSuccess}
+									onError={wrappedOnError}
 									//enableConsoleLog
 								>
 									<div className={styles.top}>
@@ -166,11 +226,27 @@ export default function PopupForm({
 									</div>
 
 									<div className={styles.bottom}>
+
+										{isSubmitting ? (
+											<div 
+												className={clsx(
+													styles.loadingMessages, 
+													'text-16 purple',
+													isMessageVisible ? styles.fadeIn : styles.fadeOut
+												)}
+											>
+												{messageArray[currentMessageIndex]}
+											</div>
+										) : (
+											<div className={styles.loadingMessages}></div>
+										)}
+
 										<Submit
 											style='gradient-blue'
 											text='Create Report'
 											className={styles.submit}
 										/>
+
 									</div>
 								</FormReport>
 							</motion.div>

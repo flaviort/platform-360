@@ -27,6 +27,20 @@ interface PopupInsight360Props {
 	className?: string
 }
 
+// loading messages to display during report generation
+const loadingMessages = [
+	"Generating your report...",
+	"Saving data to the database...",
+	"Syncing your data...",
+	"Analyzing colors and patterns...",
+	"Generating charts...",
+	"Populating fields...",
+	"Processing retailers data...",
+	"Preparing brand information...",
+	"Almost there...",
+	"Creating beautiful visualizations..."
+]
+
 export default function PopupInsight360({
 	icon: Icon,
 	text,
@@ -79,6 +93,7 @@ export default function PopupInsight360({
 			onSuccess={handleSuccess}
 			onError={handleError}
 			className={className}
+			loadingMessages={loadingMessages}
 		>
 			<ProjectName />
 			

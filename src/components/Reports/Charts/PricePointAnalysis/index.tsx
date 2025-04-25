@@ -11,17 +11,17 @@ import useWindowSize from '@/utils/useWindowSize'
 import styles from './index.module.scss'
 
 // interface
-export interface ColorsProps {
+export interface PricePointAnalysisProps {
     data: Array<{
         color: string | null
+        colorTitle?: string
         count: number
     }>
 }
 
-// process and filter data to remove empty/null colors
-const processData = (data: ColorsProps['data']) => {
-    
-    // make sure we filter out any items with empty, null, whitespace-only, or "Unknown" colors
+// Process and filter data to remove empty/null colors
+const processData = (data: PricePointAnalysisProps['data']) => {
+    // Make sure we filter out any items with empty, null, whitespace-only, or "Unknown" colors
     return data.filter(item => {
         if (item.color === null || item.color === undefined) return false
         if (item.color === '') return false
@@ -34,7 +34,7 @@ const processData = (data: ColorsProps['data']) => {
 const CustomLabel = (props: any) => {
     const { x, y, width, height, value } = props
 
-    // don't render labels for empty/null values
+    // Don't render labels for empty/null values
     if (!value || value === '' || value === 'Unknown') return null
 
     return (
@@ -60,7 +60,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         return (
             <div className={styles.tooltip}>
                 <p className='text-14 medium gray-600'>
-                    Color: {payload[0].payload.color}
+                    {payload[0].payload.color}
                 </p>
                 <p className='text-14 bold gray-600'>
                     Count: {payload[0].payload.count}
@@ -74,7 +74,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export default function Colors({
     data
-}: ColorsProps) {
+}: PricePointAnalysisProps) {
     // Filter out null or empty colors
     const filteredData = processData(data)
     
@@ -92,7 +92,7 @@ export default function Colors({
     // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
     const fontSize = windowSize.width < 575 ? 10 : 12
-    const barSize = filteredData.length > 10 ? (windowSize.width < 575 ? 10 : windowSize.width < 992 ? 15 : 22) : 15
+    const barSize = filteredData.length > 10 ? (windowSize.width < 575 ? 10 : windowSize.width < 992 ? 15 : 15) : 15
 
     return (
         <div className={styles.component}>

@@ -36,6 +36,20 @@ interface PopupShop360Props {
 	className?: string
 }
 
+// loading messages to display during report generation
+const loadingMessages = [
+	"Generating your report...",
+	"Saving data to the database...",
+	"Syncing your data...",
+	"Analyzing colors and patterns...",
+	"Generating charts...",
+	"Populating fields...",
+	"Processing retailers data...",
+	"Preparing brand information...",
+	"Almost there...",
+	"Creating beautiful visualizations..."
+]
+
 export default function PopupShop360({
 	icon: Icon,
 	text,
@@ -65,7 +79,6 @@ export default function PopupShop360({
 			const selectedCategory = [data.category || '']
 			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
 			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
-			//const selectedBrands = Array.isArray(reportData.product_settings.brands) ? reportData.product_settings.brands : []
 			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
 			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
 			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
@@ -147,7 +160,7 @@ export default function PopupShop360({
 			
 			// Add a delay before creating charts to ensure DB consistency
 			console.log('Waiting for database to synchronize before creating charts...')
-			await new Promise(resolve => setTimeout(resolve, 2000))
+			await new Promise(resolve => setTimeout(resolve, 1000))
 			
 			// base data for all charts
 			const baseChartData = {
@@ -158,89 +171,100 @@ export default function PopupShop360({
 			// 1. price point analysis
 			const pricePointAnalysisChart = {
 				...baseChartData,
-				title: "Price Point Analysis",
-				description: "Analysis of price point",
+				title: 'Price Point Analysis',
+				description: 'Pricing Distribution',
 				preferences: {
-					chart_type: "vertical"
+					chart_type: 'price_point_analysis',
+					box_size: 'full'
 				},
 				query: {
-					product_name: "",
-					brand: selectedBrands,
+					product_name: '',
+					brands: null,
 					color: null,
-					sex: selectedGenders,
-					company: selectedRetailers,
+					sex: null,
+					companies: selectedRetailers,
 					month: null,
 					year: null,
 					price: null,
-					limit: "10",
-					aggregate: "average",
-					operate_on: "brand",
-					range: {
-						start_date: selectedStartDate,
-						end_date: selectedEndDate
-					},
-					categories: selectedCategory
+					limit: 20,
+					aggregate: 'distribution',
+					operate_on: 'product_name',
+					boundaries: [0, 5, 10, 15, 20, 25, 30, 35]
 				}
 			}
 
-			// 2. price distribution by brand
-			const priceDistributionChart = {
+			// 2. price point by retailer
+			const pricePointByRetailerChart = {
 				...baseChartData,
-				title: "Price Distribution by Brand",
-				description: "Analysis of price range distribution by brand",
+				title: 'Price Point by Retailer',
+				description: 'Pricing Distribution by Retailer',
 				preferences: {
-					chart_type: "vertical"
+					chart_type: 'vertical_grouped',
+					box_size: 'full'
 				},
 				query: {
-					product_name: "",
-					brand: selectedBrands,
+					product_name: '',
+					brands: '',
 					color: null,
-					sex: selectedGenders,
-					company: selectedRetailers,
+					sex: null,
+					companies: null,
 					month: null,
 					year: null,
 					price: null,
-					limit: "10",
-					aggregate: "average",
-					operate_on: "brand",
-					range: {
-						start_date: selectedStartDate,
-						end_date: selectedEndDate
-					},
-					categories: selectedCategory
-				}
-			}
-			
-			// 3. sku analysis
-			const skuAnalysisChart = {
-				...baseChartData,
-				title: "SKU Analysis",
-				description: "Number of SKUs associated with each retailer",
-				preferences: {
-					chart_type: "horizontal" 
-				},
-				query: {
-					product_name: "",
-					brand: "",
-					color: null,
-					sex: data.genders && data.genders.length > 0 ? data.genders[0] : null,
-					company: selectedRetailers,
-					month: null,
-					year: null,
-					price: null,
-					limit: "10",
-					aggregate: "count",
-					operate_on: "company",
-					range: {
-						start_date: startDate,
-						end_date: endDate
-					},
-					categories: selectedCategory
+					limit: 20,
+					aggregate: 'all',
+					operate_on: 'company'
 				}
 			}
 			*/
 
-			// 4. color analysis
+			// 3. price distribution by brand
+			const priceDistributionChart = {
+				...baseChartData,
+				title: 'Price Distribution by Brand',
+				description: 'Average price distribution by brand',
+				preferences: {
+					chart_type: 'price_distribution'
+				},
+				query: {
+					product_name: '',
+					brands: null,
+					color: null,
+					sex: null,
+					companies: null,
+					month: null,
+					year: null,
+					price: null,
+					limit: 10,
+					aggregate: 'average',
+					operate_on: 'brand'
+				}
+			}
+			
+			// 4. sku analysis
+			const skuAnalysisChart = {
+				...baseChartData,
+				title: 'SKU Analysis',
+				description: 'Number of SKUs associated with each retailer',
+				preferences: {
+					chart_type: 'sku_analysis' 
+				},
+				query: {
+					product_name: '',
+					brands: '',
+					color: null,
+					sex: null,
+					companies: null,
+					month: null,
+					year: null,
+					price: null,
+					limit: 8,
+					aggregate: 'count',
+					operate_on: 'company'
+				}
+			}
+
+			// 5. color analysis
 			const colorAnalysisChart = {
 				...baseChartData,
 				title: 'Color Analysis',
@@ -254,19 +278,19 @@ export default function PopupShop360({
 					color: null,
 					sex: null,
 					companies: selectedRetailers,
-					limit: '20',
+					limit: 20,
 					aggregate: 'count',
 					operate_on: 'color'
 				}
 			}
 
-			// 5. test chart
+			// 6. test chart
 			const testChart = {
 				...baseChartData,
-				title: "sample chart",
-				description: "this chart is coming from the DB",
+				title: 'sample chart',
+				description: 'this chart is coming from the DB',
 				preferences: {
-					chart_type: "vertical",
+					chart_type: 'vertical',
 				},
 				query: {
 					categories: selectedCategory,
@@ -283,11 +307,12 @@ export default function PopupShop360({
 			
 			// array of charts
 			const chartsToCreate = [
-				//{ name: "Price Point Analysis", data: pricePointAnalysisChart },
-				//{ name: "Price Distribution by Brand", data: priceDistributionChart },
-				//{ name: "SKU Analysis", data: skuAnalysisChart },
-				{ name: "Color Analysis", data: colorAnalysisChart },
-				{ name: "Test Chart", data: testChart }
+				//{ name: 'Price Point Analysis', data: pricePointAnalysisChart },
+				//{ name: 'Price Point by Retailer', data: pricePointByRetailerChart },
+				{ name: 'Price Distribution by Brand', data: priceDistributionChart },
+				{ name: 'SKU Analysis', data: skuAnalysisChart },
+				{ name: 'Color Analysis', data: colorAnalysisChart },
+				{ name: 'Test Chart', data: testChart }
 			]
 			
 			// Create each chart sequentially
@@ -484,6 +509,7 @@ export default function PopupShop360({
 				onSuccess={handleSuccess}
 				onError={handleError}
 				className={className}
+				loadingMessages={loadingMessages}
 			>
 
 				<InputHidden

@@ -1,0 +1,42 @@
+.component {
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-bottom: .5rem;
+    }
+
+    .tooltip {
+        background: $white;
+        border: var(--1px) solid $gray-200;
+        border-radius: .25rem;
+        padding: .75rem;
+        max-width: 10rem;
+        text-transform: capitalize;
+    }
+
+    .label {
+        //text-shadow: 0 0 .1rem $black;
+    }
+
+    .companyLabel {
+        display: block;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1;
+        height: 100%;
+        display: flex;
+        align-items: center;
+
+        p {
+            position: relative;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-transform: capitalize;
+        }
+    }
+}

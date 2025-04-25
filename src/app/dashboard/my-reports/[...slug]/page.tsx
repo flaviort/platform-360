@@ -510,15 +510,7 @@ export default function DashboardMyReports() {
 											console.log('Processing chart:', chart.id, 'Type:', chartType, 'Results:', chart.results)
 											
 											// Format results based on chart type
-											if (chartType === 'vertical') {
-												chartData = {
-													vertical: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															label: item.product_name || 'Unknown',
-															value: typeof item.price === 'number' ? item.price : 0
-														})) : []
-												}
-											} else if (chartType === 'colors') {
+											if (chartType === 'colors') {
 												chartData = {
 													colors: Array.isArray(chart.results) ? 
 														chart.results.map((item: ChartResultItem) => ({
@@ -526,7 +518,39 @@ export default function DashboardMyReports() {
 															count: typeof item.count === 'number' ? item.count : 0
 														})) : []
 												}
-											} else if (chartType === 'horizontal') {
+											}
+											
+											else if (chartType === 'sku_analysis') {
+												chartData = {
+													skuAnalysis: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															company: item.company || 'Unknown',
+															count: typeof item.count === 'number' ? item.count : 0
+														})) : []
+												}
+											}
+
+											else if (chartType === 'price_distribution') {
+												chartData = {
+													priceDistribution: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															brand: item.brand || 'Unknown',
+															price: typeof item.price === 'number' ? item.price : 0
+														})) : []
+												}
+											}
+
+											else if (chartType === 'vertical') {
+												chartData = {
+													vertical: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															label: item.product_name || 'Unknown',
+															value: typeof item.price === 'number' ? item.price : 0
+														})) : []
+												}
+											}
+											
+											else if (chartType === 'horizontal') {
 												chartData = {
 													horizontal: Array.isArray(chart.results) ? 
 														chart.results.map((item: ChartResultItem) => ({
@@ -535,7 +559,9 @@ export default function DashboardMyReports() {
 															color: '#3691E1' // Default color
 														})) : []
 												}
-											} else if (chartType === 'productPrice') {
+											}
+											
+											else if (chartType === 'productPrice') {
 												chartData = {
 													productPrice: Array.isArray(chart.results) ? 
 														chart.results.map((item: ChartResultItem) => ({
@@ -545,7 +571,9 @@ export default function DashboardMyReports() {
 															image: item.image || ''
 														})) : []
 												}
-											} else {
+											}
+											
+											else {
 												// Default to vertical chart if type is unknown
 												chartData = {
 													vertical: Array.isArray(chart.results) ? 

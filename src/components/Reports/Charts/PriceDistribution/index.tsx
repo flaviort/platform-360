@@ -11,31 +11,25 @@ import useWindowSize from '@/utils/useWindowSize'
 import styles from './index.module.scss'
 
 // interface
-export interface ColorsProps {
+export interface PriceDistributionProps {
     data: Array<{
-        color: string | null
-        count: number
+        brand: string
+        price: number
     }>
 }
 
-// process and filter data to remove empty/null colors
-const processData = (data: ColorsProps['data']) => {
-    
-    // make sure we filter out any items with empty, null, whitespace-only, or "Unknown" colors
-    return data.filter(item => {
-        if (item.color === null || item.color === undefined) return false
-        if (item.color === '') return false
-        if (item.color.trim() === '') return false
-        if (item.color.toLowerCase() === 'unknown') return false
-        return true
-    })
+// Format price as U.S. currency
+const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(price)
 }
 
 const CustomLabel = (props: any) => {
     const { x, y, width, height, value } = props
-
-    // don't render labels for empty/null values
-    if (!value || value === '' || value === 'Unknown') return null
 
     return (
         <foreignObject
@@ -54,17 +48,17 @@ const CustomLabel = (props: any) => {
 
 const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-        // Don't show tooltip for empty/null values
-        if (!payload[0].payload.color) return null
-        
         return (
             <div className={styles.tooltip}>
+
                 <p className='text-14 medium gray-600'>
-                    Color: {payload[0].payload.color}
+                    {payload[0].payload.brand}
                 </p>
+
                 <p className='text-14 bold gray-600'>
-                    Count: {payload[0].payload.count}
+                    {formatPrice(payload[0].payload.price)}
                 </p>
+
             </div>
         )
     }
@@ -72,42 +66,36 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null
 }
 
-export default function Colors({
+export default function PriceDistribution({
     data
-}: ColorsProps) {
-    // Filter out null or empty colors
-    const filteredData = processData(data)
-    
-    // Return a message if no valid data is available
-    if (filteredData.length === 0) {
-        return (
-            <div className={styles.component}>
-                <div className="flex">
-                    <p className="text-14 gray-600">No color data available</p>
-                </div>
-            </div>
-        )
-    }
-    
+}: PriceDistributionProps) {
+
     // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
-    const fontSize = windowSize.width < 575 ? 10 : 12
-    const barSize = filteredData.length > 10 ? (windowSize.width < 575 ? 10 : windowSize.width < 992 ? 15 : 22) : 15
+    const fontSize = windowSize.width < 575 ? 8 : 12
+    const barSize = data.length > 10  ? (windowSize.width < 575 ? 5 : windowSize.width < 992 ? 10 : 15) : 19
 
     return (
         <div className={styles.component}>
             <ResponsiveContainer height={400} className={styles.chart}>
                 <BarChart 
-                    data={filteredData}
+                    data={data}
                     margin={{ bottom: 70, left: 0, right: 5, top: 0 }}
                 >
+                    <defs>
+                        <linearGradient id='verticalBarsGradient' x1='0' y1='1' x2='0' y2='0'>
+                            <stop offset='0%' stopColor='#48238F' />
+                            <stop offset='100%' stopColor='#3691E1' />
+                        </linearGradient>
+                    </defs>
+
                     <CartesianGrid 
                         strokeDasharray='3 3' 
                         vertical={false}
                     />
 
                     <XAxis 
-                        dataKey='color' 
+                        dataKey='brand' 
                         axisLine={false}
                         tickLine={false}
                         hide
@@ -124,8 +112,11 @@ export default function Colors({
                             fontSize,
                             fill: '#666'
                         }}
-                        width={45}
+                        width={70}
                         domain={[0, 'dataMax']}
+                        tickFormatter={(value) => {
+                            return `$${value.toFixed(2)}`
+                        }}
                     />
 
                     <Tooltip
@@ -134,14 +125,14 @@ export default function Colors({
                     />
 
                     <Bar
-                        dataKey='count'
-                        radius={[20, 20, 0, 0]}
+                        dataKey='price'
+                        radius={20}
                         barSize={barSize}
                         spacing={20}
                         fill='url(#verticalBarsGradient)'
                     >
                         <LabelList 
-                            dataKey='color'
+                            dataKey='brand'
                             content={CustomLabel}
                             position='bottom'
                         />
