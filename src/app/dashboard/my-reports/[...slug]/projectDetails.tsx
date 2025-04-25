@@ -3,9 +3,11 @@
 // libraries
 import clsx from 'clsx'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 // components
 import MultipleAvatar from '@/components/MultipleAvatar'
+import DeleteReport from '@/components/DeleteReport'
 
 // img
 import demand360 from '@/assets/img/logos-no-margin/demand-360.png'
@@ -14,25 +16,34 @@ import insight360 from '@/assets/img/logos-no-margin/insight-360.png'
 import shop360 from '@/assets/img/logos-no-margin/shop-360.png'
 
 // svg
-import { Ellipsis, ChevronsRight, ChevronsLeft } from 'lucide-react'
+import { ChevronsRight, ChevronsLeft } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
 
 interface ProjectDetailsProps {
+	id: string
 	product: 'shop360' | 'demand360' | 'feedback360' | 'insight360'
-	members: Array<{
+	members?: Array<{
 		image: string
 		name: string
 	}>
 	summary: {
 		name: string
+		audienceSize?: string
 		category: string
-		retailers: string
-		brands: string
-		genders: string
-		timePeriod: string
-		type: string
+		retailers?: string
+		brands?: string
+		genders?: string
+		age?: string
+		type?: string
+		includeImages?: boolean
+		timePeriod?: string
+		location?: string
+		regions?: string
+		priceRange?: string
+		questions?: string[]
+		uploadedFiles?: string[]
 		goal: string
 	}
 	onToggleCollapse: () => void
@@ -40,12 +51,15 @@ interface ProjectDetailsProps {
 }
 
 export default function ProjectDetails({
+	id,
 	product,
 	members,
 	summary,
 	onToggleCollapse,
 	isCollapsed
 }: ProjectDetailsProps) {
+
+	const router = useRouter()
 
 	return (
 		<div className={styles.detailsArea}>
@@ -63,13 +77,13 @@ export default function ProjectDetails({
 						{isCollapsed ? <ChevronsLeft /> : <ChevronsRight />}
 					</button>
 
-					<button
-						className={styles.button}
-						type='button'
-					>
-						<span className='text-14'>Actions</span>
-						<Ellipsis />
-					</button>
+					<DeleteReport
+						id={id}
+						onComplete={() => {
+							router.push('/dashboard/my-reports')
+						}}
+						internalDelete
+					/>
 
 				</div>
 
@@ -93,21 +107,23 @@ export default function ProjectDetails({
 
 						</div>
 
-						<div className={styles.item}>
+						{members && (
+							<div className={styles.item}>
 
-							<p className='uppercase semi-bold gray-400 text-14'>
-								Members
-							</p>
+								<p className='uppercase semi-bold gray-400 text-14'>
+									Members
+								</p>
 
-							<MultipleAvatar
-								showAriaLabel
-								avatars={members.map((item: any) => ({
-									image: item.image,
-									alt: item.name
-								}))}
-							/>
+								<MultipleAvatar
+									showAriaLabel
+									avatars={members.map((item: any) => ({
+										image: item.image,
+										alt: item.name
+									}))}
+								/>
 
-						</div>
+							</div>
+						)}
 
 						<div className={styles.item}>
 
@@ -117,75 +133,220 @@ export default function ProjectDetails({
 
 							<div className={styles.table}>
 
-								<p className='text-14 gray-700 bold'>
-									Name:
-								</p>
+								{summary?.name && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Name:
+										</p>
 
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.name}
-									</p>
-								</div>
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.name}
+											</p>
+										</div>
+									</>
+								)}
 
-								<p className='text-14 gray-700 bold'>
-									Category:
-								</p>
+								{summary?.audienceSize && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Audience Size:
+										</p>
 
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.category}
-									</p>
-								</div>
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.audienceSize}
+											</p>
+										</div>
+									</>
+								)}
 
-								<p className='text-14 gray-700 bold'>
-									Retailers:
-								</p>
+								{summary?.category && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Category:
+										</p>
 
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.retailers}
-									</p>
-								</div>
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.category}
+											</p>
+										</div>
+									</>
+								)}
 
-								<p className='text-14 gray-700 bold'>
-									Brands:
-								</p>
+								{summary?.retailers && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Retailers:
+										</p>
 
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.brands}
-									</p>
-								</div>
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.retailers}
+											</p>
+										</div>
+									</>
+								)}
 
-								<p className='text-14 gray-700 bold'>
-									Genders:
-								</p>
+								{summary?.brands && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Brands:
+										</p>
 
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.genders}
-									</p>
-								</div>
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.brands}
+											</p>
+										</div>
+									</>
+								)}
 
-								<p className='text-14 gray-700 bold'>
-									Time Period:
-								</p>
+								{summary?.genders && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Genders:
+										</p>
 
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.timePeriod}
-									</p>
-								</div>
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.genders}
+											</p>
+										</div>
+									</>
+								)}
 
-								<p className='text-14 gray-700 bold'>
-									Type:
-								</p>
+								{summary?.age && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Age:
+										</p>
 
-								<div className={clsx(styles.content, 'text-14 gray-500')}>
-									<p>
-										{summary.type}
-									</p>
-								</div>
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.age}
+											</p>
+										</div>
+									</>
+								)}
+
+								{summary?.type && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Type:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.type}
+											</p>
+										</div>
+									</>
+								)}
+
+								{(product === 'shop360' && summary?.includeImages !== undefined) && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Include Images:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.includeImages ? 'Yes' : 'No'}
+											</p>
+										</div>
+									</>
+								)}
+
+								{summary?.timePeriod && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Time Period:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.timePeriod}
+											</p>
+										</div>
+									</>
+								)}
+
+								{summary?.location && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Location:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.location}
+											</p>
+										</div>
+									</>
+								)}
+
+								{summary?.regions && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Regions:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.regions}
+											</p>
+										</div>
+									</>
+								)}
+
+								{summary?.priceRange && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Price Range:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											<p>
+												{summary.priceRange}
+											</p>
+										</div>
+									</>
+								)}
+
+								{summary?.questions && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Questions:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											{summary.questions.map((question: string) => (
+												<p key={question} className={styles.question}>
+													{question}
+												</p>
+											))}
+										</div>
+									</>
+								)}
+
+								{summary?.uploadedFiles && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Uploaded Files:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500')}>
+											{summary.uploadedFiles.map((file: string) => (
+												<p key={file} className={styles.file}>
+													{file}
+												</p>
+											))}
+										</div>
+										
+									</>
+								)}
 
 							</div>
 

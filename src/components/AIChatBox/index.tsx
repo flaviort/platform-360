@@ -9,6 +9,7 @@ import * as motion from 'motion/react-client'
 // components
 import Portal from '@/components/Utils/Portal'
 import Avatar from '@/components/Avatar'
+import ChartBox from '@/components/ChartBox'
 
 // svg
 import { Sparkle, X, SendHorizontal } from 'lucide-react'
@@ -23,6 +24,7 @@ import { useUser } from '@/contexts/UserContext'
 interface AIChatBoxProps {
     isOpen: boolean
     onClose: () => void
+    reportId?: string // Add reportId as a prop
 }
 
 interface Message {
@@ -36,19 +38,22 @@ interface Message {
 interface ApiResponse {
     message?: string
     data?: any[]
+    query_id?: string
+    chat_history_id?: string
 }
 
 // constants
-const API_BASE_URL = 'https://dcx3uf4aq3.us-east-1.awsapprunner.com/v2'
-const USER_ID = '1234' // should be dynamic in a real application
+const API_BASE_URL = '/api/proxy?endpoint=/api'  // Update to use proxy pattern instead of direct URL
 
 export default function AIChatBox({
     isOpen,
-    onClose
+    onClose,
+    reportId = '' // Default to empty string if not provided
 }: AIChatBoxProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [inputValue, setInputValue] = useState('')
+    const [chatHistoryId, setChatHistoryId] = useState<string | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -90,80 +95,64 @@ export default function AIChatBox({
         adjustTextareaHeight()
     }, [inputValue])
 
-    // start a new chat conversation
+    // Helper to get the auth token
+    const getAuthToken = (): string => {
+        // Try to get auth token from localStorage
+        try {
+            const token = localStorage.getItem('auth_token')
+            if (!token) {
+                console.error('No auth token found in localStorage')
+                return ''
+            }
+            return token
+        } catch (error) {
+            console.error('Error getting auth token:', error)
+            return ''
+        }
+    }
+
+    // start a new chat conversation with welcome message
     const startChatConversation = async () => {
         try {
-            setIsLoading(true)
-            
-            // Try to fetch from API with timeout to handle unresponsive server
-            const abortController = new AbortController()
-            const timeoutId = setTimeout(() => abortController.abort(), 10000) // 10 second timeout
-            
-            try {
-                const response = await fetch(
-                    `${API_BASE_URL}/products/start_user_chat?user_id=${USER_ID}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        signal: abortController.signal
-                    }
-                )
-                
-                clearTimeout(timeoutId)
-                
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`)
-                }
-
-                const data = await response.text()
-                
-                // The response might be a string or JSON object
-                let parsedData: ApiResponse = {}
-                try {
-                    if (data.startsWith('{')) {
-                        parsedData = JSON.parse(data)
-                    } else {
-                        parsedData = { message: data }
-                    }
-                } catch (e) {
-                    console.error("Error parsing response:", e)
-                    parsedData = { message: data }
-                }
-
-                if (parsedData.message) {
-                    const welcomeMessageId = Date.now().toString()
-                    const welcomeMessage: Message = {
-                        id: welcomeMessageId,
-                        text: parsedData.message,
-                        isUser: false,
-                        timestamp: new Date(),
-                        data: parsedData.data
-                    }
-                    
-                    setMessages([welcomeMessage])
-                    return // Exit function after successful response
-                }
-                
-                // If we get here, the API responded but without a valid message
-                throw new Error("Invalid API response")
-                
-            } catch (fetchError) {
-                clearTimeout(timeoutId)
-                throw fetchError // Re-throw to be caught by outer try-catch
+            // Add a welcome message without making an API call since the endpoint structure changed
+            const welcomeMessageId = Date.now().toString()
+            const welcomeMessage: Message = {
+                id: welcomeMessageId,
+                text: "Hello! How can I help you today? Ask me a question about your product data.",
+                isUser: false,
+                timestamp: new Date()
             }
             
+            setMessages([welcomeMessage])
+            // Reset chat history ID for new conversation
+            setChatHistoryId(null)
         } catch (error) {
             console.error('Error starting chat:', error)
-            
-        } finally {
-            setIsLoading(false)
         }
     }
 
     // Continue an existing chat conversation
     const continueChatConversation = async (query: string) => {
+        if (!reportId) {
+            // If no report ID is provided, show an error message
+            const errorMessageId = Date.now().toString()
+            const errorMessage: Message = {
+                id: errorMessageId,
+                text: "Please open this chat from a specific report to enable AI analysis.",
+                isUser: false,
+                timestamp: new Date()
+            }
+            
+            setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                text: query,
+                isUser: true,
+                timestamp: new Date()
+            }, errorMessage])
+            
+            return
+        }
+        
         try {
             setIsLoading(true)
             
@@ -178,95 +167,109 @@ export default function AIChatBox({
             
             setMessages(prev => [...prev, userMessage])
             
+            // Get authentication token
+            const authToken = getAuthToken()
+            if (!authToken) {
+                throw new Error('Authentication required')
+            }
+            
             // Set up abort controller for timeout handling
             const abortController = new AbortController()
-            const timeoutId = setTimeout(() => abortController.abort(), 10000) // 10 second timeout
+            const timeoutId = setTimeout(() => abortController.abort(), 60000) // Increase timeout to 60 seconds
             
             try {
-                // Make API call - using POST with path parameter and body
+                console.log('Sending chat request to API...')
+                // Make API call with the new structure
                 const response = await fetch(
-                    `${API_BASE_URL}/products/continue_user_chat/${USER_ID}`,
+                    `${API_BASE_URL}/chats`,
                     {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
                         },
-                        body: JSON.stringify({ question: query }),
+                        body: JSON.stringify({
+                            question: query,
+                            report_id: reportId,
+                            // Include chat_history_id if we have one
+                            ...(chatHistoryId ? { chat_history_id: chatHistoryId } : {})
+                        }),
                         signal: abortController.signal
                     }
                 )
                 
                 clearTimeout(timeoutId)
+                console.log('Response received:', response.status)
                 
                 if (!response.ok) {
                     throw new Error(`API error: ${response.status}`)
                 }
 
-                // Parse response
-                let data
-                const contentType = response.headers.get("content-type")
-                if (contentType && contentType.includes("application/json")) {
-                    data = await response.json()
-                } else {
-                    // Handle text response
-                    const textData = await response.text()
-                    try {
-                        // Try to parse as JSON anyway (some APIs send JSON with wrong Content-Type)
-                        data = JSON.parse(textData)
-                    } catch (e) {
-                        // If it's not JSON, use as plain text
-                        data = { message: textData }
-                    }
+                const responseText = await response.text()
+                console.log('Response text:', responseText)
+                
+                // Parse response - handle potential parsing issues
+                let data: ApiResponse
+                try {
+                    data = JSON.parse(responseText)
+                } catch (parseError) {
+                    console.error('Failed to parse response as JSON:', parseError)
+                    throw new Error('Invalid JSON response from server')
                 }
                 
-                // Extract message and data from response
-                let message = ''
-                let responseData = []
+                console.log('Parsed data:', data)
                 
-                if (typeof data === 'object') {
-                    // Try to extract message from standard locations
-                    message = data.message || data.response || data.answer || data.text || ''
-                    
-                    // Try to extract data if available
-                    responseData = data.data || data.products || data.results || []
-                    
-                    // If the API returns the message in a different property, attempt to find it
-                    if (!message && Object.keys(data).length > 0) {
-                        const possibleMessageKey = Object.keys(data).find(key => 
-                            typeof data[key] === 'string' && data[key].length > 0
-                        )
-                        
-                        if (possibleMessageKey) {
-                            message = data[possibleMessageKey]
-                        } else {
-                            message = "I received a response but couldn't extract a readable message."
-                        }
-                    }
-                } else if (typeof data === 'string') {
-                    message = data
-                } else {
-                    message = "Received a response in an unexpected format."
+                // Store chat_history_id for future requests
+                if (data.chat_history_id) {
+                    setChatHistoryId(data.chat_history_id)
                 }
                 
                 // Add AI response to chat
                 const aiMessageId = (Date.now() + 1).toString()
                 const aiMessage: Message = {
                     id: aiMessageId,
-                    text: message,
+                    text: data.message || "I don't have a specific answer for that query.",
                     isUser: false,
                     timestamp: new Date(),
-                    data: responseData.length > 0 ? responseData : undefined
+                    data: data.data || undefined
                 }
                 
                 setMessages(prev => [...prev, aiMessage])
                 
-            } catch (fetchError) {
+            } catch (fetchError: any) {
                 clearTimeout(timeoutId)
-                throw fetchError // Re-throw to be caught by outer try-catch
+                console.error('Fetch error:', fetchError)
+                
+                // Special handling for abort errors (timeouts)
+                const isTimeoutError = fetchError.name === 'AbortError'
+                
+                // Add an error message
+                const errorMessageId = (Date.now() + 1).toString()
+                const errorMessage: Message = {
+                    id: errorMessageId,
+                    text: isTimeoutError 
+                        ? "The request is taking longer than expected. Please try a simpler question or try again later."
+                        : `Error: ${fetchError.message || 'An error occurred while processing your request'}`,
+                    isUser: false,
+                    timestamp: new Date()
+                }
+                
+                setMessages(prev => [...prev, errorMessage])
             }
             
         } catch (error) {
             console.error('Error continuing chat:', error)
+            
+            // Add a fallback error message if we couldn't even make the request
+            const errorMessageId = (Date.now() + 1).toString()
+            const errorMessage: Message = {
+                id: errorMessageId,
+                text: "I'm having trouble processing your request. Please check your connection and try again.",
+                isUser: false,
+                timestamp: new Date()
+            }
+            
+            setMessages(prev => [...prev, errorMessage])
         } finally {
             setIsLoading(false)
         }
@@ -295,37 +298,19 @@ export default function AIChatBox({
         }
     }
 
-    // Clear chat history - now with better error handling
+    // Clear chat history and start a new conversation
     const clearChatHistory = async () => {
         setIsLoading(true)
 
         try {
-            // First clear local messages to give immediate feedback
+            // Clear local messages and chat history ID
             setMessages([])
-            
-            // Then try to clear on server
-            try {
-                await fetch(
-                    `${API_BASE_URL}/products/clear_user_chat?user_id=${USER_ID}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        // Add timeout with AbortController
-                        signal: AbortSignal.timeout(5000)
-                    }
-                )
-            } catch (error) {
-                console.error('Error clearing chat history on server:', error)
-                // Continue anyway - we've already cleared the UI
-            }
+            setChatHistoryId(null)
             
             // Start a new conversation
             startChatConversation()
         } catch (error) {
             console.error('Error during chat reset:', error)
-
         } finally {
             setIsLoading(false)
         }
@@ -394,7 +379,7 @@ export default function AIChatBox({
                                 <div className={styles.top}>
 
                                     <h2 className={clsx(styles.title, 'text-20 semi-bold purple')}>
-                                        <Sparkle /> AI Assistant
+                                        <Sparkle /> AI Assistant {reportId ? '' : '(No Report Selected)'}
                                     </h2>
 
                                     <div className={styles.actions}>
@@ -464,10 +449,24 @@ export default function AIChatBox({
 
                                                                 {message.data && message.data.length > 0 && (
                                                                     <>
-                                                                        <div className={clsx(styles.messageData, 'bg-gray-800 white p-1')}>
-                                                                            <pre>
+                                                                        <div className={styles.messageData}>
+                                                                            
+                                                                            {/*
+                                                                            <pre className='bg-gray-800 white p-1'>
                                                                                 {JSON.stringify(message.data, null, 2)}
                                                                             </pre>
+                                                                            */}
+
+                                                                            <ChartBox
+                                                                                boxSize='full'
+                                                                                AIChatChart
+                                                                                chart={{
+                                                                                    vertical: message.data?.map(item => ({
+                                                                                        label: item.product_name,
+                                                                                        value: item.price
+                                                                                    }))
+                                                                                }}
+                                                                            />
                                                                         </div>
 
                                                                         <button className='mt-half text-14 button button--gradient-purple button--small'>
@@ -521,19 +520,19 @@ export default function AIChatBox({
                                 <div className={styles.inputWrapper}>
                                     <textarea
                                         ref={inputRef}
-                                        placeholder='Type your message...'
+                                        placeholder={reportId ? 'Type your message...' : 'Please open this chat from a report first'}
                                         className={clsx(styles.input, 'text-16')}
                                         value={inputValue}
                                         onChange={(e) => setInputValue(e.target.value)}
                                         onKeyDown={handleKeyDown}
-                                        disabled={isLoading}
+                                        disabled={isLoading || !reportId}
                                         rows={1}
                                     />
 
                                     <button 
                                         className={styles.send} 
                                         onClick={handleSendMessage}
-                                        disabled={isLoading || !inputValue.trim()}
+                                        disabled={isLoading || !inputValue.trim() || !reportId}
                                     >
                                         <SendHorizontal />
                                     </button>

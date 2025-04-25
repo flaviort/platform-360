@@ -1,0 +1,113 @@
+.component {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .5rem;
+    
+    .button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: .275rem;
+        color: $white;
+        transition: .3s ease-in-out;
+        
+        &:hover {
+            background: rgba($white, 0.1);
+        }
+        
+        &.open {
+            background: rgba($white, 0.2);
+        }
+
+        svg {
+            width: 1rem;
+        }
+    }
+}
+
+.optionsSub {
+    display: flex;
+    background-color: $pure-white;
+    box-shadow: 0 0 1rem 0 rgba($black, .025);
+    border-radius: .25rem;
+    border: var(--1px) solid $gray-200;
+    opacity: 0;
+    visibility: hidden;
+    transition: .3s ease-in-out;
+
+    &.open {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .subWrapper {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        button,
+        a {
+            padding: .75rem 1.25rem;
+            white-space: nowrap;
+            transition: .1s ease-in-out;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            min-width: 12rem;
+
+            &:hover,
+            &:focus-visible {
+                background-color: $gray-100;
+            }
+
+            svg {
+                width: 1rem;
+                min-width: 1rem;
+                height: 1rem;
+            }
+        }
+    }
+}
+
+body .popup {
+    display: none;
+    background-color: $white;
+    width: 30rem;
+    max-width: 100%;
+    border-radius: .5rem;
+    padding: 2rem;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+
+    .buttons {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin-top: 1rem;
+
+        .confirm {
+            border-color: $gray-300;
+            color: $gray-500;
+            transition: .3s ease-in-out;
+
+            &:hover,
+            &:focus {
+                background-color: $red;
+                border-color: $red;
+                color: $white;
+            }
+
+            span {
+                transition: none;
+            }
+        }
+    }
+}

@@ -113,6 +113,16 @@ body {
 	@media #{$mq-3xl-min} {
 		font-size: 1vw;
 	}
+
+	&.is-sending {
+		pointer-events: none;
+		cursor: not-allowed;
+
+		* {
+			pointer-events: none;
+			cursor: not-allowed;
+		}
+	}
 }
 
 .skip-content {

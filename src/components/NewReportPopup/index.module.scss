@@ -123,6 +123,11 @@
 						}
 					}
 
+					&:has(.input *:focus-visible) .label,
+					&:has(.input *:hover) .label {
+						color: $blue;
+					}
+
 					.label {
 						padding-left: .075rem;
 
@@ -133,6 +138,8 @@
 					}
 
 					.input {
+						position: relative;
+						
 						&.checkboxes {
 							display: flex;
 							align-items: center;
@@ -160,6 +167,9 @@
 							}
 
 							> p {
+								transform: translateY(-.5rem);
+								text-align: center;
+
 								@media #{$mq-sm-max} {
 									display: none;
 								}
@@ -168,6 +178,88 @@
 
 						.helper {
 							margin-top: -.5rem;
+						}
+
+						.loading {
+							justify-content: flex-start;
+							padding: 0;
+							margin-bottom: 1rem;
+							margin-left: -.75rem;
+						}
+
+						.dateContainer {
+							position: relative;
+
+							&.error {
+								input {
+									color: $red;
+									border-color: $red;
+					
+									&:focus {
+										outline-color: rgba($red, .5);
+									}
+								}
+							}
+
+							.errorMsg {
+								position: absolute;
+								z-index: 2;
+								bottom: .65rem;
+								right: .75rem;
+								background-color: $red;
+								color: $white;
+								line-height: 1;
+								padding: .1rem .3rem;
+								border-radius: .1rem;
+								font-size: .675rem;
+							}
+						}
+					}
+				}
+
+				.goal {
+					position: relative;
+
+					.ai {
+						position: absolute;
+						right: 0;
+						bottom: -.1rem;
+						padding: .5rem .5rem;
+						font-weight: $medium;
+						font-size: .725rem;
+						gap: .375rem;
+						border-radius: .175rem;
+
+						&:disabled {
+							pointer-events: none;
+							opacity: .5;
+						}
+					
+						.loading {
+							span {
+								width: .75rem;
+								min-width: .75rem;
+								height: .75rem;
+
+								svg {
+									color: $white;
+									width: 100%;
+									height: 100%;
+								}
+							}
+
+							p {
+								color: $white;
+								font-weight: inherit;
+								font-size: inherit;
+							}
+						}
+
+						svg {
+							width: .75rem;
+							min-width: .75rem;
+							height: .75rem;
+							stroke-width: .1rem;
 						}
 					}
 				}

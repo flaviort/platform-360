@@ -18,17 +18,6 @@ import styles from './index.module.scss'
 // utils
 import { slugify } from '@/utils/functions'
 
-// data
-import {
-	pricePointAnalysis,
-	averagePriceDistributionByBrand,
-	numberOfSkus,
-	topColors,
-	positiveNegative,
-	productPrice,
-	access
-} from './chart-data'
-
 interface Report {
 	id: string
 	name: string
@@ -39,6 +28,22 @@ interface Report {
 	created_by_id: string
 	project_id: string
 	created_at: string
+	product_settings?: {
+		retailers?: string[]
+		brands?: string[]
+		genders?: string[]
+		type_store?: string[]
+		include_images?: boolean
+		start_date: string
+		end_date: string
+		audience_size?: number
+		age?: number
+		location?: string
+		regions?: string[]
+		min_price?: number
+		max_price?: number
+		questions?: string[]
+	}
 }
 
 interface Project {
@@ -65,11 +70,26 @@ export default function DashboardMyReports() {
 	const [error, setError] = useState<string | null>(null)
 	const [reports, setReports] = useState<Report[]>([])
 	const [charts, setCharts] = useState<any[]>([])
+	const [reportDetails, setReportDetails] = useState({
+		retailers: '',
+		audienceSize: '',
+		brands: '',
+		genders: '',
+		timePeriod: '',
+		type: '',
+		age: '',
+		includeImages: '',
+		location: '',
+		regions: '',
+		priceRange: '',
+		questions: '',
+		uploadedFiles: ''
+	})
 
-	// parse the slug to get projectName and reportName
+	// parse the slug to get projectId and reportId
 	const slug = Array.isArray(params.slug) ? params.slug : []
-	const projectSlug = slug[0] || ''
-	const reportSlug = slug[1] || ''
+	const projectSlug = slug[0] || '' // This is now a project ID, not a slug
+	const reportSlug = slug[1] || '' // This is the report ID
 
 	// Function to fetch charts for a specific report
 	const fetchCharts = async (reportId: string) => {
@@ -113,12 +133,12 @@ export default function DashboardMyReports() {
 				const projects: Project[] = await projectsResponse.json()
 				console.log('All projects:', projects)
 				
-				// Find the project by matching the slug with the slugified project name
-				const foundProject = projects.find(p => slugify(p.name) === projectSlug)
+				// Find the project by ID directly instead of slugified name
+				const foundProject = projects.find(p => p.id === projectSlug)
 				
 				if (!foundProject) {
-					console.error(`Project not found with slug: ${projectSlug}. Available projects:`, 
-						projects.map(p => ({ id: p.id, name: p.name, slug: slugify(p.name) }))
+					console.error(`Project not found with ID: ${projectSlug}. Available projects:`, 
+						projects.map(p => ({ id: p.id, name: p.name }))
 					)
 					notFound() // Trigger the 404 page for invalid project
 				}
@@ -162,12 +182,12 @@ export default function DashboardMyReports() {
 						notFound()
 					}
 					
-					// find the report by matching the slug with the slugified report name
-					const foundReport = projectReports.find(r => slugify(r.name) === reportSlug)
+					// find the report by matching the report ID directly
+					const foundReport = projectReports.find(r => r.id === reportSlug)
 					
 					if (!foundReport) {
-						console.error(`Report not found with slug: ${reportSlug}. Available reports:`, 
-							projectReports.map(r => ({ id: r.id, name: r.name, slug: slugify(r.name) }))
+						console.error(`Report not found with ID: ${reportSlug}. Available reports:`, 
+							projectReports.map(r => ({ id: r.id, name: r.name }))
 						)
 						notFound()
 					}
@@ -175,9 +195,50 @@ export default function DashboardMyReports() {
 					console.log('Found report:', foundReport)
 					setReport(foundReport)
 					
-					// Fetch charts for this report
+					// Always fetch charts, regardless of where we get the report details from
 					const reportCharts = await fetchCharts(foundReport.id)
 					setCharts(reportCharts)
+					
+					// Extract report details directly from product_settings
+					if (foundReport.product_settings) {
+						const productSettings = foundReport.product_settings
+						const details = {
+							retailers: Array.isArray(productSettings.retailers) ? 
+								productSettings.retailers
+									.map(r => r.replace(/-/g, ' '))
+									.map(r => r.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))
+									.join(', ') : '',
+							audienceSize: productSettings.audience_size ? productSettings.audience_size.toString() : '',
+							brands: Array.isArray(productSettings.brands) ? 
+								productSettings.brands
+									.map(b => b.replace(/-/g, ' '))
+									.map(b => b.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))
+									.join(', ') : '',
+							genders: Array.isArray(productSettings.genders) ? 
+								productSettings.genders.join(', ') : '',
+							timePeriod: productSettings.start_date && productSettings.end_date ? 
+								`${formatDate(new Date(productSettings.start_date))} - ${formatDate(new Date(productSettings.end_date))}` : '',
+							type: Array.isArray(productSettings.type_store) && productSettings.type_store.length > 0 ? 
+								productSettings.type_store[0] : '',
+							age: productSettings.age ? productSettings.age.toString() : '',
+							includeImages: productSettings.include_images ? 'Yes' : 'No',
+							location: productSettings.location || '',
+							regions: Array.isArray(productSettings.regions) ? productSettings.regions.join(', ') : '',
+							priceRange: (productSettings.min_price && productSettings.max_price) ? 
+								`$${productSettings.min_price} - $${productSettings.max_price}` : '',
+							questions: Array.isArray(productSettings.questions) ? 
+								productSettings.questions.join(', ') : '',
+							uploadedFiles: ''  // No data source for this yet
+						}
+						console.log('Report details from product_settings:', details)
+						setReportDetails(details)
+					} else {
+						// Fallback to chart extraction if product_settings is not available
+						// Extract report details from chart query data as fallback
+						const extractedDetails = extractReportDetailsFromCharts(reportCharts)
+						console.log('Extracted report details from charts (fallback):', extractedDetails)
+						setReportDetails(extractedDetails)
+					}
 					
 					// fetch categories to get the category name
 					const categoriesResponse = await fetch('/api/proxy?endpoint=/api/categories')
@@ -212,6 +273,78 @@ export default function DashboardMyReports() {
 		}
 	}, [projectSlug, reportSlug, router])
 
+	// Function to extract report details from chart data
+	const extractReportDetailsFromCharts = (charts: any[]): typeof reportDetails => {
+		// Default values - include all fields to match state structure
+		const details = {
+			retailers: '',
+			audienceSize: '',
+			brands: '',
+			genders: '',
+			timePeriod: '',
+			type: '',
+			age: '',
+			includeImages: '',
+			location: '',
+			regions: '',
+			priceRange: '',
+			questions: '',
+			uploadedFiles: ''
+		}
+		
+		if (!charts || charts.length === 0) {
+			return details
+		}
+		
+		// Try to find a chart with query data
+		// Most likely to be in the first chart or in a chart that has query data
+		const chartWithQuery = charts.find(chart => chart.query) || charts[0]
+		
+		if (chartWithQuery && chartWithQuery.query) {
+			const query = chartWithQuery.query
+			
+			// Extract retailers (companies in the API)
+			if (query.companies && Array.isArray(query.companies) && query.companies.length > 0) {
+				details.retailers = query.companies
+					.map((company: string) => company.replace(/-/g, ' '))
+					.map((company: string) => company.split(' ').map((word: string) => 
+						word.charAt(0).toUpperCase() + word.slice(1)
+					).join(' '))
+					.join(', ')
+			}
+			
+			// Extract brands
+			if (query.brands && Array.isArray(query.brands) && query.brands.length > 0) {
+				details.brands = query.brands
+					.map((brand: string) => brand.replace(/-/g, ' '))
+					.map((brand: string) => brand.split(' ').map((word: string) => 
+						word.charAt(0).toUpperCase() + word.slice(1)
+					).join(' '))
+					.join(', ')
+			}
+			
+			// Extract genders (sex in the API)
+			if (query.sex && Array.isArray(query.sex) && query.sex.length > 0) {
+				details.genders = query.sex.join(', ')
+			}
+			
+			// Extract time period from range
+			if (query.range && query.range.start_date && query.range.end_date) {
+				const startDate = new Date(query.range.start_date)
+				const endDate = new Date(query.range.end_date)
+				
+				// Format dates as MM/DD/YYYY
+				const formatDate = (date: Date) => {
+					return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
+				}
+				
+				details.timePeriod = `${formatDate(startDate)} - ${formatDate(endDate)}`
+			}
+		}
+		
+		return details
+	}
+
 	const handleToggleCollapse = () => {
 		setIsCollapsed(prev => !prev)
 		
@@ -221,6 +354,65 @@ export default function DashboardMyReports() {
 			setTimeout(() => {
 				setIsHidden(false)
 			}, 300)
+		}
+	}
+
+	const getProductSummary = () => {
+		const base = {
+			name: report?.name || '--',
+			goal: report?.goal || '--'
+		}
+		
+		switch (report?.product_type?.toLowerCase()) {
+			case 'shop360':
+				return {
+					...base,
+					category: category?.name || '--',
+					retailers: reportDetails.retailers || '--',
+					brands: reportDetails.brands || '--',
+					genders: reportDetails.genders || '--',
+					type: reportDetails.type || '--',
+					includeImages: reportDetails.includeImages === 'Yes',
+					timePeriod: reportDetails.timePeriod || '--'
+				}
+				
+			case 'demand360':
+				return {
+					...base,
+					category: category?.name || '--',
+					timePeriod: reportDetails.timePeriod || '--',
+					location: reportDetails.location || '--',
+					regions: reportDetails.regions || '--'
+				}
+				
+			case 'insight360':
+				return {
+					...base,
+					category: category?.name || '--',
+					brands: reportDetails.brands || '--',
+					genders: reportDetails.genders || '--'
+				}
+				
+			case 'feedback360':
+				return {
+					...base,
+					audienceSize: reportDetails?.audienceSize || '--',
+					genders: reportDetails.genders || '--',
+					age: reportDetails.age || '--',
+					location: reportDetails.location || '--',
+					regions: reportDetails.regions || '--',
+					retailers: reportDetails.retailers || '--',
+					category: category?.name || '--',
+					questions: reportDetails.questions ? [reportDetails.questions] : [],
+					priceRange: reportDetails.priceRange || '--',
+					uploadedFiles: reportDetails.uploadedFiles ? [reportDetails.uploadedFiles] : []
+				}
+				
+			default:
+				return {
+					...base,
+					category: category?.name || '--'
+				}
 		}
 	}
 
@@ -258,7 +450,7 @@ export default function DashboardMyReports() {
 											report?.id === reportItem.id ? styles.active : '', 
 											'text-16 gray-400 semi-bold'
 										)}
-										onClick={() => router.push(`/dashboard/my-reports/${projectSlug}/${slugify(reportItem.name)}`)}
+										onClick={() => router.push(`/dashboard/my-reports/${projectSlug}/${reportItem.id}`)}
 									>
 										{reportItem.name}
 									</button>
@@ -269,80 +461,6 @@ export default function DashboardMyReports() {
 				</div>
 			</section>
 
-			{/*
-			<div className='test-div'>
-				<div className="container container--big">
-
-					<h2 className="text-20 bold">
-						Test Chart Endpoints
-					</h2>
-					
-					<div className="flex flex-col space-y-4 mt-4">
-						<button 
-							className="button button--solid text-16"
-							onClick={async () => {
-								try {
-									if (!report) {
-										alert("No report selected")
-										return
-									}
-									
-									// Get the test div to show results
-									const resultsDiv = document.querySelector('.test-endpoint-results')
-									if (resultsDiv) {
-										resultsDiv.innerHTML = '<p>Loading chart data...</p>'
-									}
-									
-									// Fetch charts for the current report
-									console.log(`Fetching charts for report ID: ${report.id}`)
-									const chartsResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${report.id}`)
-									
-									const responseText = await chartsResponse.text()
-									console.log('Raw response:', responseText)
-									
-									// Display results
-									if (resultsDiv) {
-										resultsDiv.innerHTML = `
-											<div class="mt-4">
-												<h3 class="text-18 bold mb-2">Charts for Report: ${report.name}</h3>
-												<p class="mb-2">Report ID: ${report.id}</p>
-												<p class="mb-2">Status: ${chartsResponse.status === 200 ? 'Success' : `Error: ${chartsResponse.status}`}</p>
-												<pre class="bg-gray-200 p-4 rounded overflow-auto max-h-60 mb-4">${responseText}</pre>
-											</div>
-										`
-									}
-									
-									// Update charts in the UI if successful
-									if (chartsResponse.ok) {
-										try {
-											const chartsData = JSON.parse(responseText)
-											console.log('Charts data:', chartsData)
-											setCharts(chartsData)
-										} catch (e) {
-											console.error('Error parsing charts JSON:', e)
-										}
-									}
-								} catch (error) {
-									console.error('Error fetching chart data:', error)
-									const resultsDiv = document.querySelector('.test-endpoint-results')
-									if (resultsDiv) {
-										resultsDiv.innerHTML = `<p class="text-16 semi-bold red">Error fetching chart data: ${error instanceof Error ? error.message : String(error)}</p>`
-									}
-								}
-							}}
-						>
-							Get Charts for Current Report
-						</button>
-					</div>
-					
-					<div className="test-endpoint-results mt-4 p-4 border border-gray-200 rounded">
-						<p className="text-gray-500">Click the button above to fetch charts for the current report</p>
-					</div>
-
-				</div>
-			</div>
-			*/}
-
 			<section className={clsx(
 				styles.middleContent,
 				isCollapsed && styles.collapsed,
@@ -352,6 +470,7 @@ export default function DashboardMyReports() {
 					<div className={styles.contentWrapper}>
 
 						<ProjectDetails
+							id={report?.id || ''}
 							product={
 								report?.product_type?.toLowerCase() === 'shop360' ? 'shop360' :
 								report?.product_type?.toLowerCase() === 'demand360' ? 'demand360' :
@@ -359,17 +478,7 @@ export default function DashboardMyReports() {
 								report?.product_type?.toLowerCase() === 'insight360' ? 'insight360' : 
 								'shop360'
 							}
-							members={access}
-							summary={{
-								name: report?.name || 'Report name',
-								category: category?.name || 'Category',
-								retailers: 'Wallmart, Costco, Target',
-								brands: 'Nike, Adidas, New Balance, Puma, Fila',
-								genders: "Men's",
-								timePeriod: '01/01/2023 - 12/31/2023',
-								type: 'Instore',
-								goal: report?.goal || 'No goal specified'
-							}}
+							summary={getProductSummary()}
 							onToggleCollapse={handleToggleCollapse}
 							isCollapsed={isCollapsed}
 						/>
@@ -380,28 +489,93 @@ export default function DashboardMyReports() {
 							
 							<div className='relative z2'>
 								
-								<TopButtons />
+								<TopButtons reportId={report?.id} />
 								
 								<div className={styles.allCharts}>
 									{charts.length > 0 ? (
-										charts.map((chart) => (
-											<ChartBox
-												key={chart.id}
-												boxSize={chart.preferences?.boxSize || 'half'}
-												title={chart.title || 'Chart Title'}
-												description={chart.description || 'Chart Description'}
-												AIGenerated={chart.chat_generated || false}
-												chart={{
-													vertical: chart.results?.vertical || [],
-													horizontal: chart.results?.horizontal || [],
-													positiveNegative: chart.results?.positiveNegative || null,
-													productPrice: chart.results?.productPrice || null
-												}}
-											/>
-										))
+										charts.map((chart) => {
+											// Process chart data based on chart type
+											let chartData = {}
+											const chartType = chart.preferences?.chart_type || 'vertical'
+											
+											// Define type for chart result items
+											interface ChartResultItem {
+												product_name?: string
+												price?: number
+												image?: string
+												[key: string]: any // Allow for additional properties
+											}
+											
+											// Log the raw chart data for debugging
+											console.log('Processing chart:', chart.id, 'Type:', chartType, 'Results:', chart.results)
+											
+											// Format results based on chart type
+											if (chartType === 'vertical') {
+												chartData = {
+													vertical: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															label: item.product_name || 'Unknown',
+															value: typeof item.price === 'number' ? item.price : 0
+														})) : []
+												}
+											} else if (chartType === 'colors') {
+												chartData = {
+													colors: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															color: item.color || 'Unknown',
+															count: typeof item.count === 'number' ? item.count : 0
+														})) : []
+												}
+											} else if (chartType === 'horizontal') {
+												chartData = {
+													horizontal: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															name: item.product_name || 'Unknown',
+															value: typeof item.price === 'number' ? item.price : 0,
+															color: '#3691E1' // Default color
+														})) : []
+												}
+											} else if (chartType === 'productPrice') {
+												chartData = {
+													productPrice: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															name: item.product_name || 'Unknown',
+															price: typeof item.price === 'number' ? 
+																`$${item.price.toFixed(2)}` : '$0.00',
+															image: item.image || ''
+														})) : []
+												}
+											} else {
+												// Default to vertical chart if type is unknown
+												chartData = {
+													vertical: Array.isArray(chart.results) ? 
+														chart.results.map((item: ChartResultItem) => ({
+															label: item.product_name || 'Unknown',
+															value: typeof item.price === 'number' ? item.price : 0
+														})) : []
+												}
+											}
+											
+											return (
+												<ChartBox
+													key={chart.id}
+													boxSize={chart.preferences?.box_size || 'half'}
+													title={chart.title || 'Chart Title'}
+													description={chart.description || 'Chart Description'}
+													AIGenerated={chart.chat_generated || false}
+													chart={chartData}
+												/>
+											)
+										})
 									) : (
 										<>
+											
+											<p className='text-16 semi-bold red'>
+												Insufficient data to generate charts.
+											</p>
+
 											{/* Display default charts if no API charts are available */}
+											{/*
 											<ChartBox
 												boxSize={pricePointAnalysis.length > 10 ? 'full' : 'half'}
 												title='Price Point Analysis'
@@ -447,48 +621,9 @@ export default function DashboardMyReports() {
 													productPrice: productPrice
 												}}
 											/>
+											*/}
 										</>
 									)}
-									
-									{/*
-									<div className="w-full mt-8 p-4 bg-white rounded-lg shadow">
-										<h3 className="text-18 bold mb-4">Test Chart API</h3>
-										<button 
-											className="button button--gradient-blue text-16"
-											onClick={async () => {
-												try {
-													if (!report) {
-														console.error("No report selected")
-														return
-													}
-													
-													// Test the chart endpoint
-													console.log(`Testing chart API for report ID: ${report.id}`)
-													const chartsResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${report.id}`)
-													
-													const responseText = await chartsResponse.text()
-													console.log('Raw response:', responseText)
-													
-													if (chartsResponse.ok) {
-														try {
-															const chartsData = JSON.parse(responseText)
-															console.log('Charts data:', chartsData)
-															setCharts(chartsData)
-														} catch (e) {
-															console.error('Error parsing charts JSON:', e)
-														}
-													} else {
-														console.error(`Failed to fetch charts: ${chartsResponse.status}`)
-													}
-												} catch (error) {
-													console.error('Error testing chart API:', error)
-												}
-											}}
-										>
-											Refresh Charts
-										</button>
-									</div>
-									*/}
 									
 								</div>
 
@@ -502,4 +637,9 @@ export default function DashboardMyReports() {
 
 		</main>
 	)
+}
+
+// Add this helper function at the appropriate scope
+const formatDate = (date: Date) => {
+	return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
 }

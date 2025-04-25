@@ -12,7 +12,7 @@ import { ChevronDown, Check, X } from 'lucide-react'
 // css
 import styles from './form.module.scss'
 
-interface DropdownProps {
+interface SearchProps {
     label?: string
     hideLabel?: boolean
     required?: boolean
@@ -28,9 +28,12 @@ interface DropdownProps {
     name: string
     id: string
     showHideAll?: boolean
+    onSearch?: (query: string) => void
+    isLoading?: boolean
+    onFieldChange?: (name: string, value: Record<string, boolean>) => void
 }
 
-export default function Dropdown({
+export default function Search({
     label,
     hideLabel,
     required,
@@ -43,7 +46,10 @@ export default function Dropdown({
     name,
     id,
     showHideAll,
-}: DropdownProps) {
+    onSearch,
+    isLoading = false,
+    onFieldChange,
+}: SearchProps) {
 
     const { register, watch, trigger, formState: { errors }, setValue, control } = useFormContext()
 
@@ -76,7 +82,7 @@ export default function Dropdown({
                                 handleDeselectItem(item.name)
                             }}
                         >
-                            {typeof item.label === 'string' ? item.label : String(item.label || '')} <X />
+                            {typeof item.label === 'string' ? item.label : String(item.label || '')} <X size={14} />
                         </span>
                     ))}
                 </span>
@@ -127,20 +133,19 @@ export default function Dropdown({
         }
     })
 
-    const handleDeselectItem = (itemName: string) => {
-        const currentValue = field.value || {}
-        setValue(name, {
-            ...currentValue,
-            [itemName]: false
-        }, { shouldValidate: true })
-    }
-
     const handleCheckboxChange = (itemName: string, checked: boolean) => {
         const currentValue = field.value || {}
-        setValue(name, {
+        const newValue = {
             ...currentValue,
             [itemName]: checked
-        }, { shouldValidate: true })
+        }
+        
+        setValue(name, newValue, { shouldValidate: true })
+        
+        // Notify parent component about field changes
+        if (onFieldChange) {
+            onFieldChange(name, newValue)
+        }
     }
 
     const handleSelectAll = () => {
@@ -157,10 +162,35 @@ export default function Dropdown({
             newValue[item.name] = true
         })
         setValue(name, newValue, { shouldValidate: true })
+        
+        // Notify parent component about field changes
+        if (onFieldChange) {
+            onFieldChange(name, newValue)
+        }
     }
 
     const handleDeselectAll = () => {
-        setValue(name, {}, { shouldValidate: true })
+        const newValue = {}
+        setValue(name, newValue, { shouldValidate: true })
+        
+        // Notify parent component about field changes
+        if (onFieldChange) {
+            onFieldChange(name, newValue)
+        }
+    }
+
+    const handleDeselectItem = (itemName: string) => {
+        const currentValue = field.value || {}
+        const newValue = {
+            ...currentValue,
+            [itemName]: false
+        }
+        setValue(name, newValue, { shouldValidate: true })
+        
+        // Notify parent component about field changes
+        if (onFieldChange) {
+            onFieldChange(name, newValue)
+        }
     }
 
     // reset component state on form reset
@@ -168,7 +198,13 @@ export default function Dropdown({
         const handleFormReset = () => {
             setIsDropdownVisible(false)
             setSearchValue('')
-            setValue(name, {}, { shouldValidate: true })
+            const newValue = {}
+            setValue(name, newValue, { shouldValidate: true })
+            
+            // Notify parent component about field changes
+            if (onFieldChange) {
+                onFieldChange(name, newValue)
+            }
         }
 
         document.addEventListener('formReset', handleFormReset)
@@ -176,7 +212,17 @@ export default function Dropdown({
         return () => {
             document.removeEventListener('formReset', handleFormReset) 
         }
-    }, [name, setValue])
+    }, [name, setValue, onFieldChange])
+    
+    // Handle search input changes
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const query = e.target.value
+        setSearchValue(query)
+        
+        if (onSearch) {
+            onSearch(query)
+        }
+    }
 
     return (
         <div className={clsx(
@@ -235,16 +281,19 @@ export default function Dropdown({
                                 placeholder='Search'
                                 className={styles.input}
                                 value={searchValue}
-                                onChange={(e) => setSearchValue(e.target.value)}
+                                onChange={handleSearchChange}
                             />
 
                             {searchValue && (
                                 <button 
                                     type='button'
                                     className={styles.clear}
-                                    onClick={() => setSearchValue('')}
+                                    onClick={() => {
+                                        setSearchValue('')
+                                        if (onSearch) onSearch('')
+                                    }}
                                 >
-                                    View All <X />
+                                    Clear <X />
                                 </button>
                             )}
 
@@ -278,34 +327,80 @@ export default function Dropdown({
                         </div>
                     )}
 
-                    {items?.filter(item => {
-                        // Safely check if label is a string before calling toLowerCase
-                        const itemLabel = typeof item.label === 'string' ? item.label : String(item.label || '')
-                        return itemLabel.toLowerCase().includes(searchValue.toLowerCase())
-                    }).map((item, i) => (
-                        <label className={styles.item} key={i}>
-
-                            <input
-                                type='checkbox'
-                                className={styles.checkbox}
-                                checked={field.value?.[item.name] || false}
-                                onChange={(e) => handleCheckboxChange(item.name, e.target.checked)}
-                                disabled={Boolean(!field.value?.[item.name] && limitSelected && selectedCount >= limitSelected)}
-                            />
-
-                            <span className={styles.checkboxWrapper}>
-
-                                <span className={styles.check}>
-                                    <Check />
-                                </span>
-
-                                <span className={clsx(styles.text, 'text-16')}>
-                                    {typeof item.label === 'string' ? item.label : String(item.label || '')}
-                                </span>
-
+                    {isLoading ? (
+                        <div className={styles.item}>
+                            <span className={clsx(styles.text, 'text-16')}>
+                                Loading brands...
                             </span>
-                        </label>
-                    ))}
+                        </div>
+                    ) : (
+                        <>
+                            {/* Always show selected items first */}
+                            {items.filter(item => field.value?.[item.name]).map((item, i) => (
+                                <label className={styles.item} key={`selected-${i}`}>
+                                    <input
+                                        type='checkbox'
+                                        className={styles.checkbox}
+                                        checked={true}
+                                        onChange={(e) => handleCheckboxChange(item.name, e.target.checked)}
+                                    />
+                                    <span className={styles.checkboxWrapper}>
+                                        <span className={styles.check}>
+                                            <Check />
+                                        </span>
+                                        <span className={clsx(styles.text, 'text-16')}>
+                                            {typeof item.label === 'string' ? item.label : String(item.label || '')}
+                                        </span>
+                                    </span>
+                                </label>
+                            ))}
+                            
+                            {/* Show divider if there are both selected items and search results */}
+                            {items.some(item => field.value?.[item.name]) && 
+                             items.some(item => {
+                                const itemLabel = typeof item.label === 'string' ? item.label : String(item.label || '')
+                                return !field.value?.[item.name] && 
+                                  (!searchValue || itemLabel.toLowerCase().includes(searchValue.toLowerCase()))
+                             }) && (
+                                <div className={styles.divider}></div>
+                            )}
+                            
+                            {/* Show unselected items that match search */}
+                            {items.length === 0 && searchValue.length >= 2 ? (
+                                <div className={styles.item}>
+                                    <span className={clsx(styles.text, 'text-16')}>
+                                        No brands found
+                                    </span>
+                                </div>
+                            ) : (
+                                items
+                                    .filter(item => {
+                                        const itemLabel = typeof item.label === 'string' ? item.label : String(item.label || '')
+                                        return !field.value?.[item.name] && 
+                                            (!searchValue || itemLabel.toLowerCase().includes(searchValue.toLowerCase()))
+                                    })
+                                    .map((item, i) => (
+                                        <label className={styles.item} key={`unselected-${i}`}>
+                                            <input
+                                                type='checkbox'
+                                                className={styles.checkbox}
+                                                checked={false}
+                                                onChange={(e) => handleCheckboxChange(item.name, e.target.checked)}
+                                                disabled={Boolean(limitSelected && selectedCount >= limitSelected)}
+                                            />
+                                            <span className={styles.checkboxWrapper}>
+                                                <span className={styles.check}>
+                                                    <Check />
+                                                </span>
+                                                <span className={clsx(styles.text, 'text-16')}>
+                                                    {typeof item.label === 'string' ? item.label : String(item.label || '')}
+                                                </span>
+                                            </span>
+                                        </label>
+                                    ))
+                            )}
+                        </>
+                    )}
                     
                 </div>
             </div>

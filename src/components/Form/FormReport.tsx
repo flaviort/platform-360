@@ -57,6 +57,7 @@ export default function FormReport({
 
         if (form.current) {
             (form.current as HTMLElement).classList.add('is-sending')
+            document.body.classList.add('is-sending')
             document.dispatchEvent(new Event('formSending'))
         }
 
@@ -120,12 +121,14 @@ export default function FormReport({
                 if (form.current) {
                     form.current.classList.remove('is-sending')
                 }
+                document.body.classList.remove('is-sending')
             })
 
             document.addEventListener('formError', () => {
                 if (form.current) {
                     form.current.classList.remove('is-sending')
                 }
+                document.body.classList.remove('is-sending')
             })
         }
     }, [])

@@ -1,0 +1,38 @@
+.component {
+    .tooltip {
+        background: $white;
+        border: var(--1px) solid $gray-200;
+        border-radius: .25rem;
+        padding: .75rem;
+        max-width: 10rem;
+    }
+
+    .chart {
+        .bars {
+
+        }
+
+        .bottomLabel {
+            display: block;
+            transform-origin: center;
+            width: 50px;
+            line-height: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
+            padding-top: 4px;
+            white-space: nowrap;
+
+            @media #{$mq-xl-min} {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                white-space: normal;
+            }
+
+            @media #{$mq-sm-max} {
+                font-size: .5rem;
+            }
+        }
+    }
+}

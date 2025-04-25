@@ -1,5 +1,10 @@
+'use client'
+
 // libraries
+import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 // components
 import PopupForm from './form'
@@ -13,10 +18,17 @@ import Type from './fields/Type'
 import IncludeImages from './fields/IncludeImages'
 import TimePeriod from './fields/TimePeriod'
 import Goal from './fields/Goal'
+import Loading from '@/components/Loading'
+import InputHidden from '@/components/Form/InputHidden'
+
+// img / svg
+import { Sparkles } from 'lucide-react'
 
 // utils
 import { createReport, CreateReportData, getProjectAndCategoryIds } from '@/utils/reports'
-import { slugify } from '@/utils/functions'
+
+// css
+import styles from './index.module.scss'
 
 interface PopupShop360Props {
 	icon: React.ComponentType<any>
@@ -29,34 +41,52 @@ export default function PopupShop360({
 	text,
 	className
 }: PopupShop360Props) {
+
 	const router = useRouter()
+	const [isGenerating, setIsGenerating] = useState(false)
 
 	const handleSuccess = async (data: any) => {
-		// Declare report variable outside try block so it's accessible in catch
+		
 		let report: any = null
 		
 		try {
+			console.log('Form data received:', data);
+			console.log('Project goal from form:', data.projectGoal);
+			
 			// get project and category IDs
 			const { projectId, categoryId } = await getProjectAndCategoryIds({
 				selectedProject: data.selectedProject,
 				newProjectName: data.newProjectName,
+				projectGoal: data.projectGoal,
 				category: data.category
 			})
+
+			// selected fields
+			const selectedCategory = [data.category || '']
+			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
+			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
+			//const selectedBrands = Array.isArray(reportData.product_settings.brands) ? reportData.product_settings.brands : []
+			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
+			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
+			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
 
 			// transform form data to match API format
 			const reportData: CreateReportData = {
 				name: data.reportName,
-				product_type: 'Shop360',
+				product_type: 'shop360',
 				category_id: categoryId,
-				status: true,
+				status: false,
 				goal: data.goal,
 				project_id: projectId,
-				retailers: Object.keys(data.retailers || {}),
-				brands: Object.keys(data.brands || {}),
-				genders: data.genders,
-				type: data.type,
-				include_images: data.includeImages,
-				time_period: data.timePeriod
+				product_settings: {
+					retailers: selectedRetailers,
+					brands: selectedBrands,
+					genders: selectedGenders,
+					type_store: [data.type],
+					include_images: data.includeImages,
+					start_date: selectedStartDate,
+					end_date: selectedEndDate
+				}
 			}
 
 			// Step 1: Create the report
@@ -70,10 +100,11 @@ export default function PopupShop360({
 
 			// Step 2: Verify report exists in database
 			console.log(`Verifying report ${report.id} exists in database...`)
+			
 			const verifyReportResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${report.id}`, {
 				method: 'GET',
 				headers: {
-					'Accept': 'application/json'
+					'Accept': 'application/json',
 				}
 			})
 
@@ -88,7 +119,7 @@ export default function PopupShop360({
 
 			// Debug time period data from form
 			console.log('Raw form data:', data)
-			
+
 			// Format dates correctly from the form data
 			let startDate = "2022-01-01"
 			let endDate = "2025-01-01"
@@ -111,106 +142,191 @@ export default function PopupShop360({
 				}
 			}
 			
-			// Step 3: Create chart using the report ID
-			const chartData = {
+			// Step 3: Create multiple charts using the report ID
+			console.log('Creating multiple charts for report ID:', report.id)
+			
+			// Add a delay before creating charts to ensure DB consistency
+			console.log('Waiting for database to synchronize before creating charts...')
+			await new Promise(resolve => setTimeout(resolve, 2000))
+			
+			// base data for all charts
+			const baseChartData = {
+				report_id: report.id
+			}
+
+			/*
+			// 1. price point analysis
+			const pricePointAnalysisChart = {
+				...baseChartData,
+				title: "Price Point Analysis",
+				description: "Analysis of price point",
+				preferences: {
+					chart_type: "vertical"
+				},
+				query: {
+					product_name: "",
+					brand: selectedBrands,
+					color: null,
+					sex: selectedGenders,
+					company: selectedRetailers,
+					month: null,
+					year: null,
+					price: null,
+					limit: "10",
+					aggregate: "average",
+					operate_on: "brand",
+					range: {
+						start_date: selectedStartDate,
+						end_date: selectedEndDate
+					},
+					categories: selectedCategory
+				}
+			}
+
+			// 2. price distribution by brand
+			const priceDistributionChart = {
+				...baseChartData,
+				title: "Price Distribution by Brand",
+				description: "Analysis of price range distribution by brand",
+				preferences: {
+					chart_type: "vertical"
+				},
+				query: {
+					product_name: "",
+					brand: selectedBrands,
+					color: null,
+					sex: selectedGenders,
+					company: selectedRetailers,
+					month: null,
+					year: null,
+					price: null,
+					limit: "10",
+					aggregate: "average",
+					operate_on: "brand",
+					range: {
+						start_date: selectedStartDate,
+						end_date: selectedEndDate
+					},
+					categories: selectedCategory
+				}
+			}
+			
+			// 3. sku analysis
+			const skuAnalysisChart = {
+				...baseChartData,
+				title: "SKU Analysis",
+				description: "Number of SKUs associated with each retailer",
+				preferences: {
+					chart_type: "horizontal" 
+				},
+				query: {
+					product_name: "",
+					brand: "",
+					color: null,
+					sex: data.genders && data.genders.length > 0 ? data.genders[0] : null,
+					company: selectedRetailers,
+					month: null,
+					year: null,
+					price: null,
+					limit: "10",
+					aggregate: "count",
+					operate_on: "company",
+					range: {
+						start_date: startDate,
+						end_date: endDate
+					},
+					categories: selectedCategory
+				}
+			}
+			*/
+
+			// 4. color analysis
+			const colorAnalysisChart = {
+				...baseChartData,
+				title: 'Color Analysis',
+				description: 'Analysis of product colors distribution',
+				preferences: {
+					chart_type: 'colors',
+					box_size: 'full'
+				},
+				query: {
+					brands: selectedBrands,
+					color: null,
+					sex: null,
+					companies: selectedRetailers,
+					limit: '20',
+					aggregate: 'count',
+					operate_on: 'color'
+				}
+			}
+
+			// 5. test chart
+			const testChart = {
+				...baseChartData,
 				title: "sample chart",
 				description: "this chart is coming from the DB",
 				preferences: {
 					chart_type: "vertical",
 				},
 				query: {
-					categories: [data.category || ""],
-					companies: Array.isArray(data.retailers) ? data.retailers : Object.keys(data.retailers || {}),
-					brands: Array.isArray(data.brands) ? data.brands : Object.keys(data.brands || {}),
-					sex: Array.isArray(data.genders) ? data.genders : [data.genders].filter(Boolean),
+					categories: selectedCategory,
+					companies: selectedRetailers,
+					brands: selectedBrands,
+					sex: selectedGenders,
 					range: {
 						start_date: startDate,
 						end_date: endDate
 					},
-					limit: 1000
-				},
-				report_id: report.id
-			}
-
-			console.log('Creating chart with data:', JSON.stringify(chartData, null, 2))
-			
-			// Add a delay before creating the chart to ensure DB consistency
-			console.log('Waiting for database to synchronize before creating chart...')
-			await new Promise(resolve => setTimeout(resolve, 2000))
-			
-			// Get authentication token
-			let authToken = '';
-			try {
-				authToken = localStorage.getItem('auth_token') || '';
-				if (!authToken) {
-					console.error('No auth_token found in localStorage');
-					authToken = localStorage.getItem('token') || '';
+					limit: 10
 				}
-			} catch (e) {
-				console.error('Error getting auth token:', e);
 			}
 			
-			// Make a single attempt to create the chart
-			console.log('Making chart creation request with auth token:', authToken ? 'Token found' : 'No token found');
+			// array of charts
+			const chartsToCreate = [
+				//{ name: "Price Point Analysis", data: pricePointAnalysisChart },
+				//{ name: "Price Distribution by Brand", data: priceDistributionChart },
+				//{ name: "SKU Analysis", data: skuAnalysisChart },
+				{ name: "Color Analysis", data: colorAnalysisChart },
+				{ name: "Test Chart", data: testChart }
+			]
 			
-			// Use the same fetch format as createReport for consistency
-			const chartResponse = await fetch('/api/proxy?endpoint=/api/charts', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${authToken}`
-				},
-				body: JSON.stringify(chartData)
-			})
-			
-			console.log('Chart response status:', chartResponse.status)
-			const responseText = await chartResponse.text()
-			console.log('Raw chart response:', responseText)
-			
-			if (!chartResponse.ok) {
-				// Log detailed error information
-				if (chartResponse.status === 401) {
-					console.error('Authentication failed (401 Unauthorized). Auth token may be invalid or expired.')
-					console.error('Current auth token:', authToken ? `${authToken.substring(0, 10)}...` : 'None')
+			// Create each chart sequentially
+			for (const chart of chartsToCreate) {
+				try {
+					console.log(`Creating ${chart.name} chart with data:`, JSON.stringify(chart.data, null, 2))
+					
+					const chartResponse = await fetch('/api/proxy?endpoint=/api/charts', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+						},
+						body: JSON.stringify(chart.data)
+					})
+					
+					console.log(`${chart.name} chart response status:`, chartResponse.status)
+					const responseText = await chartResponse.text()
+					
+					if (!chartResponse.ok) {
+						console.error(`Failed to create ${chart.name} chart:`, responseText)
+						console.warn(`Continuing with other charts despite ${chart.name} chart creation failure`)
+					} else {
+						const chartData = responseText ? JSON.parse(responseText) : {}
+						console.log(`Created ${chart.name} chart:`, chartData)
+					}
+					
+					// Add a small delay between chart creations
+					await new Promise(resolve => setTimeout(resolve, 500))
+				} catch (error) {
+					console.error(`Error creating ${chart.name} chart:`, error)
+					console.warn(`Continuing with other charts despite ${chart.name} chart creation failure`)
 				}
-				
-				console.error(`Chart creation failed with status: ${chartResponse.status}`)
-				console.error('Request headers:', {
-					'Content-Type': 'application/json',
-					'Authorization': authToken ? 'Bearer token present' : 'No authorization'
-				})
-				console.error('Request data sent:', JSON.stringify(chartData, null, 2))
-				console.error('Response:', responseText)
-				
-				// Report was created but chart creation failed
-				console.error(`Report ID ${report.id} was created but chart creation failed. Operation aborted.`)
-				
-				// Create a helpful error message based on the error type
-				const errorType = chartResponse.status === 401 ? '401 Authentication Error' : 
-								 chartResponse.status === 500 ? '500 Server Error' : 
-								 `${chartResponse.status} ${chartResponse.statusText}`;
-								 
-				const authHelp = chartResponse.status === 401 ? 
-					'Authentication token may be invalid. Try logging out and back in to refresh your session.' : 
-					'';
-				
-				document.dispatchEvent(new Event('formError'))
-				throw new Error(
-					`Failed to create chart. Report was created with ID ${report.id}, but chart creation failed with ${errorType}. ` +
-					`${authHelp} Please check the console logs and contact the developer with this report ID.`
-				)
 			}
 			
-			// Chart creation succeeded
-			const chart = responseText ? JSON.parse(responseText) : {}
-			console.log('Created chart:', chart)
-			
-			// Only redirect if both report and chart were created successfully
-			console.log('Both report and chart created successfully. Redirecting to report page...')
+			// Only redirect after attempting to create all charts
+			console.log('Report and charts creation process completed. Redirecting to report page...')
             document.dispatchEvent(new Event('formSent'))
-			const projectName = data.selectedProject === 'New Project' ? data.newProjectName : data.selectedProject
-			const reportName = data.reportName
-			router.push(`/dashboard/my-reports/${slugify(projectName)}/${slugify(reportName)}`)
+			router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
 		} catch (error) {
 			console.error('Error during report/chart creation process:', error)
 			document.dispatchEvent(new Event('formError'))
@@ -233,6 +349,133 @@ export default function PopupShop360({
         document.dispatchEvent(new Event('formError'))
 	}
 
+	// This function will be called when the Generate Goal button is clicked
+	const generateGoal = () => {
+		try {
+			setIsGenerating(true)
+			
+			// Create a custom event to request the form data
+			const event = new CustomEvent('requestFormDataForGoal', {
+				detail: { productType: 'shop360' }
+			})
+			document.dispatchEvent(event)
+			
+			// Set a timeout to reset the generating state if no response comes back
+			setTimeout(() => {
+				setIsGenerating(false)
+			}, 2000)
+		} catch (error) {
+			console.error('Error generating goal:', error)
+			setIsGenerating(false)
+		}
+	}
+	
+	// Listen for the form data event and handle generating the goal
+	useEffect(() => {
+		const handleFormData = (e: any) => {
+			// Make sure this event is for us
+			if (e.detail.productType !== 'shop360') return
+			
+			try {
+				const {
+					category = 'Unknown Category',
+					retailers = {},
+					brands = {},
+					genders = [],
+					timePeriodStart,
+					timePeriodEnd,
+					setGoalValue
+				} = e.detail
+				
+				// Create a helper function to generate the goal text
+				const generateGoalText = (
+					category: string, 
+					retailers: string[], 
+					brands: string[], 
+					genders: string[],
+					timePeriodStart: any,
+					timePeriodEnd: any
+				) => {
+					// Generate goal text
+					let goalText = `Analyze ${category} data`
+					
+					// Add retailers if available
+					if (retailers.length > 0) {
+						goalText += ` from ${retailers.length > 1 ? 'the following retailers:' : 'the following retailer:'} ${retailers.join(', ')}`
+					}
+					
+					// Add brands if available
+					if (brands.length > 0) {
+						goalText += ` for ${brands.length > 1 ? 'the following brands:' : 'the following brand:'} ${brands.join(', ')}`
+					}
+					
+					// Add gender if available
+					if (genders.length > 0) {
+						goalText += ` targeting ${genders.join(' and ')} demographics`
+					}
+					
+					// Format time period
+					let timePeriod = "recent time period"
+					
+					if (timePeriodStart && timePeriodEnd) {
+						const startDate = new Date(timePeriodStart)
+						const endDate = new Date(timePeriodEnd)
+						
+						timePeriod = `period from ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`
+					}
+					
+					// Add time period
+					goalText += ` during the ${timePeriod}.`
+					
+					// Add action statement
+					goalText += ` Identify key trends, competitive insights, and strategic opportunities to optimize product positioning and marketing strategies.`
+					
+					return goalText
+				}
+				
+				// Generate goal text
+				let goalText = generateGoalText(
+					category,
+					Object.entries(retailers || {})
+						.filter(([_, selected]) => selected)
+						.map(([name, _]) => name),
+					Object.entries(brands || {})
+						.filter(([_, selected]) => selected)
+						.map(([name, _]) => name),
+					genders,
+					timePeriodStart,
+					timePeriodEnd
+				)
+				
+				// Set the goal value using the provided function
+				if (typeof setGoalValue === 'function') {
+					setGoalValue(goalText)
+					console.log('Generated goal:', goalText)
+				} else {
+					console.error('setGoalValue is not a function', setGoalValue)
+				}
+			} catch (error) {
+				console.error('Error processing form data for goal:', error)
+			} finally {
+				setIsGenerating(false)
+			}
+		}
+		
+		// Listen for incomplete form data events
+		const handleIncompleteData = (e: any) => {
+			console.log('Incomplete form data:', e.detail)
+			setIsGenerating(false)
+		}
+		
+		document.addEventListener('formDataForGoal', handleFormData)
+		document.addEventListener('formDataForGoalIncomplete', handleIncompleteData)
+		
+		return () => {
+			document.removeEventListener('formDataForGoal', handleFormData)
+			document.removeEventListener('formDataForGoalIncomplete', handleIncompleteData)
+		}
+	}, [])
+
 	return (
 		<>
 			<PopupForm
@@ -242,6 +485,12 @@ export default function PopupShop360({
 				onError={handleError}
 				className={className}
 			>
+
+				<InputHidden
+					name='productType'
+					value='shop360'
+				/>
+
 				<ProjectName />
 
 				<ReportName />
@@ -260,7 +509,31 @@ export default function PopupShop360({
 
 				<TimePeriod />
 
-				<Goal />
+				<div className={styles.goal}>
+
+					<Goal />
+
+					<button
+						type='button'
+						className={clsx(styles.ai, 'button button--gradient-purple')}
+						onClick={generateGoal}
+						disabled={isGenerating}
+					>
+						{isGenerating ? (
+							<Loading
+								simple
+								noContainer
+								className={styles.loading}
+								text='Generating...'
+							/>
+						) : (
+							<>
+								<Sparkles /> Generate Goal
+							</>
+						)}
+					</button>
+
+				</div>
 
 			</PopupForm>
 		</>

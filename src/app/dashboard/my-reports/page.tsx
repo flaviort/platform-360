@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation'
 
 // components
 import TitlePart from '@/components/TitlePart'
-import List, { ListProps } from './list'
-import LazyLoad from '@/components/LazyLoad'
+import List from './list'
+import Loading from '@/components/Loading'
 
 // css
 import styles from './index.module.scss'
@@ -121,6 +121,7 @@ export default function DashboardMyReports() {
 
 	// Memoize the transformed projects data
 	const transformedProjects = useMemo(() => {
+		
 		// Start with all projects, even if they have no reports
 		return projects.map(project => {
 			// Find all reports for this project
@@ -136,6 +137,7 @@ export default function DashboardMyReports() {
 				const userName = formatUserName(currentUser)
 
 				return {
+					id: report.id,
 					reportName: report.name,
 					status: report.status ? 'green' as const : 'empty' as const,
 					category: categoryName,
@@ -162,9 +164,7 @@ export default function DashboardMyReports() {
 
 	if (isLoading) {
 		return (
-			<LazyLoad>
-				<></>
-			</LazyLoad>
+			<Loading />
 		)
 	}
 
@@ -185,10 +185,9 @@ export default function DashboardMyReports() {
 	return (
 		<main className={styles.page}>
 		
-			<TitlePart
-				title='My Reports'
-				description='Below are all the reports you have created. You can filter them by product clicking on the logos below or even search for a specific report by typing in the search bar. You can also create new reports by clicking the "+ New" button.'
-			/>
+			{projects.length > 0 && (
+				<TitlePart title='My Reports' />
+			)}
 
 			<List 
 				projects={transformedProjects} 

@@ -30,7 +30,7 @@ export default function Location() {
 	const handleLocationChange = (value: string) => {
 		setSelectedLocation(value)
 		
-		setValue('reportStates', {}, { shouldValidate: true })
+		setValue('regions', {}, { shouldValidate: true })
 		
 		switch(value) {
 			case 'United States':
@@ -95,8 +95,8 @@ export default function Location() {
 							items={regions}
 							searchable
 							required
-							name='reportStates'
-							id='reportStates'
+							name='regions'
+							id='regions'
 						/>
 					</div>
 				</div>

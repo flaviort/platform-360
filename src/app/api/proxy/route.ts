@@ -273,4 +273,79 @@ export async function PATCH(request: Request) {
             { status: 500 }
         )
     }
+}
+
+export async function DELETE(request: Request) {
+    const url = new URL(request.url)
+    const targetEndpoint = url.searchParams.get('endpoint')
+    
+    if (!targetEndpoint) {
+        return new Response(
+            JSON.stringify({ message: 'No endpoint specified' }),
+            { status: 400 }
+        )
+    }
+
+    try {
+        // For a DELETE request, we typically don't need a body
+        const response = await fetch(
+            `${backendUrl}${targetEndpoint}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': request.headers.get('Authorization') || '',
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+
+        // Try to get response as text first
+        const responseText = await response.text()
+        console.log('DELETE response text:', responseText)
+
+        // Try to parse as JSON if there's content
+        let data = {}
+        if (responseText.trim()) {
+            try {
+                data = JSON.parse(responseText)
+            } catch (parseError) {
+                console.error('Failed to parse DELETE response as JSON:', parseError)
+                // If it's not JSON, use empty object
+            }
+        }
+        
+        if (!response.ok) {
+            return new Response(
+                JSON.stringify({ 
+                    message: 'DELETE operation failed',
+                    status: response.status,
+                    error: data
+                }),
+                { 
+                    status: response.status,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            )
+        }
+
+        // Handle successful response
+        return new Response(
+            responseText.trim() ? JSON.stringify(data) : JSON.stringify({ success: true }),
+            {
+                status: response.status,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+    } catch (error) {
+        console.error('Proxy DELETE error:', error)
+        return new Response(
+            JSON.stringify({ 
+                message: 'An error occurred while processing your DELETE request',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            }),
+            { status: 500 }
+        )
+    }
 } 

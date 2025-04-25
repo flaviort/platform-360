@@ -121,19 +121,19 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 								{[
 									{
 										icon: ShoppingCart,
-										text: 'Shop360' as ProductFilter
+										text: 'shop360' as ProductFilter
 									},
 									{
 										icon: ChartNoAxesCombined,
-										text: 'Demand360' as ProductFilter
+										text: 'demand360' as ProductFilter
 									},
 									{
 										icon: Search,
-										text: 'Insight360' as ProductFilter
+										text: 'insight360' as ProductFilter
 									},
 									{
 										icon: FilePenLine,
-										text: 'Feedback360' as ProductFilter
+										text: 'feedback360' as ProductFilter
 									}
 								].map((item, i) => (
 									<button
@@ -184,22 +184,22 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 								{[
 									{
 										image: shop360.src,
-										name: 'Shop360' as ProductFilter,
+										name: 'shop360' as ProductFilter,
 										width: 355
 									},
 									{
 										image: demand360.src,
-										name: 'Demand360' as ProductFilter,
+										name: 'demand360' as ProductFilter,
 										width: 365
 									},
 									{
 										image: insight360.src,
-										name: 'Insight360' as ProductFilter,
+										name: 'insight360' as ProductFilter,
 										width: 315
 									},
 									{
 										image: feedback360.src,
-										name: 'Feedback360' as ProductFilter,
+										name: 'feedback360' as ProductFilter,
 										width: 420
 									}
 								].map((item, i) => (

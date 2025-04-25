@@ -15,18 +15,43 @@ interface Project {
 	id: string
 	name: string
 	created_at: string
+	project_goal?: string
 }
 
 export default function ProjectName() {
 	const [projects, setProjects] = useState<Project[]>([])
 	const [selectedProject, setSelectedProject] = useState('')
 	const [isLoading, setIsLoading] = useState(true)
+	
+	// set up monitoring of the project goal field
+	useEffect(() => {
+		if (selectedProject === 'New Project') {
+			
+			// wait for the DOM to update with the field
+			setTimeout(() => {
+				const projectGoalField = document.getElementById('projectGoal') as HTMLTextAreaElement
+
+				if (projectGoalField) {
+					const handleInput = () => {
+						//console.log('Project goal value:', projectGoalField.value)
+					}
+					
+					projectGoalField.addEventListener('input', handleInput)
+
+					return () => {
+						projectGoalField.removeEventListener('input', handleInput)
+					}
+				}
+			}, 100)
+		}
+	}, [selectedProject])
 
 	useEffect(() => {
 		const fetchProjects = async () => {
 			try {
 				const response = await fetch('/api/proxy?endpoint=/api/projects/me')
 				const data = await response.json()
+				//console.log('Fetched projects:', data)
 				setProjects(data)
 			} catch (error) {
 				console.error('Error fetching projects:', error)
@@ -45,9 +70,13 @@ export default function ProjectName() {
 		if (value === 'New Project') {
 			// Reset the form fields when selecting New Project
 			const newProjectNameInput = document.getElementById('newProjectName') as HTMLInputElement
-			const projectDescriptionInput = document.getElementById('projectDescription') as HTMLTextAreaElement
+			const projectGoalInput = document.getElementById('projectGoal') as HTMLTextAreaElement
 			if (newProjectNameInput) newProjectNameInput.value = ''
-			if (projectDescriptionInput) projectDescriptionInput.value = ''
+			if (projectGoalInput) projectGoalInput.value = ''
+		} else {
+			// Log selected project details
+			const selectedProjectDetails = projects.find(p => p.name === value)
+			//console.log('Selected existing project:', selectedProjectDetails)
 		}
 	}
 
@@ -111,20 +140,20 @@ export default function ProjectName() {
 
 					<div className={styles.group}>
 						<div className={styles.label}>
-							<label htmlFor='projectDescription' className='text-16 semi-bold'>
-								Project Description <span className='red'>*</span>
+							<label htmlFor='projectGoal' className='text-16 semi-bold'>
+								Project Goal <span className='red'>*</span>
 							</label>
 						</div>
 
 						<div className={styles.input}>
 							<Textarea
-								placeholder='Type here'
+								placeholder='What is the goal of this project?'
 								required
-								label='Project Description'
-								name='projectDescription'
+								label='Project Goal'
+								name='projectGoal'
 								hideLabel
-								id='projectDescription'
-								maxLength={250}
+								id='projectGoal'
+								maxLength={1000}
 							/>
 						</div>
 					</div>

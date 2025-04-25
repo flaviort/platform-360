@@ -53,12 +53,6 @@ export default function PopupForm({
 	}
 
 	useEffect(() => {
-		function handleKeyDown(e: KeyboardEvent) {
-			if (e.key === 'Escape' && optionsSub) {
-				closeNewReportPopup()
-			}
-		}
-
 		function handleClickOutside(e: MouseEvent) {
 			if (!optionsSub) return
 	  
@@ -78,10 +72,8 @@ export default function PopupForm({
 		}
 	  
 		document.addEventListener('mousedown', handleClickOutside)
-		document.addEventListener('keydown', handleKeyDown)
 
 		return () => {
-			document.removeEventListener('keydown', handleKeyDown)
 			document.removeEventListener('mousedown', handleClickOutside)
 		}
 	}, [optionsSub])
@@ -145,7 +137,7 @@ export default function PopupForm({
 									className={styles.form}
 									onSuccess={onSuccess}
 									onError={onError}
-									enableConsoleLog
+									//enableConsoleLog
 								>
 									<div className={styles.top}>
 										<div className={styles.left}>

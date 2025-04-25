@@ -7,6 +7,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import Guidelines from '@/components/Utils/Guidelines'
 import Providers from '@/components/Providers'
 import GDPR from '@/components/GDPR'
+import FullScreenLoader from '@/components/FullScreenLoader'
 
 // css
 import '@/assets/css/normalize.min.css'
@@ -76,6 +77,8 @@ export default function RootLayout({
 				<Guidelines />
 
 				<GoogleAnalytics gaId='G-FE8FLM7CTP' />
+
+				<FullScreenLoader />
 
 			</body>
 

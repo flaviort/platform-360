@@ -59,9 +59,7 @@ export default function PopupInsight360({
 			const report = await createReport(reportData)
 			
 			// Redirect to the report page
-			const projectName = data.selectedProject === 'New Project' ? data.newProjectName : data.selectedProject
-			const reportName = data.reportName
-			router.push(`/dashboard/my-reports/${slugify(projectName)}/${slugify(reportName)}`)
+			router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
 		} catch (error) {
 			console.error('Failed to create report:', error)
 			throw error // Re-throw to be handled by handleError

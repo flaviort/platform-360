@@ -6,6 +6,11 @@
     gap: .5rem;
     padding: 2rem 0;
 
+    &.simple {
+        padding: 0;
+        justify-content: flex-start;
+    }
+
     span {
         display: flex;
         align-items: center;
