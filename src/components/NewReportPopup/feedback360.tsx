@@ -61,20 +61,38 @@ export default function PopupFeedback360({
 				category: data.category
 			})
 
+			// selected fields
+			const selectedCategory = [data.category || '']
+			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
+			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
+			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
+			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
+			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
+
 			// transform form data to match API format
 			const reportData: CreateReportData = {
 				name: data.reportName,
-				product_type: 'Feedback360',
+				product_type: 'feedback360',
 				category_id: categoryId,
 				status: true,
 				goal: data.goal,
 				project_id: projectId,
-				audience_size: data.audienceSize,
-				age: data.age,
-				genders: data.genders,
-				retailers: Object.keys(data.retailers || {}),
-				questions: data.questions,
-				price: data.price
+				product_settings: {
+					//audience_size: data.audienceSize,
+					//age: data.age,
+					//genders: selectedGenders,
+					//retailers: selectedRetailers,
+					//questions: data.questions,
+					start_date: selectedStartDate,
+					end_date: selectedEndDate
+					//price: data.price
+					
+				}
+				//age: data.age,
+				//genders: data.genders,
+				//retailers: Object.keys(data.retailers || {}),
+				//questions: data.questions,
+				//price: data.price
 			}
 
 			console.log('Creating report with data:', reportData)

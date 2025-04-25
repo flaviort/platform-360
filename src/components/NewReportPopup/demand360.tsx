@@ -76,6 +76,30 @@ export default function PopupDemand360({
 				category: data.category
 			})
 
+			// selected fields
+			const selectedCategory = [data.category || '']
+			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
+			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
+			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
+			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
+			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
+
+			const selectedRegions = Object.entries(data.regions || {})
+				.filter(([_, selected]) => selected === true)
+				.map(([name, _]) => {
+					// get all regions from all location sources
+					const allRegions = [
+						...canadaProvinces,
+						...usaStates,
+						...europeanCountries,
+						...ukRegions
+					]
+
+					// find the region object by name and return its label
+					const region = allRegions.find(r => r.name === name)
+					return region ? region.label : name
+			})
+
 			// transform form data to match API format
 			const reportData: CreateReportData = {
 				name: data.reportName,
@@ -85,27 +109,10 @@ export default function PopupDemand360({
 				goal: data.goal,
 				project_id: projectId,
 				product_settings: {
-					start_date: data.timePeriodStart instanceof Date 
-						? data.timePeriodStart.toISOString()
-						: new Date(data.timePeriodStart).toISOString(),
-					end_date: data.timePeriodEnd instanceof Date
-						? data.timePeriodEnd.toISOString()
-						: new Date(data.timePeriodEnd).toISOString(),
+					start_date: selectedStartDate,
+					end_date: selectedEndDate,
 					location: data.location,
-					regions: Object.entries(data.regions || {})
-						.filter(([_, selected]) => selected === true)
-						.map(([name, _]) => {
-							// Get all regions from all location sources
-							const allRegions = [
-								...canadaProvinces,
-								...usaStates,
-								...europeanCountries,
-								...ukRegions
-							]
-							// Find the region object by name and return its label
-							const region = allRegions.find(r => r.name === name)
-							return region ? region.label : name
-						})
+					regions: selectedRegions
 				}
 			}
 

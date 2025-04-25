@@ -57,16 +57,26 @@ export default function PopupInsight360({
 				category: data.category
 			})
 
+			// selected fields
+			const selectedCategory = [data.category || '']
+			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
+			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
+			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
+			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
+			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
+
 			// transform form data to match API format
 			const reportData: CreateReportData = {
 				name: data.reportName,
-				product_type: 'Insight360',
+				product_type: 'insight360',
 				category_id: categoryId,
 				status: true,
 				goal: data.goal,
 				project_id: projectId,
-				brands: Object.keys(data.brands || {}),
-				genders: data.genders
+				product_settings: {
+					start_date: selectedStartDate,
+					end_date: selectedEndDate
+				}
 			}
 
 			console.log('Creating report with data:', reportData)
