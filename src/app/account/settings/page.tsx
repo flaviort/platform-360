@@ -355,7 +355,6 @@ function AccountDetailsForm({ userData }: { userData: any }) {
                         label='Country'
                         name='country'
                         required
-                        labelAlwaysVisible
                     >
                         <option value='' disabled>Select one</option>
                         {countries.map((item, i) => (

@@ -458,13 +458,21 @@ export default function AIChatBox({
                                                                             */}
 
                                                                             <ChartBox
+                                                                                id={`ai-chart-${message.id}`}
                                                                                 boxSize='full'
                                                                                 AIChatChart
+                                                                                chartType='vertical'
                                                                                 chart={{
                                                                                     vertical: message.data?.map(item => ({
                                                                                         label: item.product_name,
                                                                                         value: item.price
                                                                                     }))
+                                                                                }}
+                                                                                reportSummary={{
+                                                                                    retailers: [],
+                                                                                    brands: [],
+                                                                                    genders: [],
+                                                                                    regions: []
                                                                                 }}
                                                                             />
                                                                         </div>

@@ -333,8 +333,10 @@ export default function PopupShop360({
 			const results = await Promise.all(chartPromises)
 
 			// Process results
-			const chartResults = results.filter(r => r.ok).map(r => r.data)
-			const atleastOneChartHasData = results.some(r => r.hasData)
+			const chartResults = results
+				.filter(r => r.ok && 'data' in r)
+				.map(r => (r as { data: any }).data)
+			const atleastOneChartHasData = results.some(r => 'hasData' in r && r.hasData)
 			
 			if (!atleastOneChartHasData) {
 				console.log('⚠️ All charts have empty results. Deleting report and notifying user.')

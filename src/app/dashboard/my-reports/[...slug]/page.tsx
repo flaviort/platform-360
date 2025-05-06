@@ -365,9 +365,9 @@ export default function DashboardMyReports() {
 				return {
 					...base,
 					category: category?.name || '--',
-					retailers: reportDetails.retailers || '--',
-					brands: reportDetails.brands || '--',
-					genders: reportDetails.genders || '--',
+					retailers: reportDetails.retailers ? [reportDetails.retailers] : [],
+					brands: reportDetails.brands ? [reportDetails.brands] : [],
+					genders: reportDetails.genders ? [reportDetails.genders] : [],
 					type: reportDetails.type || '--',
 					includeImages: reportDetails.includeImages === 'Yes',
 					timePeriod: reportDetails.timePeriod || '--'
@@ -379,26 +379,26 @@ export default function DashboardMyReports() {
 					category: category?.name || '--',
 					timePeriod: reportDetails.timePeriod || '--',
 					location: reportDetails.location || '--',
-					regions: reportDetails.regions || '--'
+					regions: reportDetails.regions ? [reportDetails.regions] : []
 				}
 				
 			case 'insight360':
 				return {
 					...base,
 					category: category?.name || '--',
-					brands: reportDetails.brands || '--',
-					genders: reportDetails.genders || '--'
+					brands: reportDetails.brands ? [reportDetails.brands] : [],
+					genders: reportDetails.genders ? [reportDetails.genders] : []
 				}
 				
 			case 'feedback360':
 				return {
 					...base,
 					audienceSize: reportDetails?.audienceSize || '--',
-					genders: reportDetails.genders || '--',
+					genders: reportDetails.genders ? [reportDetails.genders] : [],
 					age: reportDetails.age || '--',
 					location: reportDetails.location || '--',
-					regions: reportDetails.regions || '--',
-					retailers: reportDetails.retailers || '--',
+					regions: reportDetails.regions ? [reportDetails.regions] : [],
+					retailers: reportDetails.retailers ? [reportDetails.retailers] : [],
 					category: category?.name || '--',
 					questions: reportDetails.questions ? [reportDetails.questions] : [],
 					priceRange: reportDetails.priceRange || '--',
@@ -410,6 +410,23 @@ export default function DashboardMyReports() {
 					...base,
 					category: category?.name || '--'
 				}
+		}
+	}
+
+	// Helper function to extract chart-specific properties
+	const getChartSummary = () => {
+		const summary = getProductSummary()
+		return {
+			retailers: 'retailers' in summary ? summary.retailers : [],
+			brands: 'brands' in summary ? summary.brands : [],
+			genders: 'genders' in summary ? summary.genders : [],
+			age: 'age' in summary ? summary.age : undefined,
+			type: 'type' in summary ? summary.type : undefined,
+			includeImages: 'includeImages' in summary ? summary.includeImages : undefined,
+			timePeriod: 'timePeriod' in summary ? summary.timePeriod : undefined,
+			location: 'location' in summary ? summary.location : undefined,
+			regions: 'regions' in summary ? summary.regions : [],
+			priceRange: 'priceRange' in summary ? summary.priceRange : undefined
 		}
 	}
 
@@ -692,7 +709,7 @@ export default function DashboardMyReports() {
 													AIGenerated={chart.chat_generated || false}
 													chart={chartData}
 													chartType={chartType}
-													reportSummary={getProductSummary()}
+													reportSummary={getChartSummary()}
 												/>
 											)
 										})
