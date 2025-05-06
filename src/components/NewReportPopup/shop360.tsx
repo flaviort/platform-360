@@ -3,8 +3,7 @@
 // libraries
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useState, useEffect } from 'react'
 
 // components
 import PopupForm from './form'
@@ -76,12 +75,43 @@ export default function PopupShop360({
 			})
 
 			// selected fields
-			const selectedCategory = [data.category || '']
-			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
-			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
-			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
-			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
-			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
+			let selectedCategory = [data.category || '']
+			
+			if (selectedCategory.includes('Footwear')) {
+				selectedCategory = ['running shoes', 'heels', 'sandals', 'loafers', 'sneakers', 'shoes', 'flats', 'slippers', 'boots', 'clogs', 'oxfords']
+			}
+			
+			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true).map(retailer => retailer) : []
+			
+			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true).map(brand => brand) : []
+			
+			// transform gender values: convert to lowercase and remove 's or 's at the end
+			const transformGender = (gender: string): string => {
+				const lowercased = gender.toLowerCase()
+
+				if (lowercased === "kids") {
+					return "kids"
+				}
+				
+				if (lowercased.endsWith("'s")) {
+					return lowercased.slice(0, -2)
+				} else if (lowercased.endsWith("s")) {
+					return lowercased.slice(0, -1)
+				}
+
+				return lowercased
+			}
+
+			const selectedGenders = Array.isArray(data.genders)  ? data.genders.map(transformGender)  : (data.genders ? [transformGender(data.genders)] : [])
+			
+			// format dates to remove the milliseconds and Z timezone indicator
+			const formatISODate = (date: Date | string): string => {
+				const isoString = date instanceof Date ? date.toISOString() : new Date(date).toISOString()
+				return isoString.substring(0, 19)
+			}
+
+			const selectedStartDate = formatISODate(data.timePeriodStart)
+			const selectedEndDate = formatISODate(data.timePeriodEnd)
 
 			// transform form data to match API format
 			const reportData: CreateReportData = {
@@ -102,7 +132,7 @@ export default function PopupShop360({
 				}
 			}
 
-			// Step 1: Create the report
+			// step 1: create the report
 			console.log('Creating report with data:', reportData)
 			report = await createReport(reportData)
 			console.log('Report created:', report)
@@ -111,7 +141,7 @@ export default function PopupShop360({
 				throw new Error('Report creation failed or returned invalid data')
 			}
 
-			// Step 2: Verify report exists in database
+			// step 2: verify report exists in database
 			console.log(`Verifying report ${report.id} exists in database...`)
 			
 			const verifyReportResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${report.id}`, {
@@ -130,119 +160,92 @@ export default function PopupShop360({
 			const reportCharts = await verifyReportResponse.json()
 			console.log('Report verification successful:', reportCharts)
 
-			// Debug time period data from form
+			// debug time period data from form
 			console.log('Raw form data:', data)
-
-			// Format dates correctly from the form data
-			let startDate = "2022-01-01"
-			let endDate = "2025-01-01"
 			
-			// TimePeriod component uses timePeriodStart and timePeriodEnd fields
-			// Check for these fields directly in the form data
-			if (data.timePeriodStart) {
-				if (data.timePeriodStart instanceof Date) {
-					startDate = data.timePeriodStart.toISOString().split('T')[0]
-				} else if (typeof data.timePeriodStart === 'string') {
-					startDate = data.timePeriodStart
-				}
-			}
-			
-			if (data.timePeriodEnd) {
-				if (data.timePeriodEnd instanceof Date) {
-					endDate = data.timePeriodEnd.toISOString().split('T')[0]
-				} else if (typeof data.timePeriodEnd === 'string') {
-					endDate = data.timePeriodEnd
-				}
-			}
-			
-			// Step 3: Create multiple charts using the report ID
+			// step 3: create multiple charts using the report ID
 			console.log('Creating multiple charts for report ID:', report.id)
 			
-			// Add a delay before creating charts to ensure DB consistency
+			// add a delay before creating charts to ensure DB consistency
 			console.log('Waiting for database to synchronize before creating charts...')
 			await new Promise(resolve => setTimeout(resolve, 1000))
 			
 			// base data for all charts
 			const baseChartData = {
-				report_id: report.id
+				report_id: report.id,
+				query: {
+					category: selectedCategory,
+					company: selectedRetailers,
+					brand: selectedBrands,
+					gender: selectedGenders,
+					operator: {
+						start_date: selectedStartDate,
+						end_date: selectedEndDate
+					}
+				}
 			}
 
-			/*
 			// 1. price point analysis
-			const pricePointAnalysisChart = {
+			const pricePointAnalysis = {
 				...baseChartData,
 				title: 'Price Point Analysis',
-				description: 'Pricing Distribution',
+				description: 'Pricing Distribution ($5 increments)',
 				preferences: {
 					chart_type: 'price_point_analysis',
 					box_size: 'full'
 				},
 				query: {
-					product_name: '',
-					brands: null,
-					color: null,
-					sex: null,
-					companies: selectedRetailers,
-					month: null,
-					year: null,
-					price: null,
-					limit: 20,
-					aggregate: 'distribution',
-					operate_on: 'product_name',
-					boundaries: [0, 5, 10, 15, 20, 25, 30, 35]
+					...baseChartData.query,
+					operator: {
+						limit: 30,
+						aggregate: 'distribution',
+						operates_on: 'price',
+						boundaries: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
+					}
 				}
 			}
 
 			// 2. price point by retailer
-			const pricePointByRetailerChart = {
+			const pricePointByRetailer = {
 				...baseChartData,
 				title: 'Price Point by Retailer',
 				description: 'Pricing Distribution by Retailer',
 				preferences: {
-					chart_type: 'vertical_grouped',
+					chart_type: 'price_point_by_retailer',
 					box_size: 'full'
 				},
 				query: {
-					product_name: '',
-					brands: '',
-					color: null,
-					sex: null,
-					companies: null,
-					month: null,
-					year: null,
-					price: null,
-					limit: 20,
-					aggregate: 'all',
-					operate_on: 'company'
+					...baseChartData.query,
+					operator: {
+						...baseChartData.query.operator,
+						limit: 10,
+						aggregate: 'all',
+						operates_on: 'company'
+					}
 				}
 			}
-			*/
 
 			// 3. price distribution by brand
-			const priceDistributionChart = {
+			const priceDistribution = {
 				...baseChartData,
 				title: 'Price Distribution by Brand',
 				description: 'Average price distribution by brand',
 				preferences: {
-					chart_type: 'price_distribution'
+					chart_type: 'price_distribution_by_brand'
 				},
 				query: {
-					product_name: '',
-					brands: null,
-					color: null,
-					sex: null,
-					companies: null,
-					month: null,
-					year: null,
-					price: null,
-					limit: 10,
-					aggregate: 'average',
-					operate_on: 'brand'
+					...baseChartData.query,
+					operator: {
+						...baseChartData.query.operator,
+						limit: 10,
+						aggregate: 'average',
+						operates_on: 'brand'
+					}
 				}
 			}
 			
 			// 4. sku analysis
-			const skuAnalysisChart = {
+			const skuAnalysis = {
 				...baseChartData,
 				title: 'SKU Analysis',
 				description: 'Number of SKUs associated with each retailer',
@@ -250,22 +253,18 @@ export default function PopupShop360({
 					chart_type: 'sku_analysis' 
 				},
 				query: {
-					product_name: '',
-					brands: '',
-					color: null,
-					sex: null,
-					companies: null,
-					month: null,
-					year: null,
-					price: null,
-					limit: 8,
-					aggregate: 'count',
-					operate_on: 'company'
+					...baseChartData.query,
+					operator: {
+						...baseChartData.query.operator,
+						limit: 8,
+						aggregate: 'count',
+						operates_on: 'company'
+					}
 				}
 			}
 
 			// 5. color analysis
-			const colorAnalysisChart = {
+			const colorAnalysis = {
 				...baseChartData,
 				title: 'Color Analysis',
 				description: 'Analysis of product colors distribution',
@@ -274,84 +273,108 @@ export default function PopupShop360({
 					box_size: 'full'
 				},
 				query: {
-					brands: selectedBrands,
-					color: null,
-					sex: null,
-					companies: selectedRetailers,
-					limit: 20,
-					aggregate: 'count',
-					operate_on: 'color'
-				}
-			}
-
-			// 6. test chart
-			const testChart = {
-				...baseChartData,
-				title: 'sample chart',
-				description: 'this chart is coming from the DB',
-				preferences: {
-					chart_type: 'vertical',
-				},
-				query: {
-					categories: selectedCategory,
-					companies: selectedRetailers,
-					brands: selectedBrands,
-					sex: selectedGenders,
-					range: {
-						start_date: startDate,
-						end_date: endDate
-					},
-					limit: 10
+					...baseChartData.query,
+					operator: {
+						...baseChartData.query.operator,
+						limit: 20,
+						aggregate: 'count',
+						operates_on: 'color'
+					}
 				}
 			}
 			
 			// array of charts
 			const chartsToCreate = [
-				//{ name: 'Price Point Analysis', data: pricePointAnalysisChart },
-				//{ name: 'Price Point by Retailer', data: pricePointByRetailerChart },
-				{ name: 'Price Distribution by Brand', data: priceDistributionChart },
-				{ name: 'SKU Analysis', data: skuAnalysisChart },
-				{ name: 'Color Analysis', data: colorAnalysisChart },
-				{ name: 'Test Chart', data: testChart }
+				{ name: 'Price Point Analysis', data: pricePointAnalysis },
+				{ name: 'Price Point by Retailer', data: pricePointByRetailer },
+				{ name: 'Price Distribution by Brand', data: priceDistribution },
+				{ name: 'SKU Analysis', data: skuAnalysis },
+				{ name: 'Color Analysis', data: colorAnalysis }
 			]
 			
-			// Create each chart sequentially
-			for (const chart of chartsToCreate) {
-				try {
-					console.log(`Creating ${chart.name} chart with data:`, JSON.stringify(chart.data, null, 2))
-					
-					const chartResponse = await fetch('/api/proxy?endpoint=/api/charts', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-						},
-						body: JSON.stringify(chart.data)
-					})
-					
+			// Create all charts in parallel
+			const chartPromises = chartsToCreate.map(chart => {
+				console.log(`Creating ${chart.name} chart with data:`, JSON.stringify(chart.data, null, 2))
+				
+				return fetch('/api/proxy?endpoint=/api/charts', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+					},
+					body: JSON.stringify(chart.data)
+				})
+				.then(async chartResponse => {
 					console.log(`${chart.name} chart response status:`, chartResponse.status)
 					const responseText = await chartResponse.text()
 					
 					if (!chartResponse.ok) {
 						console.error(`Failed to create ${chart.name} chart:`, responseText)
-						console.warn(`Continuing with other charts despite ${chart.name} chart creation failure`)
-					} else {
-						const chartData = responseText ? JSON.parse(responseText) : {}
-						console.log(`Created ${chart.name} chart:`, chartData)
+						return { ok: false, name: chart.name }
 					}
 					
-					// Add a small delay between chart creations
-					await new Promise(resolve => setTimeout(resolve, 500))
-				} catch (error) {
+					const chartData = responseText ? JSON.parse(responseText) : {}
+					console.log(`Created ${chart.name} chart:`, chartData)
+					
+					return { 
+						ok: true, 
+						data: chartData, 
+						name: chart.name,
+						hasData: chartData && chartData.results && chartData.results.length > 0
+					}
+				})
+				.catch(error => {
 					console.error(`Error creating ${chart.name} chart:`, error)
-					console.warn(`Continuing with other charts despite ${chart.name} chart creation failure`)
-				}
-			}
+					return { ok: false, name: chart.name }
+				})
+			})
+
+			// Wait for all chart creations to complete
+			const results = await Promise.all(chartPromises)
+
+			// Process results
+			const chartResults = results.filter(r => r.ok).map(r => r.data)
+			const atleastOneChartHasData = results.some(r => r.hasData)
 			
-			// Only redirect after attempting to create all charts
-			console.log('Report and charts creation process completed. Redirecting to report page...')
-            document.dispatchEvent(new Event('formSent'))
-			router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
+			if (!atleastOneChartHasData) {
+				console.log('⚠️ All charts have empty results. Deleting report and notifying user.')
+				
+				// Delete the report that was just created
+				try {
+					console.log(`Deleting report with ID: ${report.id} because all charts have empty results`)
+					const deleteResponse = await fetch(`/api/delete-report`, {
+						method: 'POST',
+						headers: {
+							'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							reportId: report.id
+						})
+					})
+					
+					if (deleteResponse.ok) {
+						console.log('Report deleted successfully due to empty chart results')
+					} else {
+						console.error('Failed to delete report:', await deleteResponse.text())
+					}
+					
+					// Notify user with alert (temporary solution)
+					alert('No data found for the selected criteria. Please try different filters or time period.')
+					
+					// Dispatch form error event
+					document.dispatchEvent(new Event('formError'))
+					
+					return // Don't redirect
+				} catch (deleteError) {
+					console.error('Error deleting report with empty charts:', deleteError)
+				}
+			} else {
+				// only redirect if at least one chart has data
+				console.log('Report and charts creation process completed. At least one chart has data. Redirecting to report page...')
+				document.dispatchEvent(new Event('formSent'))
+				router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
+			}
 		} catch (error) {
 			console.error('Error during report/chart creation process:', error)
 			document.dispatchEvent(new Event('formError'))
@@ -521,6 +544,8 @@ export default function PopupShop360({
 
 				<ReportName />
 
+				<TimePeriod />
+
 				<Category />
 
 				<Retailers />
@@ -533,9 +558,7 @@ export default function PopupShop360({
 
 				<IncludeImages />
 
-				<TimePeriod />
-
-				<div className={styles.goal}>
+				<div className='relative'>
 
 					<Goal />
 

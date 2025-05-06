@@ -24,8 +24,8 @@ export default function Retailers() {
 			try {
 				const response = await fetch('/api/proxy?endpoint=/api/retailers')
 				const data = await response.json()
-				//console.log('API response for retailers:', data)
 				setRetailers(data)
+				//console.log(data)
 			} catch (error) {
 				console.error('Error fetching retailers:', error)
 			} finally {

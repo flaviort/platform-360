@@ -376,8 +376,14 @@ export default function Search({
                                 items
                                     .filter(item => {
                                         const itemLabel = typeof item.label === 'string' ? item.label : String(item.label || '')
-                                        return !field.value?.[item.name] && 
-                                            (!searchValue || itemLabel.toLowerCase().includes(searchValue.toLowerCase()))
+                                        // Don't show items that are already selected
+                                        if (field.value?.[item.name]) return false
+                                        
+                                        // If no search value, show all items
+                                        if (!searchValue) return true
+                                        
+                                        // Show items that include the search term (case insensitive)
+                                        return itemLabel.toLowerCase().includes(searchValue.toLowerCase())
                                     })
                                     .map((item, i) => (
                                         <label className={styles.item} key={`unselected-${i}`}>

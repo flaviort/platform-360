@@ -13,22 +13,18 @@
         }
 
         .bottomLabel {
-            display: block;
-            transform-origin: center;
-            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 80px;
+            //background-color: red;
+            padding-right: 15px;
             line-height: 1;
             overflow: hidden;
             text-overflow: ellipsis;
             text-align: right;
             padding-top: 4px;
             white-space: nowrap;
-
-            @media #{$mq-xl-min} {
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 2;
-                white-space: normal;
-            }
 
             @media #{$mq-sm-max} {
                 font-size: .5rem;

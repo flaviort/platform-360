@@ -74,9 +74,9 @@ export default function RootLayout({
 
 				<GDPR />
 
-				<Guidelines />
+				{process.env.NODE_ENV === 'development' && <Guidelines /> }
 
-				<GoogleAnalytics gaId='G-FE8FLM7CTP' />
+				{/*<GoogleAnalytics gaId='G-FE8FLM7CTP' />*/}
 
 				<FullScreenLoader />
 

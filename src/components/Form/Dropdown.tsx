@@ -22,6 +22,7 @@ interface DropdownProps {
     items: Array<{
         label: string
         name: string
+        id?: string
     }>
     limitSelected?: number
     searchable?: boolean
@@ -70,9 +71,9 @@ export default function Dropdown({
                     {selectedItemsArray.map((item, index) => (
                         <span
                             key={index}
-                            className={styles.button}
+                            className={clsx(styles.button, 'capitalize')}
                             onClick={(e) => {
-                                e.stopPropagation() // Prevent dropdown from toggling
+                                e.stopPropagation()
                                 handleDeselectItem(item.name)
                             }}
                         >
@@ -283,10 +284,15 @@ export default function Dropdown({
                         const itemLabel = typeof item.label === 'string' ? item.label : String(item.label || '')
                         return itemLabel.toLowerCase().includes(searchValue.toLowerCase())
                     }).map((item, i) => (
-                        <label className={styles.item} key={i}>
+                        <label
+                            className={styles.item}
+                            key={i}
+                            htmlFor={item.id}
+                        >
 
                             <input
                                 type='checkbox'
+                                id={item.id}
                                 className={styles.checkbox}
                                 checked={field.value?.[item.name] || false}
                                 onChange={(e) => handleCheckboxChange(item.name, e.target.checked)}
@@ -299,7 +305,7 @@ export default function Dropdown({
                                     <Check />
                                 </span>
 
-                                <span className={clsx(styles.text, 'text-16')}>
+                                <span className={clsx(styles.text, 'text-16 capitalize')}>
                                     {typeof item.label === 'string' ? item.label : String(item.label || '')}
                                 </span>
 

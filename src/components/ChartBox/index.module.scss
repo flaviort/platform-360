@@ -47,43 +47,14 @@
                     height: .75rem;
                 }
             }
-
-            .options {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 2rem;
-                min-width: 2rem;
-                height: 2rem;
-                padding: .5rem;
-                color: $gray-500;
-                border: var(--1px) solid $gray-200;
-                transition: .2s ease-in-out;
-                border-radius: .25rem;
-
-                &:hover,
-                &:focus-visible,
-                &.open {
-                    color: $white;
-                    background-color: $gray-500;
-                }
-
-                &.open {
-                    &:before,
-                    &:after {
-                        opacity: 0;
-                    }
-                }
-
-                svg {
-                    width: 100%;
-                    height: auto;
-                }
-            }
         }
     }
 
     .chart {
         margin-top: 1.5rem;
+
+        svg {
+            overflow: visible;
+        }
     }
 }

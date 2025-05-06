@@ -93,7 +93,7 @@ export default function TimePeriod() {
                         required
                         hideLabel
                         minDate='2018-01-01'
-                        maxDate='2025-03-10'
+                        maxDate={new Date().toISOString().split('T')[0]}
                         placeholderText='Start date'
                         hideValidations
                     />
@@ -116,7 +116,7 @@ export default function TimePeriod() {
                         required
                         hideLabel
                         minDate='2018-01-01'
-                        maxDate='2025-03-10'
+                        maxDate={new Date().toISOString().split('T')[0]}
                         placeholderText='End date'
                         hideValidations
                     />

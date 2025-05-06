@@ -1,0 +1,20 @@
+.component {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    background-color: $gray-100;
+    border-radius: 2rem;
+    font-size: .625rem;
+    color: $gray-700;
+    padding: .375rem .75rem;
+    margin-bottom: 2.25rem;
+    margin-top: -.75rem;
+    gap: .325rem;
+    margin-left: -.125rem;
+
+    svg {
+        width: .875rem;
+        min-width: .875rem;
+        height: .875rem;
+    }
+}

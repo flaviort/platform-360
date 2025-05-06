@@ -1,7 +1,6 @@
 // libraries
 import clsx from 'clsx'
-import { useState } from 'react'
-import { useFormContext, RegisterOptions } from 'react-hook-form'
+import { useFormContext, Controller } from 'react-hook-form'
 
 // svg
 import { ChevronDown } from 'lucide-react'
@@ -15,9 +14,9 @@ export interface SelectProps {
     name: string
     hideLabel?: boolean
     className?: string
+    selectClassName?: string
     required?: boolean
     hideValidations?: boolean
-    labelAlwaysVisible?: boolean
     defaultValue?: string
     onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
     children: React.ReactNode,
@@ -30,84 +29,76 @@ export default function Select({
     name,
     hideLabel,
     className,
+    selectClassName,
     required,
     hideValidations,
-    labelAlwaysVisible,
     defaultValue,
     onChange = () => {},
     children,
     disabled
 }: SelectProps) {
 
-    const { register, watch, formState: { errors } } = useFormContext()
+    const { control } = useFormContext()
 
-    // watch the input value
-    const inputValue = watch(name, '')
-
-    // track focus state
-    const [isFocused, setIsFocused] = useState(false)
-
-    let validations: RegisterOptions = {
-        onChange: (e) => onChange(e),
-        required
-    }
-    
-    if (!hideValidations) {
-        validations = {
-            required: required && 'This field is required'
-        }
-    }
-
-    // determine whether the label should shrink based on focus or input value
-    const shouldShrinkLabel = isFocused || inputValue !== ''
-
-    const isLabelAlwaysVisible = labelAlwaysVisible ? false : true
+    const validationRules = !hideValidations ? {
+        required: required && 'This field is required'
+    } : {}
 
     return (
-        <div className={clsx(
-            styles.formLine,
-            className,
-            hideLabel && styles.noLabel,
-            !hideValidations && errors[name] && styles.error
-        )}>
+        <Controller
+            name={name}
+            control={control}
+            defaultValue={defaultValue || ''}
+            rules={validationRules}
+            render={({ field, fieldState }) => {
+                
+                const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+                    field.onChange(e)
+                    onChange && onChange(e)
+                }
 
-            {!hideLabel && (
-                <label
-                    className={clsx(styles.label, 'text-16')}
-                    htmlFor={id}
-                    data-shrink={shouldShrinkLabel ? 'false' : isLabelAlwaysVisible}
-                >
-                    {label} {required && <span className='red'>*</span>}
-                </label>
-            )}
+                return (
+                    <div className={clsx(
+                        styles.formLine,
+                        className,
+                        hideLabel && styles.noLabel,
+                        !hideValidations && fieldState.error && styles.error
+                    )}>
+                        {!hideLabel && (
+                            <label
+                                className={clsx(styles.label, 'text-16')}
+                                htmlFor={id}
+                            >
+                                {label} {required && <span className='red'>*</span>}
+                            </label>
+                        )}
 
-            <div className={styles.lineWrapper}>
+                        <div className={styles.lineWrapper}>
+                            <select
+                                id={id}
+                                className={clsx(styles.input, styles.select, selectClassName)}
+                                disabled={disabled || false}
+                                value={field.value}
+                                onChange={handleChange}
+                                name={field.name}
+                                ref={field.ref}
+                            >
+                                {children}
+                            </select>
 
-                <select
-                    id={id}
-                    className={clsx(styles.input, styles.select)}
-                    defaultValue={defaultValue}
-                    disabled={disabled || false}
-                    {...register(name, {
-                        onChange: (e) => onChange && onChange(e),
-                        ...validations
-                    })}
-                >
-                    {children}
-                </select>
+                            <span className={styles.sideIcon}>
+                                <ChevronDown />
+                            </span>
+                        </div>
 
-                <span className={styles.sideIcon}>
-                    <ChevronDown />
-                </span>
-
-            </div>
-
-            {!hideValidations && errors[name] && (
-                <p className={styles.errorMsg}>
-                    {String(errors[name].message)}
-                </p>
-            )}
-
-        </div>
+                        {!hideValidations && fieldState.error && (
+                            <p className={styles.errorMsg}>
+                                {fieldState.error.message}
+                            </p>
+                        )}
+                    </div>
+                )
+            }}
+        />
     )
 }

@@ -94,7 +94,7 @@ export default function DashboardMyReports() {
 	// Function to fetch charts for a specific report
 	const fetchCharts = async (reportId: string) => {
 		try {
-			console.log(`Fetching charts for report ID: ${reportId}`)
+			//console.log(`Fetching charts for report ID: ${reportId}`)
 			const chartsResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${reportId}`)
 			
 			if (!chartsResponse.ok) {
@@ -117,7 +117,7 @@ export default function DashboardMyReports() {
 			setError(null)
 
 			try {
-				console.log(`Finding project with slug: ${projectSlug}`)
+				//console.log(`Finding project with slug: ${projectSlug}`)
 				
 				// Fetch all projects first
 				const projectsResponse = await fetch('/api/proxy?endpoint=/api/projects/me')
@@ -131,7 +131,7 @@ export default function DashboardMyReports() {
 				}
 				
 				const projects: Project[] = await projectsResponse.json()
-				console.log('All projects:', projects)
+				//console.log('All projects:', projects)
 				
 				// Find the project by ID directly instead of slugified name
 				const foundProject = projects.find(p => p.id === projectSlug)
@@ -143,7 +143,7 @@ export default function DashboardMyReports() {
 					notFound() // Trigger the 404 page for invalid project
 				}
 				
-				console.log('Found project:', foundProject)
+				//console.log('Found project:', foundProject)
 				setProject(foundProject)
 				
 				// Also try to get all reports to see what's available
@@ -152,11 +152,11 @@ export default function DashboardMyReports() {
 				
 				if (allReportsResponse.ok) {
 					const allReports: Report[] = await allReportsResponse.json()
-					console.log('All available reports:', allReports)
+					//console.log('All available reports:', allReports)
 					
 					// Filter reports for this project
 					projectReports = allReports.filter((r: Report) => r.project_id === foundProject.id)
-					console.log('Reports that match this project:', projectReports)
+					//console.log('Reports that match this project:', projectReports)
 					
 					// Set the reports state
 					setReports(projectReports)
@@ -167,12 +167,14 @@ export default function DashboardMyReports() {
 				
 				// Note: We'll skip the problematic project-specific endpoint since it's not returning the correct data
 				// Just log for debugging purposes
+				/*
 				const reportsUrl = `/api/proxy?endpoint=/api/projects/${foundProject.id}/reports`
 				console.log('Fetching reports URL for reference (known issue):', reportsUrl)
 				const reportsResponse = await fetch(reportsUrl)
 				console.log('Project-specific reports endpoint response status:', reportsResponse.status)
 				const responseText = await reportsResponse.text()
 				console.log('Project-specific reports endpoint response text:', responseText)
+				*/
 				
 				// if we have a reportSlug, try to find the corresponding report
 				if (reportSlug) {
@@ -192,7 +194,7 @@ export default function DashboardMyReports() {
 						notFound()
 					}
 					
-					console.log('Found report:', foundReport)
+					//console.log('Found report:', foundReport)
 					setReport(foundReport)
 					
 					// Always fetch charts, regardless of where we get the report details from
@@ -230,7 +232,7 @@ export default function DashboardMyReports() {
 								productSettings.questions.join(', ') : '',
 							uploadedFiles: ''  // No data source for this yet
 						}
-						console.log('Report details from product_settings:', details)
+						//console.log('Report details from product_settings:', details)
 						setReportDetails(details)
 					} else {
 						// Fallback to chart extraction if product_settings is not available
@@ -332,11 +334,6 @@ export default function DashboardMyReports() {
 			if (query.range && query.range.start_date && query.range.end_date) {
 				const startDate = new Date(query.range.start_date)
 				const endDate = new Date(query.range.end_date)
-				
-				// Format dates as MM/DD/YYYY
-				const formatDate = (date: Date) => {
-					return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
-				}
 				
 				details.timePeriod = `${formatDate(startDate)} - ${formatDate(endDate)}`
 			}
@@ -489,170 +486,226 @@ export default function DashboardMyReports() {
 							
 							<div className='relative z2'>
 								
-								<TopButtons reportId={report?.id} />
+								<TopButtons
+									projectId={project?.id || ''}
+									reportId={report?.id || ''}
+									howManyCharts={charts.length}
+								/>
 								
 								<div className={styles.allCharts}>
-									{charts.length > 0 ? (
-										charts.map((chart) => {
-											// Process chart data based on chart type
+									{charts.length > 0 ? (() => {
+										// Filter out charts with empty results
+										const chartsWithData = charts.filter(chart => 
+											chart.results && Array.isArray(chart.results) && chart.results.length > 0
+										)
+										
+										// If no charts have data, show the no charts message
+										if (chartsWithData.length === 0) {
+											return (
+												<div className={styles.noCharts}>
+													
+													<h2 className='text-30 semi-bold blue'>
+														Unfortunatelly, there is no data for this report.
+													</h2>
+
+													<p className='text-16'>
+														Try generate a new report with different filters or time period.
+													</p>
+
+												</div>
+											)
+										}
+										
+										// Organize charts by size (half vs full)
+										const halfCharts = chartsWithData.filter(chart => 
+											chart.preferences?.box_size !== 'full'
+										)
+										
+										const fullCharts = chartsWithData.filter(chart => 
+											chart.preferences?.box_size === 'full'
+										)
+										
+										// Prepare the final order of charts
+										const finalCharts = []
+										
+										// Process half charts (in pairs when possible)
+										for (let i = 0; i < halfCharts.length; i += 2) {
+											if (i + 1 < halfCharts.length) {
+												// We have a pair
+												finalCharts.push(halfCharts[i])
+												finalCharts.push(halfCharts[i + 1])
+											} else {
+												// Last unpaired half chart
+												finalCharts.push(halfCharts[i])
+											}
+										}
+										
+										// Add all full charts after the half charts
+										finalCharts.push(...fullCharts)
+										
+										// Render the charts in the organized order
+										return finalCharts.map((chart) => {
 											let chartData = {}
 											const chartType = chart.preferences?.chart_type || 'vertical'
 											
-											// Define type for chart result items
 											interface ChartResultItem {
-												product_name?: string
-												price?: number
-												image?: string
-												[key: string]: any // Allow for additional properties
+												[key: string]: any
 											}
 											
-											// Log the raw chart data for debugging
-											console.log('Processing chart:', chart.id, 'Type:', chartType, 'Results:', chart.results)
+											chartData = {}
 											
-											// Format results based on chart type
-											if (chartType === 'colors') {
-												chartData = {
-													colors: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															color: item.color || 'Unknown',
-															count: typeof item.count === 'number' ? item.count : 0
-														})) : []
-												}
-											}
-											
-											else if (chartType === 'sku_analysis') {
-												chartData = {
-													skuAnalysis: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															company: item.company || 'Unknown',
-															count: typeof item.count === 'number' ? item.count : 0
-														})) : []
-												}
-											}
+											// format results based on chart type
+											switch(chartType) {
+												
+												// price point analysis
+												case 'price_point_analysis':
+													chartData = {
+														pricePointAnalysis: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => {
+																
+																	// handle both _id and id fields
+																	const pricePoint = item._id !== undefined ? item._id : item.id
+																	
+																	// convert price point to range
+																	let rangeLabel
 
-											else if (chartType === 'price_distribution') {
-												chartData = {
-													priceDistribution: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															brand: item.brand || 'Unknown',
-															price: typeof item.price === 'number' ? item.price : 0
-														})) : []
-												}
-											}
+																	if (pricePoint === 'other') {
+																		rangeLabel = '$145 - $150'
+																	} else {
+																		const numericPoint = Number(pricePoint)
+																	
+																		// create a range label: current point to next point
+																		const increment = 5
+																		const nextPoint = numericPoint + increment
+																		rangeLabel = `$${numericPoint}-$${nextPoint}`
+																	}
+																	
+																	return {
+																		id: rangeLabel,
+																		count: typeof item.count === 'number' ? item.count : 0
+																	}
+																}).sort((a: {id: string, count: number}, b: {id: string, count: number}) => {
+																
+																	// special handling for '$145 - $150' category (always at the end)
+																	if (a.id === '$145 - $150') return 1
+																	if (b.id === '$145 - $150') return -1
+																
+																	// extract the starting price from the range
+																	const getStartPrice = (range: string) => {
+																		const match = range.match(/\$(\d+)-/)
+																		return match ? parseInt(match[1]) : 0
+																	}
+																
+																	// sort by starting price
+																	return getStartPrice(a.id) - getStartPrice(b.id)
+																}) : []
+													}
+													break
+													
+												// price point by retailer
+												case 'price_point_by_retailer':
+													chartData = {
+														pricePointByRetailer: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => ({
+																company: item.company || item.retailer || 'Unknown',
+																min: typeof item.min === 'number' ? item.min : 0,
+																avg: typeof item.avg === 'number' ? item.avg : 0,
+																max: typeof item.max === 'number' ? item.max : 0
+															})) : []
+													}
+													break
 
-											else if (chartType === 'vertical') {
-												chartData = {
-													vertical: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															label: item.product_name || 'Unknown',
-															value: typeof item.price === 'number' ? item.price : 0
-														})) : []
-												}
-											}
-											
-											else if (chartType === 'horizontal') {
-												chartData = {
-													horizontal: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															name: item.product_name || 'Unknown',
-															value: typeof item.price === 'number' ? item.price : 0,
-															color: '#3691E1' // Default color
-														})) : []
-												}
-											}
-											
-											else if (chartType === 'productPrice') {
-												chartData = {
-													productPrice: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															name: item.product_name || 'Unknown',
-															price: typeof item.price === 'number' ? 
-																`$${item.price.toFixed(2)}` : '$0.00',
-															image: item.image || ''
-														})) : []
-												}
-											}
-											
-											else {
-												// Default to vertical chart if type is unknown
-												chartData = {
-													vertical: Array.isArray(chart.results) ? 
-														chart.results.map((item: ChartResultItem) => ({
-															label: item.product_name || 'Unknown',
-															value: typeof item.price === 'number' ? item.price : 0
-														})) : []
-												}
+												// price distribution by brand
+												case 'price_distribution_by_brand' :
+													chartData = {
+														priceDistributionByBrand: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => ({
+																brand: item.brand || 'Unknown',
+																price: typeof item.price === 'number' ? item.price : 0
+															})) : []
+													}
+													break
+
+												// sku analysis
+												case 'sku_analysis':
+													chartData = {
+														skuAnalysis: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => ({
+																company: item.company || 'Unknown',
+																count: typeof item.count === 'number' ? item.count : 0
+															})) : []
+													}
+													break
+
+												// color analysis
+												case 'colors':
+													chartData = {
+														colors: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => ({
+																color: item.color || 'Unknown',
+																count: typeof item.count === 'number' ? item.count : 0
+															})) : []
+													}
+													break
+													
+												case 'vertical':
+													chartData = {
+														vertical: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => ({
+																label: item.product_name || 'Unknown',
+																value: typeof item.price === 'number' ? item.price : 0
+															})) : []
+													}
+													break
+													
+												case 'horizontal':
+													chartData = {
+														horizontal: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => ({
+																name: item.product_name || 'Unknown',
+																value: typeof item.price === 'number' ? item.price : 0
+															})) : []
+													}
+													break
+													
+												default:
+													//console.log('Unknown chart type:', chartType)
+													
+													// Default to vertical chart if type is unknown
+													chartData = {
+														vertical: Array.isArray(chart.results) ? 
+															chart.results.map((item: ChartResultItem) => ({
+																label: item.product_name || 'Unknown',
+																value: typeof item.price === 'number' ? item.price : 0
+															})) : []
+													}
+													break
 											}
 											
 											return (
 												<ChartBox
 													key={chart.id}
+													id={chart.id}
 													boxSize={chart.preferences?.box_size || 'half'}
 													title={chart.title || 'Chart Title'}
 													description={chart.description || 'Chart Description'}
 													AIGenerated={chart.chat_generated || false}
 													chart={chartData}
+													chartType={chartType}
+													reportSummary={getProductSummary()}
 												/>
 											)
 										})
-									) : (
-										<>
-											
-											<p className='text-16 semi-bold red'>
-												Insufficient data to generate charts.
+									})() : (
+										<div className={styles.noCharts}>
+											<h2 className='text-30 semi-bold blue'>
+												This report doesn't contain any charts.
+											</h2>
+											<p className='text-16'>
+												You can either generate new charts using the "Generate with AI" button, or you can create a new report on the previous page.
 											</p>
-
-											{/* Display default charts if no API charts are available */}
-											{/*
-											<ChartBox
-												boxSize={pricePointAnalysis.length > 10 ? 'full' : 'half'}
-												title='Price Point Analysis'
-												description='Pricing Distribution'
-												chart={{
-													vertical: pricePointAnalysis
-												}}
-											/>
-
-											<ChartBox
-												boxSize={averagePriceDistributionByBrand.length > 10 ? 'full' : 'half'}
-												title='Average Price Distribution by Brand'
-												description='Pricing Distribution'
-												chart={{
-													vertical: averagePriceDistributionByBrand
-												}}
-											/>
-											
-											<ChartBox
-												boxSize='half'
-												title='Number of SKUs associated with each retailer'
-												description='Minim dolor in amet nulla laboris enim dolore consequatt...'
-												AIGenerated={true}
-												chart={{
-													horizontal: numberOfSkus
-												}}
-											/>
-
-											<ChartBox
-												boxSize='half'
-												title='Statistic'
-												description='Minim dolor in amet nulla laboris enim dolore consequatt.'
-												chart={{
-													positiveNegative: positiveNegative
-												}}
-											/>
-
-											<ChartBox
-												boxSize='half'
-												title='Top Products'
-												description='Priced at $35 or less'
-												chart={{
-													productPrice: productPrice
-												}}
-											/>
-											*/}
-										</>
+										</div>
 									)}
-									
 								</div>
 
 							</div>

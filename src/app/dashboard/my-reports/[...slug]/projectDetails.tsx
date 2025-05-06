@@ -32,15 +32,15 @@ interface ProjectDetailsProps {
 		name: string
 		audienceSize?: string
 		category: string
-		retailers?: string
-		brands?: string
-		genders?: string
+		retailers?: string[]
+		brands?: string[]
+		genders?: string[]
 		age?: string
 		type?: string
 		includeImages?: boolean
 		timePeriod?: string
 		location?: string
-		regions?: string
+		regions?: string[]
 		priceRange?: string
 		questions?: string[]
 		uploadedFiles?: string[]
@@ -167,7 +167,7 @@ export default function ProjectDetails({
 											Category:
 										</p>
 
-										<div className={clsx(styles.content, 'text-14 gray-500')}>
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
 												{summary.category}
 											</p>
@@ -181,7 +181,7 @@ export default function ProjectDetails({
 											Retailers:
 										</p>
 
-										<div className={clsx(styles.content, 'text-14 gray-500')}>
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
 												{summary.retailers}
 											</p>
@@ -195,7 +195,7 @@ export default function ProjectDetails({
 											Brands:
 										</p>
 
-										<div className={clsx(styles.content, 'text-14 gray-500')}>
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
 												{summary.brands}
 											</p>
@@ -209,7 +209,7 @@ export default function ProjectDetails({
 											Genders:
 										</p>
 
-										<div className={clsx(styles.content, 'text-14 gray-500')}>
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
 												{summary.genders}
 											</p>
@@ -237,7 +237,7 @@ export default function ProjectDetails({
 											Type:
 										</p>
 
-										<div className={clsx(styles.content, 'text-14 gray-500')}>
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
 												{summary.type}
 											</p>
@@ -279,7 +279,7 @@ export default function ProjectDetails({
 											Location:
 										</p>
 
-										<div className={clsx(styles.content, 'text-14 gray-500')}>
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
 												{summary.location}
 											</p>
@@ -293,7 +293,7 @@ export default function ProjectDetails({
 											Regions:
 										</p>
 
-										<div className={clsx(styles.content, 'text-14 gray-500')}>
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
 												{summary.regions}
 											</p>

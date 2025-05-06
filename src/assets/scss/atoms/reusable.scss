@@ -24,6 +24,7 @@
 
 .nowrap { white-space: nowrap; }
 .uppercase { text-transform: uppercase; }
+.capitalize { text-transform: capitalize; }
 
 [data-stagger] > * { will-change: transform, opacity; }
 

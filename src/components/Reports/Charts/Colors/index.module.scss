@@ -5,6 +5,15 @@
         border-radius: .25rem;
         padding: .75rem;
         max-width: 10rem;
+
+        .color {
+            display: block;
+            width: 5rem;
+            height: .5rem;
+            border-radius: .125rem;
+            border: var(--1px) solid $gray-300;
+            margin-bottom: .25rem;
+        }
     }
 
     .chart {
@@ -22,6 +31,7 @@
             text-align: right;
             padding-top: 4px;
             white-space: nowrap;
+            text-transform: capitalize;
 
             @media #{$mq-xl-min} {
                 display: -webkit-box;

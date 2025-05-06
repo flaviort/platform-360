@@ -179,7 +179,6 @@
                 .topButtons {
                     display: flex;
                     align-items: center;
-                    justify-content: flex-end;
                     flex-direction: column;
                     gap: .5rem;
                     padding-top: 2rem;
@@ -191,6 +190,7 @@
 
                     @media #{$mq-lg-min} {
                         padding-right: 2rem;
+                        justify-content: flex-end;
                     }
 
                     .button {
@@ -198,6 +198,11 @@
                         border-radius: .25rem;
                         padding: .75rem 2rem;
                         transition: .2s ease-in-out;
+                        width: 100%;
+
+                        @media #{$mq-sm-min} {
+                            width: fit-content;
+                        }
 
                         &:hover,
                         &:focus-visible {
@@ -253,8 +258,21 @@
                         padding-right: 2rem;
                     }
 
-                    @media #{$mq-2xl-min} {
-                        
+                    .noCharts {
+                        display: flex;
+                        flex-direction: column;
+                        width: 100%;
+                        gap: .5rem;
+
+                        @media #{$mq-sm-min} {
+                            padding: 1rem 0;
+                        }
+
+                        @media #{$mq-lg-min} {
+                            padding: 2rem 0;
+                            text-align: center;
+                            align-items: center;
+                        }
                     }
                 }
             }

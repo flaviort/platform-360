@@ -4,7 +4,27 @@
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        padding-bottom: .5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .warning {
+        display: flex;
+        width: fit-content;
+        align-items: center;
+        background-color: $purple;
+        border-radius: 2rem;
+        font-size: .625rem;
+        color: $white;
+        padding: .375rem .75rem;
+        margin-bottom: 2.25rem;
+        margin-top: -.75rem;
+        gap: .325rem;
+
+        svg {
+            width: .875rem;
+            min-width: .875rem;
+            height: .875rem;
+        }
     }
 
     .tooltip {

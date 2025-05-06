@@ -17,9 +17,10 @@ import PopupInsight360 from '@/components/NewReportPopup/insight360'
 import PopupFeedback360 from '@/components/NewReportPopup/feedback360'
 import DeleteReport from '@/components/DeleteReport'
 import DeleteProject from '@/components/DeleteProject'
+import GenerateReport from '@/components/GenerateReport'
 
 // img / svg
-import { ArrowLeft, ArrowRight, FileChartColumn, Info, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Check } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChartColumn, Info, ShoppingCart, ChartNoAxesCombined, Search, FilePenLine, Check } from 'lucide-react'
 import OtherReports from '@/assets/svg/other/reports.svg'
 
 // css
@@ -65,6 +66,7 @@ export default function List({
     const [resultsPerPage, setResultsPerPage] = useState(50)
     const [searchText, setSearchText] = useState('')
     const [selectedProjectForReport, setSelectedProjectForReport] = useState<string | null>(null)
+    const [generateReportOpen, setGenerateReportOpen] = useState<boolean>(false)
 
     useEffect(() => {
         if (projects) {
@@ -158,6 +160,16 @@ export default function List({
         }
     }
 
+    const openGenerateReport = (projectId: string) => {
+        setSelectedProjectForReport(projectId)
+        setGenerateReportOpen(true)
+    }
+
+    const closeGenerateReport = () => {
+        setGenerateReportOpen(false)
+        setSelectedProjectForReport(null)
+    }
+
     const renderPaginatedProjects = () => {
         let currentCount = 0
         const paginatedContent: JSX.Element[] = []
@@ -202,7 +214,6 @@ export default function List({
                     <div
                         key={projectName}
                         className={styles.listGroup}
-                        data-select-report={selectedProjectForReport === group.projectId}
                     >
                         <div className={styles.listGroupTitle}>
                             
@@ -213,12 +224,10 @@ export default function List({
                             <div className={styles.projectActions}>
                                 <button
                                     className={styles.button}
-                                    onClick={() => {
-                                        setSelectedProjectForReport(group.projectId)
-                                    }}
+                                    onClick={() => openGenerateReport(group.projectId)}
                                 >
+                                    <ChartColumn />
                                     <span className='text-14 bold uppercase'>Generate Report</span>
-                                    <FileChartColumn />
                                 </button>
 
                                 <DeleteProject
@@ -293,6 +302,12 @@ export default function List({
                         <>
                             <Filters  onFilterChange={handleFilterChange}  />
 
+                            <GenerateReport
+                                projectId={selectedProjectForReport || ''}
+                                isOpen={generateReportOpen}
+                                onClose={closeGenerateReport}
+                            />
+
                             <section className={styles.list}>
                                 <div className='container container--big pt-smallest'>
                                     <div className={styles.listWrapper}>
@@ -357,35 +372,6 @@ export default function List({
                                     </div>
                                 </section>
                             )}
-
-                            <AnimatePresence>
-                                {selectedProjectForReport && (
-                                    <motion.div 
-                                        className={styles.generateReportWrapper}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -20 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <p className='text-16'>
-                                            Select the report you would like to include in your report.
-                                        </p>
-
-                                        <div className={styles.actions}>
-                                            <button 
-                                                className='button button--small button--hollow-white text-14'
-                                                onClick={() => setSelectedProjectForReport(null)}
-                                            >
-                                                Cancel
-                                            </button>
-
-                                            <button className={clsx(styles.submit, 'button button--small button--white text-14')}>
-                                                Generate
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
                         </>
                     )}
                 </>
@@ -413,19 +399,6 @@ export function ListItem({
 }) {
     return (
         <div className={styles.listItem}>
-            <div className={styles.checkboxCol}>
-                <label className={styles.checkbox} htmlFor={`report-${item.id}`}>
-                    <input
-                        type='checkbox'
-                        id={`report-${item.id}`}
-                        defaultChecked
-                    />
-                </label>
-
-                <span className={styles.checkboxIcon}>
-                    <Check />
-                </span>
-            </div>
 
             <div className={styles.nameCol}>
                 <Link
@@ -448,7 +421,7 @@ export function ListItem({
             </div>
 
             <div className={styles.categoryCol}>
-                <p className='text-16'>
+                <p className='text-16 capitalize'>
                     {item.category}
                 </p>
             </div>

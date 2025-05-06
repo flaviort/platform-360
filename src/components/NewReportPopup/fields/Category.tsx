@@ -15,6 +15,7 @@ interface Category {
 }
 
 export default function Category() {
+    /*
 	const [categories, setCategories] = useState<Category[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 
@@ -33,6 +34,7 @@ export default function Category() {
 
 		fetchCategories()
 	}, [])
+    */
 
 	return (
 		<div className={styles.group}>
@@ -51,15 +53,28 @@ export default function Category() {
                     name='category'
                     hideLabel
                     id='report-category'
+                    selectClassName='capitalize'
                 >
+                    {/*   
                     <option value='' disabled>
                         {isLoading ? 'Loading categories...' : 'Select one'}
                     </option>
+
                     {categories.map((category) => (
                         <option key={category.id} value={category.name}>
                             {category.name}
                         </option>
                     ))}
+                    */}
+                    <option value=''>Select one</option>
+                    <option value='Footwear'>Footwear</option>
+                    <option value='Apparel' disabled>Apparel</option>
+                    <option value='Equipment' disabled>Equipment</option>
+                    <option value='Accessories' disabled>Accessories</option>
+                    <option value='Work' disabled>Work</option>
+                    <option value='Home' disabled>Home</option>
+                    <option value='In Home' disabled>In Home</option>
+                    <option value='Electronics' disabled>Electronics</option>
                 </Select>
             </div>
 

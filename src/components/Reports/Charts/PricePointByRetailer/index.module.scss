@@ -1,0 +1,40 @@
+.component {
+    .tooltip {
+        background: $white;
+        border: var(--1px) solid $gray-200;
+        border-radius: .25rem;
+        padding: .75rem;
+        max-width: 10rem;
+    }
+
+    .chart {
+        .bars {
+
+        }
+
+        & :global {
+            .recharts-legend-wrapper {
+                ul {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 1rem;
+
+                    li {
+                        margin: 0!important;
+
+                        svg {
+                            position: relative;
+                            overflow: hidden;
+                            border-radius: .125rem;
+                        }
+                        
+                        span {
+                            @include text-12;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

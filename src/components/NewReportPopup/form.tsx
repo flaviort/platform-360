@@ -49,7 +49,7 @@ export default function PopupForm({
 
 	const popoverStyle = usePopoverPosition(optionsSubRef, optionsSub)
 
-	// Rotating through multiple loading messages when form is submitting
+	// rotating through multiple loading messages when form is submitting
 	useEffect(() => {
 		if (!isSubmitting || !Array.isArray(loadingMessages) || loadingMessages.length <= 1) return
 
@@ -70,7 +70,7 @@ export default function PopupForm({
 		}
 	}, [currentMessageIndex, loadingMessages, isSubmitting])
 
-	// Listen for form submission events
+	// listen for form submission events
 	useEffect(() => {
 		const handleFormSubmitStart = () => {
 			setIsSubmitting(true)
@@ -103,32 +103,6 @@ export default function PopupForm({
 	}
 
 	useEffect(() => {
-		function handleClickOutside(e: MouseEvent) {
-			if (!optionsSub) return
-	  
-			const target = e.target as Node
-
-			// if clicked inside toggle / buttons
-			if (optionsSubRef.current?.contains(target)) {
-				return
-			}
-			
-			// if click inside the popover itself
-			if (popoverRef.current?.contains(target)) {
-				return
-			}
-
-			closeNewReportPopup()
-		}
-	  
-		document.addEventListener('mousedown', handleClickOutside)
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [optionsSub])
-
-	useEffect(() => {
 		if (optionsSub) {
 			document.body.classList.add('no-scroll')
 		} else {
@@ -136,12 +110,12 @@ export default function PopupForm({
 		}
 	}, [optionsSub])
 
-	// Wrapped success handler to reset state
+	// wrapped success handler to reset state
 	const wrappedOnSuccess = (data: any) => {
 		onSuccess?.(data)
 	}
 
-	// Wrapped error handler to reset state
+	// wrapped error handler to reset state
 	const wrappedOnError = (error: any) => {
 		onError?.(error)
 	}
@@ -175,8 +149,12 @@ export default function PopupForm({
 								ease: 'easeInOut' 
 							}}
 							ref={popoverRef}
-							className={styles.component}
+							className={clsx(
+								styles.component,
+								isSubmitting && styles.submitting
+							)}
 						>
+
 							<div
 								className={styles.bg}
 								onClick={closeNewReportPopup}
@@ -199,8 +177,11 @@ export default function PopupForm({
 									onError={wrappedOnError}
 									//enableConsoleLog
 								>
+
 									<div className={styles.top}>
+
 										<div className={styles.left}>
+
 											<p className='text-25 bold'>
 												New Report
 											</p>
@@ -210,6 +191,7 @@ export default function PopupForm({
 											<p className='text-25 bold purple'>
 												{text}
 											</p>
+											
 										</div>
 
 										<button
@@ -219,6 +201,7 @@ export default function PopupForm({
 										>
 											<X />
 										</button>
+
 									</div>
 
 									<div className={styles.middle}>

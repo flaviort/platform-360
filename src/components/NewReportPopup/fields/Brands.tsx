@@ -1,10 +1,10 @@
 'use client'
 
 // libraries
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 // components
-import Search from '@/components/Form/Search'
+import CustomSearch from './CustomSearch'
 
 // css
 import styles from '../index.module.scss'
@@ -26,7 +26,6 @@ export default function Brands() {
 	
 	// transform all results to include selected items
 	const getDisplayItems = useCallback(() => {
-
 		// get unique brands from both search results and selected brands
 		const selectedBrandSlugs = Object.entries(selectedBrands)
 			.filter(([_, isSelected]) => isSelected)
@@ -37,24 +36,25 @@ export default function Brands() {
 			!searchResults.some(brand => brand.slug === slug)
 		)
 		
-		// create a complete list of items to display
-
-		// first add all search results
-		const displayItems = searchResults.map(brand => ({
+		// Map API results
+		const apiItems = searchResults.map(brand => ({
 			name: brand.slug,
 			label: brand.name
 		}))
 		
-		// then add any selected items that aren't in the search results
-		// for these, we don't have the original name, so we use the slug as both name and label
-		selectedBrandsNotInSearch.forEach(slug => {
-			displayItems.push({
-				name: slug,
-				label: slug
-			})
-		})
+		// Add any selected items
+		const selectedItems = selectedBrandsNotInSearch.map(slug => ({
+			name: slug,
+			label: slug
+		}))
 		
-		return displayItems
+		// Combine the lists
+		const allItems = [...apiItems, ...selectedItems]
+		
+		console.log('API Search Results:', searchResults.map(b => b.name))
+		console.log('Items for Search component:', allItems.map(i => i.label))
+		
+		return allItems
 	}, [searchResults, selectedBrands])
 	
 	const fetchBrands = useCallback(async (query: string) => {
@@ -65,9 +65,13 @@ export default function Brands() {
 		
 		setIsLoading(true)
 		try {
+			console.log('Fetching brands for query:', query)
 			const response = await fetch(`/api/proxy?endpoint=/api/brands?query=${encodeURIComponent(query)}`)
 			const data = await response.json()
-			//console.log('API response for brands:', data)
+			
+			console.log('API response for query:', query, data)
+			
+			// Store the search results
 			setSearchResults(data)
 		} catch (error) {
 			console.error('Error fetching brands:', error)
@@ -86,11 +90,10 @@ export default function Brands() {
 			</div>
 
 			<div className={styles.input}>
-				<Search
+				<CustomSearch
 					defaultValue='Search and select up to 5 brands...'
 					limitSelected={5}
 					items={getDisplayItems()}
-					searchable
 					required
 					name='brands'
 					id='report-brands'
