@@ -1,6 +1,7 @@
 // libraries
+import { useState } from 'react'
 import clsx from 'clsx'
-import { useFormContext, Controller } from 'react-hook-form'
+import { useFormContext, Controller, useWatch } from 'react-hook-form'
 
 // svg
 import { ChevronDown } from 'lucide-react'
@@ -44,6 +45,15 @@ export default function Select({
         required: required && 'This field is required'
     } : {}
 
+    // track focus state
+    const [isFocused, setIsFocused] = useState(false)
+
+    // watch the input value
+    const inputValue = useWatch({ control, name })
+
+    // determine whether the label should shrink based on focus or input value
+    const shouldShrinkLabel = isFocused || (inputValue !== undefined && inputValue !== '')
+
     return (
         <Controller
             name={name}
@@ -68,6 +78,7 @@ export default function Select({
                             <label
                                 className={clsx(styles.label, 'text-16')}
                                 htmlFor={id}
+                                data-shrink={shouldShrinkLabel ? 'false' : 'true'}
                             >
                                 {label} {required && <span className='red'>*</span>}
                             </label>
