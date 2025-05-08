@@ -104,49 +104,66 @@ export default function HorizontalBars({
     data,
     reportSummary
 }: HorizontalBarsProps) {
-
-    // process data to include all selected retailers
-    const processedData = React.useMemo(() => {
-        // parse retailers - handle case where it's a comma-separated string
-        let allSelectedRetailers: string[] = []
-        
+    //console.log('DEBUGGING RAW DATA:')
+    //console.log('Original reportSummary:', reportSummary)
+    
+    // Handle the case where retailers is an array containing comma-separated strings
+    let retailersList: string[] = []
+    
+    if (reportSummary.retailers) {
         if (Array.isArray(reportSummary.retailers)) {
-            allSelectedRetailers = reportSummary.retailers
-        } else if (typeof reportSummary.retailers === 'string') {
-            // split by comma and trim each value
-            allSelectedRetailers = (reportSummary.retailers as string)
-                .split(',')
-                .map((retailer: string) => retailer.trim())
-        }
-        
-        console.log('Parsed retailers:', allSelectedRetailers)
-        
-        // create a map of existing data by company name (case insensitive)
-        const dataByCompany = data.reduce((acc, item) => {
-            // store with lowercase key for case-insensitive matching
-            acc[item.company.toLowerCase()] = item
-            return acc
-        }, {} as Record<string, typeof data[0]>)
-        
-        return allSelectedRetailers.map(retailer => {
-            const retailerLower = retailer.toLowerCase()
-            
-            // if we have data for this retailer, use it
-            if (dataByCompany[retailerLower]) {
-                return dataByCompany[retailerLower]
+            // Process each item in the array, handling comma-separated values
+            for (const item of reportSummary.retailers) {
+                if (typeof item === 'string' && item.includes(',')) {
+                    // This array element itself contains comma-separated values
+                    const splitItems = item.split(',').map(r => r.trim()).filter(Boolean)
+                    retailersList.push(...splitItems)
+                } else {
+                    // Regular array element
+                    retailersList.push(item)
+                }
             }
-            
-            return {
+        } else if (typeof reportSummary.retailers === 'string') {
+            // Direct string splitting
+            retailersList = (reportSummary.retailers as string)
+                .split(',')
+                .map(r => r.trim())
+                .filter(Boolean)
+        }
+    }
+    
+    //console.log('Processed retailersList:', retailersList)
+    
+    // Create processed data - start with existing data
+    let processedData: Array<{company: string, count: number | null}> = [...data.map(item => ({
+        company: item.company,
+        count: item.count
+    }))]
+    
+    // Add missing retailers
+    for (const retailer of retailersList) {
+        // Case-insensitive match
+        const exists = processedData.some(
+            item => item.company.toLowerCase() === retailer.toLowerCase()
+        )
+        
+        if (!exists) {
+            processedData.push({
                 company: retailer,
                 count: null
-            }
-        })
-    }, [data, reportSummary.retailers])
+            })
+        }
+    }
+    
+    //console.log('Final processedData:', processedData)
+    
+    // Check if any retailers are missing data
+    const hasMissingData = processedData.some(item => item.count === null)
 
     return (
         <div className={styles.component}>
 
-            {processedData !== data && (
+            {hasMissingData && (
                 <Warning text="Some retailers you've selected do not have enough data to completely generate this chart. For a more accurate chart, please change the queries when creating the report." />
             )}
 

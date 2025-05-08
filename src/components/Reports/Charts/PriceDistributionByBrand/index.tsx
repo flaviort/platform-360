@@ -4,6 +4,9 @@
 import clsx from 'clsx'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, Cell } from 'recharts'
 
+// components
+import Warning from '@/components/Reports/components/Warning'
+
 // utils
 import useWindowSize from '@/utils/useWindowSize'
 import { formatPrice } from '@/utils/functions'
@@ -17,6 +20,18 @@ export interface PriceDistributionByBrandProps {
         brand: string
         price: number
     }>
+    reportSummary: {
+        retailers?: string[]
+        brands?: string[]
+        genders?: string[]
+        age?: string
+        type?: string
+        includeImages?: boolean
+        timePeriod?: string
+        location?: string
+        regions?: string
+        priceRange?: string
+    }
 }
 
 const CustomLabel = (props: any) => {
@@ -58,8 +73,64 @@ const CustomTooltip = ({ active, payload }: any) => {
 }
 
 export default function PriceDistributionByBrand({
-    data
+    data,
+    reportSummary
 }: PriceDistributionByBrandProps) {
+    //console.log('DEBUGGING RAW DATA:')
+    //console.log('Original reportSummary:', reportSummary)
+    
+    // Handle the case where brands is an array containing comma-separated strings
+    let brandsList: string[] = []
+    
+    if (reportSummary.brands) {
+        if (Array.isArray(reportSummary.brands)) {
+            // Process each item in the array, handling comma-separated values
+            for (const item of reportSummary.brands) {
+                if (typeof item === 'string' && item.includes(',')) {
+                    // This array element itself contains comma-separated values
+                    const splitItems = item.split(',').map(b => b.trim()).filter(Boolean)
+                    brandsList.push(...splitItems)
+                } else {
+                    // Regular array element
+                    brandsList.push(item)
+                }
+            }
+        } else if (typeof reportSummary.brands === 'string') {
+            // Direct string splitting
+            brandsList = (reportSummary.brands as string)
+                .split(',')
+                .map(b => b.trim())
+                .filter(Boolean)
+        }
+    }
+    
+    //console.log('Processed brandsList:', brandsList)
+    
+    // Create processed data - start with existing data
+    let processedData: Array<{brand: string, price: number | null}> = [...data.map(item => ({
+        brand: item.brand,
+        price: item.price
+    }))]
+    
+    // Add missing brands
+    for (const brand of brandsList) {
+        // Case-insensitive match
+        const exists = processedData.some(
+            item => item.brand.toLowerCase() === brand.toLowerCase()
+        )
+        
+        if (!exists) {
+            processedData.push({
+                brand: brand,
+                price: null
+            })
+        }
+    }
+    
+    //console.log('Final processedData:', processedData)
+    
+    // Check if any brands are missing data
+    const hasMissingData = processedData.some(item => item.price === null)
 
     // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
@@ -67,9 +138,13 @@ export default function PriceDistributionByBrand({
 
     return (
         <div className={styles.component}>
+            {hasMissingData && (
+                <Warning text="Some brands you've selected do not have enough data to completely generate this chart. For a more accurate chart, please change the queries when creating the report." />
+            )}
+
             <ResponsiveContainer height={400} className={styles.chart}>
                 <BarChart 
-                    data={data}
+                    data={processedData}
                     margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
                 >
                     <defs>

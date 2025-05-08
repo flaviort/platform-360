@@ -36,6 +36,13 @@ export interface PricePointByRetailerProps {
     }
 }
 
+interface RetailerData {
+    company: string
+    min: number | null
+    avg: number | null
+    max: number | null
+}
+
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
@@ -62,50 +69,70 @@ export default function PricePointByRetailer({
     data,
     reportSummary
 }: PricePointByRetailerProps) {
-
-    // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
     const fontSize = windowSize.width < 575 ? 8 : 12
     
-    // process data to include all selected retailers
-    const processedData = React.useMemo(() => {
-        // parse retailers - handle case where it's a comma-separated string
-        let allSelectedRetailers: string[] = []
-        
+    //console.log('DEBUGGING RAW DATA:')
+    //console.log('Original reportSummary:', reportSummary)
+    //console.log('Type of retailers:', typeof reportSummary.retailers)
+    
+    // Handle the case where retailers is an array containing comma-separated strings
+    let retailersList: string[] = []
+    
+    if (reportSummary.retailers) {
         if (Array.isArray(reportSummary.retailers)) {
-            allSelectedRetailers = reportSummary.retailers
-        } else if (typeof reportSummary.retailers === 'string') {
-            // split by comma and trim each value
-            allSelectedRetailers = (reportSummary.retailers as string)
-                .split(',')
-                .map((retailer: string) => retailer.trim())
-        }
-        
-        console.log('Parsed retailers:', allSelectedRetailers)
-        
-        // create a map of existing data by company name (case insensitive)
-        const dataByCompany = data.reduce((acc, item) => {
-            // store with lowercase key for case-insensitive matching
-            acc[item.company.toLowerCase()] = item
-            return acc
-        }, {} as Record<string, typeof data[0]>)
-        
-        return allSelectedRetailers.map(retailer => {
-            const retailerLower = retailer.toLowerCase()
-            
-            // If we have data for this retailer, use it
-            if (dataByCompany[retailerLower]) {
-                return dataByCompany[retailerLower]
+            // Process each item in the array, handling comma-separated values
+            for (const item of reportSummary.retailers) {
+                if (typeof item === 'string' && item.includes(',')) {
+                    // This array element itself contains comma-separated values
+                    const splitItems = item.split(',').map(r => r.trim()).filter(Boolean)
+                    retailersList.push(...splitItems)
+                } else {
+                    // Regular array element
+                    retailersList.push(item)
+                }
             }
-            
-            return {
+        } else if (typeof reportSummary.retailers === 'string') {
+            // Direct string splitting
+            retailersList = (reportSummary.retailers as string)
+                .split(',')
+                .map(r => r.trim())
+                .filter(Boolean)
+        }
+    }
+    
+    //console.log('Processed retailersList:', retailersList)
+    
+    // Create processed data - start with existing data
+    let processedData: RetailerData[] = [...data.map(item => ({
+        company: item.company,
+        min: item.min,
+        avg: item.avg,
+        max: item.max
+    }))]
+    
+    // Add missing retailers
+    for (const retailer of retailersList) {
+        // Case-insensitive match
+        const exists = processedData.some(
+            item => item.company.toLowerCase() === retailer.toLowerCase()
+        )
+        
+        if (!exists) {
+            processedData.push({
                 company: retailer,
                 min: null,
                 avg: null,
                 max: null
-            }
-        })
-    }, [data, reportSummary.retailers])
+            })
+        }
+    }
+    
+    //console.log('Final processedData:', processedData)
+    
+    const hasMissingData = processedData.some(item => 
+        item.min === null || item.avg === null || item.max === null
+    )
     
     // adjust bar size based on number of retailers and screen size
     const getBarSize = () => {
@@ -117,14 +144,10 @@ export default function PricePointByRetailer({
     
     const barSize = getBarSize()
 
-    //console.log('report summary:', reportSummary)
-    //console.log('original data:', data)
-    //console.log('processed data with all retailers:', processedData)
-
     return (
         <div className={styles.component}>
 
-            {processedData !== data && (
+            {hasMissingData && (
                 <Warning text="Some retailers you've selected do not have enough data to completely generate this chart. For a more accurate chart, please change the queries when creating the report." />
             )}
 

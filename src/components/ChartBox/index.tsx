@@ -178,7 +178,10 @@ export default function ChartBox({
                 {chart.priceDistributionByBrand && (
                     <PriceDistributionByBrand
                         data={chart.priceDistributionByBrand}
-                        //reportSummary={reportSummary}
+                        reportSummary={{
+                            ...reportSummary,
+                            regions: reportSummary.regions?.join(',')
+                        }}
                     />
                 )}
 

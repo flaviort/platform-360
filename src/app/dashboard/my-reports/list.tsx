@@ -129,14 +129,54 @@ export default function List({
         }
         acc[groupKey].reports.push(...item.reports)
         return acc
-    }, {} as Record<string, { projectName: string, reports: typeof filteredProjects[number]['reports'], projectId: string }>)
+    }, {} as Record<string, {
+        projectName: string,
+        reports: typeof filteredProjects[number]['reports'],
+        projectId: string
+    }>)
 
     const sortedProjectEntries = Object.entries(groupedProjects).sort((a, b) => {
         if (a[1].reports.length > 0 && b[1].reports.length === 0) return -1
-        
         if (a[1].reports.length === 0 && b[1].reports.length > 0) return 1
 
+        // sort projects by their most recent report date
+        const getLatestDate = (reports: Array<{
+            reportName: string
+            id: string
+            status: 'empty' | 'green'
+            category: string
+            createdAt: string
+            product: 'Shop360' | 'Demand360' | 'Insight360' | 'Feedback360'
+            createdBy: {
+                image?: string
+                name: string
+            }
+            access: Array<{
+                image?: string
+                name: string
+            }>
+            goal: string
+        }>) => {
+            if (reports.length === 0) return new Date(0)
+            return new Date(Math.max(...reports.map(r => new Date(r.createdAt).getTime())))
+        }
+
+        const dateA = getLatestDate(a[1].reports)
+        const dateB = getLatestDate(b[1].reports)
+
+        if (dateA > dateB) return -1
+        if (dateA < dateB) return 1
+
         return a[1].projectName.localeCompare(b[1].projectName)
+    })
+
+    // sort reports within each project by date
+    Object.values(groupedProjects).forEach(group => {
+        group.reports.sort((a, b) => {
+            const dateA = new Date(a.createdAt)
+            const dateB = new Date(b.createdAt)
+            return dateB.getTime() - dateA.getTime()
+        })
     })
 
     const totalReports = sortedProjectEntries.reduce((total, [_, group]) => 
@@ -238,6 +278,7 @@ export default function List({
                         </div>
 
                         {projectReports}
+                        
                     </div>
                 )
             }
@@ -339,6 +380,7 @@ export default function List({
                                         </div>
 
                                         {renderPaginatedProjects()}
+
                                     </div>
                                 </div>
                             </section>
@@ -347,6 +389,7 @@ export default function List({
                                 <section className={styles.pagination}>
                                     <div className='container container--big pt-smaller pt-md-smallest'>
                                         <div className={styles.flex}>
+
                                             <div className={styles.left}>
                                                 <p className='text-14 gray-500'>
                                                     Showing <span>{startIndex + 1}</span>-<span>{Math.min(endIndex, totalReports)}</span> out of <span>{totalReports}</span>

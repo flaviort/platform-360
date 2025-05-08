@@ -165,6 +165,21 @@
                     }
                 }
 
+                .tags {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: .5rem;
+                    margin: .75rem 0;
+
+                    p {
+                        display: inline-block;
+                        line-height: 1;
+                        padding: .25rem .75rem;
+                        border-radius: 2rem;
+                        background-color: $gray-100;
+                    }
+                }
+
                 .charts {
                     position: relative;
                     display: block;
@@ -218,6 +233,12 @@
             button {
                 @media #{$mq-md-max} {
                     width: 100%;
+                }
+
+                &.disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    pointer-events: none;
                 }
             }
         }
