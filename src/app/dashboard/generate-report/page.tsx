@@ -6,10 +6,13 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { notFound } from 'next/navigation'
 
+// components
+import LazyLoad from '@/components/LazyLoad'
+
 // css
 import styles from './index.module.scss'
 
-export default function GenerateReport() {
+function GenerateReportContent() {
 	const searchParams = useSearchParams()
 	
 	useEffect(() => {
@@ -27,7 +30,6 @@ export default function GenerateReport() {
 			console.error('Error parsing report data:', error)
 			notFound()
 		}
-		
 	}, [searchParams])
 
 	return (
@@ -36,19 +38,25 @@ export default function GenerateReport() {
 				<div className={styles.pages}>
 
 					<div className={styles.page}>
-
 						<h1>
 							Generate Report
 						</h1>
-
 					</div>
 
 					<div className={styles.page}>
-
+						
 					</div>
 
 				</div>
 			</div>
 		</div>
+	)
+}
+
+export default function GenerateReport() {
+	return (
+		<LazyLoad>
+			<GenerateReportContent />
+		</LazyLoad>
 	)
 }
