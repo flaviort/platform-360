@@ -15,6 +15,7 @@ export default function Warning({
             data-balloon-pos='down-left'
             data-balloon-length='xlarge'
             aria-label={text}
+            data-warning
         >
             <BadgeAlert strokeWidth={1.5} /> Attention
         </p>

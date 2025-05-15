@@ -30,6 +30,8 @@ interface ChartBoxProps {
     AIChatChart?: boolean
     boxSize: 'half' | 'full'
     chartType: string
+    chartHeight?: number
+    showAllNumbers?: boolean
     chart: {
         pricePointAnalysis?: Array<{
             id: string
@@ -92,17 +94,22 @@ export default function ChartBox({
     AIChatChart,
     boxSize = 'half',
     chartType,
+    chartHeight,
     chart,
-    reportSummary
+    reportSummary,
+    showAllNumbers
 }: ChartBoxProps) {
     return (
-        <div className={clsx(
-            styles.component,
-            boxSize === 'full' && styles.full,
-            boxSize === 'half' && styles.half
-        )}>
+        <div
+            className={clsx(
+                styles.component,
+                boxSize === 'full' && styles.full,
+                boxSize === 'half' && styles.half
+            )}
+            data-chart
+        >
 
-            <div className={styles.header}>
+            <div className={styles.header} data-chart-header>
 
                 {!AIChatChart && (title || description) && (
                     <div className={styles.left}>
@@ -146,11 +153,17 @@ export default function ChartBox({
 
             </div>
 
-            <div className={styles.chart} data-chart-type={chartType}>
+            <div
+                className={styles.chart}
+                data-chart-type={chartType}
+                data-chart-main
+            >
 
                 {chart.pricePointAnalysis && (
                     <PricePointAnalysis
                         data={chart.pricePointAnalysis}
+                        height={chartHeight}
+                        showAllNumbers={showAllNumbers}
                         //reportSummary={reportSummary}
                     />
                 )}
@@ -158,6 +171,7 @@ export default function ChartBox({
                 {chart.pricePointByRetailer && (
                     <PricePointByRetailer
                         data={chart.pricePointByRetailer}
+                        height={chartHeight}
                         reportSummary={{
                             ...reportSummary,
                             regions: reportSummary.regions?.join(',')
@@ -168,6 +182,7 @@ export default function ChartBox({
                 {chart.skuAnalysis && (
                     <SkuAnalysis
                         data={chart.skuAnalysis}
+                        height={chartHeight}
                         reportSummary={{
                             ...reportSummary,
                             regions: reportSummary.regions?.join(',')
@@ -178,16 +193,20 @@ export default function ChartBox({
                 {chart.priceDistributionByBrand && (
                     <PriceDistributionByBrand
                         data={chart.priceDistributionByBrand}
+                        height={chartHeight}
                         reportSummary={{
                             ...reportSummary,
                             regions: reportSummary.regions?.join(',')
                         }}
+                        showAllNumbers={showAllNumbers}
                     />
                 )}
 
                 {chart.colors && (
                     <Colors
                         data={chart.colors}
+                        height={chartHeight}
+                        showAllNumbers={showAllNumbers}
                         //reportSummary={reportSummary}
                     />
                 )}

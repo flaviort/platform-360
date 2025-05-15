@@ -49,9 +49,9 @@ export default function Guidelines() {
     return (
         <>
 
-            <div className={styles.breakpoint}></div>
+            <div className={styles.breakpoint} data-breakpoint></div>
 
-            <div className={clsx(styles.grid, isGridVisible && styles.visible)}>
+            <div className={clsx(styles.grid, isGridVisible && styles.visible)} data-grid>
                 <div className='container'>
                     <div className='row'>
                         {Array.from({ length: 12 }).map((_, i) => (

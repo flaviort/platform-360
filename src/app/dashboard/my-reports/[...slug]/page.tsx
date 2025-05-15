@@ -16,7 +16,8 @@ import TopButtons from './topButtons'
 import styles from './index.module.scss'
 
 // utils
-import { slugify } from '@/utils/functions'
+import { slugify, formatDateForReport } from '@/utils/functions'
+import { formatChartData, ChartResultItem } from '@/utils/chartUtils'
 
 interface Report {
 	id: string
@@ -522,7 +523,7 @@ export default function DashboardMyReports() {
 												<div className={styles.noCharts}>
 													
 													<h2 className='text-30 semi-bold blue'>
-														Unfortunatelly, there is no data for this report.
+														Unfortunately, there is no data for this report.
 													</h2>
 
 													<p className='text-16'>
@@ -562,142 +563,7 @@ export default function DashboardMyReports() {
 										
 										// Render the charts in the organized order
 										return finalCharts.map((chart) => {
-											let chartData = {}
-											const chartType = chart.preferences?.chart_type || 'vertical'
-											
-											interface ChartResultItem {
-												[key: string]: any
-											}
-											
-											chartData = {}
-											
-											// format results based on chart type
-											switch(chartType) {
-												
-												// price point analysis
-												case 'price_point_analysis':
-													chartData = {
-														pricePointAnalysis: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => {
-																
-																	// handle both _id and id fields
-																	const pricePoint = item._id !== undefined ? item._id : item.id
-																	
-																	// convert price point to range
-																	let rangeLabel
-
-																	if (pricePoint === 'other') {
-																		rangeLabel = '$145 - $150'
-																	} else {
-																		const numericPoint = Number(pricePoint)
-																	
-																		// create a range label: current point to next point
-																		const increment = 5
-																		const nextPoint = numericPoint + increment
-																		rangeLabel = `$${numericPoint}-$${nextPoint}`
-																	}
-																	
-																	return {
-																		id: rangeLabel,
-																		count: typeof item.count === 'number' ? item.count : 0
-																	}
-																}).sort((a: {id: string, count: number}, b: {id: string, count: number}) => {
-																
-																	// special handling for '$145 - $150' category (always at the end)
-																	if (a.id === '$145 - $150') return 1
-																	if (b.id === '$145 - $150') return -1
-																
-																	// extract the starting price from the range
-																	const getStartPrice = (range: string) => {
-																		const match = range.match(/\$(\d+)-/)
-																		return match ? parseInt(match[1]) : 0
-																	}
-																
-																	// sort by starting price
-																	return getStartPrice(a.id) - getStartPrice(b.id)
-																}) : []
-													}
-													break
-													
-												// price point by retailer
-												case 'price_point_by_retailer':
-													chartData = {
-														pricePointByRetailer: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => ({
-																company: item.company || item.retailer || 'Unknown',
-																min: typeof item.min === 'number' ? item.min : 0,
-																avg: typeof item.avg === 'number' ? item.avg : 0,
-																max: typeof item.max === 'number' ? item.max : 0
-															})) : []
-													}
-													break
-
-												// price distribution by brand
-												case 'price_distribution_by_brand' :
-													chartData = {
-														priceDistributionByBrand: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => ({
-																brand: item.brand || 'Unknown',
-																price: typeof item.price === 'number' ? item.price : 0
-															})) : []
-													}
-													break
-
-												// sku analysis
-												case 'sku_analysis':
-													chartData = {
-														skuAnalysis: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => ({
-																company: item.company || 'Unknown',
-																count: typeof item.count === 'number' ? item.count : 0
-															})) : []
-													}
-													break
-
-												// color analysis
-												case 'colors':
-													chartData = {
-														colors: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => ({
-																color: item.color || 'Unknown',
-																count: typeof item.count === 'number' ? item.count : 0
-															})) : []
-													}
-													break
-													
-												case 'vertical':
-													chartData = {
-														vertical: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => ({
-																label: item.product_name || 'Unknown',
-																value: typeof item.price === 'number' ? item.price : 0
-															})) : []
-													}
-													break
-													
-												case 'horizontal':
-													chartData = {
-														horizontal: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => ({
-																name: item.product_name || 'Unknown',
-																value: typeof item.price === 'number' ? item.price : 0
-															})) : []
-													}
-													break
-													
-												default:
-													//console.log('Unknown chart type:', chartType)
-													
-													// Default to vertical chart if type is unknown
-													chartData = {
-														vertical: Array.isArray(chart.results) ? 
-															chart.results.map((item: ChartResultItem) => ({
-																label: item.product_name || 'Unknown',
-																value: typeof item.price === 'number' ? item.price : 0
-															})) : []
-													}
-													break
-											}
+											const { chartData, chartType } = formatChartData(chart)
 											
 											return (
 												<ChartBox

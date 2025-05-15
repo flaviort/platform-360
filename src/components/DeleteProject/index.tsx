@@ -154,11 +154,11 @@ export default function DeleteProject({
                                                     
                                                     console.log('Found project reports:', projectReports.length)
                                                     
-                                                    // Delete all reports in this project using their IDs
-                                                    for (const report of projectReports) {
+                                                    // Process all reports in this project
+                                                    // First, gather all charts from all reports
+                                                    const getAllChartsPromises = projectReports.map(async (report: any) => {
                                                         console.log('Processing report ID:', report.id)
                                                         
-                                                        // First try to delete associated charts
                                                         try {
                                                             console.log('Checking for associated charts for report ID:', report.id)
                                                             
@@ -174,68 +174,113 @@ export default function DeleteProject({
                                                                 
                                                                 if (charts && charts.length > 0) {
                                                                     console.log(`Found ${charts.length} charts to delete for report ${report.id}`)
-                                                                    
-                                                                    // Delete each chart individually
-                                                                    for (const chart of charts) {
-                                                                        const chartId = chart.id
-                                                                        console.log(`Deleting chart with ID: ${chartId}`)
-                                                                        
-                                                                        const deleteChartResponse = await fetch(`/api/proxy?endpoint=/api/charts/${chartId}`, {
-                                                                            method: 'DELETE',
-                                                                            headers: {
-                                                                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                                                                            }
-                                                                        })
-                                                                        
-                                                                        if (deleteChartResponse.ok) {
-                                                                            console.log(`Successfully deleted chart: ${chartId}`)
-                                                                        } else {
-                                                                            console.warn(`Warning: Failed to delete chart ${chartId}`)
-                                                                        }
-                                                                    }
+                                                                    return { report, charts }
                                                                 } else {
                                                                     console.log(`No charts found for report ${report.id}`)
+                                                                    return { report, charts: [] }
                                                                 }
                                                             } else if (chartsResponse.status === 404) {
                                                                 console.log('Chart listing endpoint not available for this report - continuing')
+                                                                return { report, charts: [] }
                                                             } else {
                                                                 console.warn(`Could not fetch charts for report ${report.id}: ${chartsResponse.status} ${chartsResponse.statusText}`)
+                                                                return { report, charts: [] }
                                                             }
                                                         } catch (chartError: any) {
                                                             console.warn(`Error handling charts for report ${report.id}:`, chartError.message || chartError)
-                                                            // Continue with report deletion even if chart deletion fails
+                                                            return { report, charts: [] }
                                                         }
+                                                    })
+                                                    
+                                                    // Wait for all chart listings to be fetched
+                                                    const reportChartsList = await Promise.all(getAllChartsPromises)
+                                                    
+                                                    // Prepare all chart deletion promises
+                                                    const allChartDeletionPromises: Promise<any>[] = []
+                                                    
+                                                    // Gather all chart deletion promises
+                                                    reportChartsList.forEach(({ report, charts }) => {
+                                                        if (charts.length > 0) {
+                                                            const chartDeletionPromises = charts.map((chart: any) => {
+                                                                const chartId = chart.id
+                                                                console.log(`Queueing deletion for chart with ID: ${chartId}`)
+                                                                
+                                                                return fetch(`/api/proxy?endpoint=/api/charts/${chartId}`, {
+                                                                    method: 'DELETE',
+                                                                    headers: {
+                                                                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                                                                    }
+                                                                }).then(response => {
+                                                                    if (response.ok) {
+                                                                        console.log(`Successfully deleted chart: ${chartId}`)
+                                                                        return { chartId, success: true }
+                                                                    } else {
+                                                                        console.warn(`Warning: Failed to delete chart ${chartId}`)
+                                                                        return { chartId, success: false }
+                                                                    }
+                                                                })
+                                                            })
+                                                            
+                                                            allChartDeletionPromises.push(...chartDeletionPromises)
+                                                        }
+                                                    })
+                                                    
+                                                    // Execute all chart deletions in parallel
+                                                    if (allChartDeletionPromises.length > 0) {
+                                                        console.log(`Deleting ${allChartDeletionPromises.length} charts in parallel`)
+                                                        const chartResults = await Promise.all(allChartDeletionPromises)
+                                                        const successCount = chartResults.filter(r => r.success).length
+                                                        console.log(`Successfully deleted ${successCount} out of ${allChartDeletionPromises.length} charts`)
+                                                    } else {
+                                                        console.log('No charts to delete')
+                                                    }
+                                                    
+                                                    // Add a small delay to ensure database consistency after chart deletion
+                                                    await new Promise(resolve => setTimeout(resolve, 500))
+                                                    
+                                                    // Now delete all reports in parallel
+                                                    const reportDeletionPromises = projectReports.map((report: any) => {
+                                                        const reportId = report.id
+                                                        console.log(`Queueing deletion for report ID: ${reportId}`)
                                                         
-                                                        // Add a small delay to ensure database consistency
-                                                        await new Promise(resolve => setTimeout(resolve, 500))
-                                                        
-                                                        // Now delete the report
-                                                        console.log(`Deleting report ID: ${report.id}`)
-                                                        const deleteResponse = await fetch(`/api/delete-report`, {
+                                                        return fetch(`/api/delete-report`, {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                                                                 'Content-Type': 'application/json'
                                                             },
                                                             body: JSON.stringify({
-                                                                reportId: report.id
+                                                                reportId: reportId
                                                             })
-                                                        })
-                                                        
-                                                        if (!deleteResponse.ok) {
-                                                            console.warn(`Warning: Failed to delete report ${report.id}`)
-                                                            console.log('Response status:', deleteResponse.status)
-                                                            
-                                                            try {
-                                                                const errorData = await deleteResponse.json()
-                                                                console.error('Error deleting report:', errorData)
-                                                            } catch (e) {
-                                                                const errorText = await deleteResponse.text()
-                                                                console.error('Error text:', errorText)
+                                                        }).then(async response => {
+                                                            if (response.ok) {
+                                                                console.log(`Successfully deleted report: ${reportId}`)
+                                                                return { reportId, success: true }
+                                                            } else {
+                                                                console.warn(`Warning: Failed to delete report ${reportId}`)
+                                                                console.log('Response status:', response.status)
+                                                                
+                                                                try {
+                                                                    const errorData = await response.json()
+                                                                    console.error('Error deleting report:', errorData)
+                                                                } catch (e) {
+                                                                    const errorText = await response.text()
+                                                                    console.error('Error text:', errorText)
+                                                                }
+                                                                
+                                                                return { reportId, success: false }
                                                             }
-                                                        } else {
-                                                            console.log(`Successfully deleted report: ${report.id}`)
-                                                        }
+                                                        })
+                                                    })
+                                                    
+                                                    // Execute all report deletions in parallel
+                                                    if (reportDeletionPromises.length > 0) {
+                                                        console.log(`Deleting ${reportDeletionPromises.length} reports in parallel`)
+                                                        const reportResults = await Promise.all(reportDeletionPromises)
+                                                        const successCount = reportResults.filter(r => r.success).length
+                                                        console.log(`Successfully deleted ${successCount} out of ${reportDeletionPromises.length} reports`)
+                                                    } else {
+                                                        console.log('No reports to delete')
                                                     }
                                                     
                                                     // Now delete the project

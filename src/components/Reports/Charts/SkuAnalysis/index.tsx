@@ -28,6 +28,7 @@ export interface HorizontalBarsProps {
 		regions?: string
 		priceRange?: string
     }
+    height?: number
 }
 
 const CustomLabel = (props: any) => {
@@ -73,7 +74,7 @@ const CustomValueLabel = (props: any) => {
             y={yPosition}
             fill='#333'
             alignmentBaseline='middle'
-            className='text-14 medium'
+            className='text-12 medium'
         >
             {formattedValue}
         </text>
@@ -102,7 +103,8 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export default function HorizontalBars({
     data,
-    reportSummary
+    reportSummary,
+    height
 }: HorizontalBarsProps) {
     //console.log('DEBUGGING RAW DATA:')
     //console.log('Original reportSummary:', reportSummary)
@@ -159,6 +161,39 @@ export default function HorizontalBars({
     
     // Check if any retailers are missing data
     const hasMissingData = processedData.some(item => item.count === null)
+    
+    // Calculate a better domain max based on actual data
+    const calculateXAxisMax = () => {
+        // Find the actual max value in the data
+        const maxCount = Math.max(...processedData
+            .filter(item => item.count !== null)
+            .map(item => item.count as number))
+        
+        // Round up to an appropriate value
+        if (maxCount <= 10) return 10
+        if (maxCount <= 20) return 20
+        if (maxCount <= 50) return 50
+        if (maxCount <= 100) return 100
+        
+        // Round to nearest 50 for values below 1000
+        if (maxCount < 1000) {
+            return Math.ceil(maxCount / 50) * 50
+        }
+        
+        // Round to nearest 100 for values 500+
+        return Math.ceil(maxCount / 100) * 100
+    }
+    
+    const xAxisMax = calculateXAxisMax()
+    
+    // Generate appropriate tick values
+    const generateTicks = (max: number) => {
+        const numTicks = 5 // Number of ticks to generate
+        const step = max / (numTicks - 1)
+        return Array.from({length: numTicks}, (_, i) => Math.round(i * step))
+    }
+    
+    const xAxisTicks = generateTicks(xAxisMax)
 
     return (
         <div className={styles.component}>
@@ -167,7 +202,7 @@ export default function HorizontalBars({
                 <Warning text="Some retailers you've selected do not have enough data to completely generate this chart. For a more accurate chart, please change the queries when creating the report." />
             )}
 
-            <div className={styles.header}>
+            <div className={styles.header} data-chart-header-inner>
                 
                 <h4 className='text-14 gray-600'>
                     List of Retailers
@@ -179,7 +214,7 @@ export default function HorizontalBars({
 
             </div>
 
-            <ResponsiveContainer height={processedData.length * 50} className={styles.chart}>
+            <ResponsiveContainer height={height || processedData.length * 50} className={styles.chart} data-chart-main-inner>
                 <BarChart
                     data={processedData}
                     layout='vertical'
@@ -207,8 +242,8 @@ export default function HorizontalBars({
                             fill: '#666',
                             fontSize: 10
                         }}
-                        //axisLine={false}
-                        //tickLine={false}
+                        domain={[0, xAxisMax]}
+                        ticks={xAxisTicks}
                         tickMargin={10}
                     />
 

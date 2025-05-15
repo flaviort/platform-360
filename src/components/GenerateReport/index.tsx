@@ -225,6 +225,29 @@ export default function GenerateReport({
         }
     }, [isOpen])
 
+    // select all
+    const handleSelectAll = (report: any, isSelected: boolean) => {
+        if (isSelected) {
+            // Get all valid charts from this report
+            const validCharts = report.charts.filter((chart: any) => 
+                chart.results && Array.isArray(chart.results) && chart.results.length > 0
+            )
+            
+            // Add all valid charts from this report that aren't already selected
+            const chartsToAdd = validCharts
+                .filter((chart: any) => !selectedCharts.some(c => c.id === chart.id))
+                .map((chart: any) => ({
+                    id: chart.id,
+                    reportId: report.id
+                }))
+                
+            setSelectedCharts(prev => [...prev, ...chartsToAdd])
+        } else {
+            // Remove all charts that belong to this report
+            setSelectedCharts(prev => prev.filter(c => c.reportId !== report.id))
+        }
+    }
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -305,6 +328,33 @@ export default function GenerateReport({
                                                 <p className='text-14'>
                                                     {report.created_at ? formatDate(report.created_at) : '--'}
                                                 </p>
+                                            </div>
+
+                                            <div className={styles.selectAll}>
+                                                <label htmlFor={`select-all-${report.id}`} className={styles.checkbox}>
+                                                            
+                                                    <input 
+                                                        type='checkbox' 
+                                                        id={`select-all-${report.id}`}
+                                                        onChange={(e) => handleSelectAll(report, e.target.checked)}
+                                                        checked={
+                                                            report.charts && 
+                                                            report.charts.length > 0 && 
+                                                            report.charts
+                                                                .filter((chart: any) => chart.results && Array.isArray(chart.results) && chart.results.length > 0)
+                                                                .every((chart: any) => selectedCharts.some(c => c.id === chart.id))
+                                                        }
+                                                    />
+                                                    
+                                                    <span className={styles.icon}>
+                                                        <Check />
+                                                    </span>
+
+                                                    <p className='text-16'>
+                                                        Select all
+                                                    </p>
+                                                    
+                                                </label>
                                             </div>
 
                                             <div className={styles.charts}>

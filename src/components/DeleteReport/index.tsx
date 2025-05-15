@@ -162,24 +162,31 @@ export default function DeleteReport({
                                                             if (charts && charts.length > 0) {
                                                                 console.log(`Found ${charts.length} charts to delete for report ${id}`)
                                                                 
-                                                                // Delete each chart individually
-                                                                for (const chart of charts) {
+                                                                // Delete all charts in parallel
+                                                                const deletePromises = charts.map((chart: { id: string }) => {
                                                                     const chartId = chart.id
-                                                                    console.log(`Deleting chart with ID: ${chartId}`)
+                                                                    console.log(`Queueing deletion for chart with ID: ${chartId}`)
                                                                     
-                                                                    const deleteChartResponse = await fetch(`/api/proxy?endpoint=/api/charts/${chartId}`, {
+                                                                    return fetch(`/api/proxy?endpoint=/api/charts/${chartId}`, {
                                                                         method: 'DELETE',
                                                                         headers: {
                                                                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                                                                         }
+                                                                    }).then(response => {
+                                                                        if (response.ok) {
+                                                                            console.log(`Successfully deleted chart: ${chartId}`)
+                                                                            return { chartId, success: true }
+                                                                        } else {
+                                                                            console.warn(`Warning: Failed to delete chart ${chartId}`)
+                                                                            return { chartId, success: false }
+                                                                        }
                                                                     })
-                                                                    
-                                                                    if (deleteChartResponse.ok) {
-                                                                        console.log(`Successfully deleted chart: ${chartId}`)
-                                                                    } else {
-                                                                        console.warn(`Warning: Failed to delete chart ${chartId}`)
-                                                                    }
-                                                                }
+                                                                })
+                                                                
+                                                                // Wait for all deletions to complete
+                                                                const results = await Promise.all(deletePromises)
+                                                                const successCount = results.filter(r => r.success).length
+                                                                console.log(`Successfully deleted ${successCount} out of ${charts.length} charts`)
                                                                 
                                                                 // Add a small delay to ensure database consistency
                                                                 await new Promise(resolve => setTimeout(resolve, 500))

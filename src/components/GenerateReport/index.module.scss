@@ -180,6 +180,12 @@
                     }
                 }
 
+                .selectAll {
+                    margin-bottom: .5rem;
+                    padding-bottom: .5rem;
+                    border-bottom: var(--1px) solid $gray-200;
+                }
+
                 .charts {
                     position: relative;
                     display: block;

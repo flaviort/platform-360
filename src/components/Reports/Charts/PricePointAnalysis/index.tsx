@@ -16,6 +16,8 @@ export interface PricePointAnalysisProps {
         id: string
         count: number
     }>
+    height?: number
+    showAllNumbers?: boolean
 }
 
 const CustomLabel = (props: any) => {
@@ -55,8 +57,34 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null
 }
 
+const CustomValueLabel = (props: any) => {
+    const { x, y, width, value } = props
+    
+    // format number with US locale (adds commas as thousand separators)
+    const formattedValue = typeof value === 'number' ? value.toLocaleString('en-US') : value
+    
+    // Calculate position for rotated text
+    const rotationX = x + (width / 2 + 4)
+    const rotationY = y - 7
+    
+    return (
+        <text
+            x={rotationX}
+            y={rotationY}
+            fill='#333'
+            //textAnchor="left"
+            transform={`rotate(-90, ${rotationX}, ${rotationY})`}
+            className='text-14 medium'
+        >
+            {formattedValue}
+        </text>
+    )
+}
+
 export default function PricePointAnalysis({
-    data
+    data,
+    height,
+    showAllNumbers
 }: PricePointAnalysisProps) {
 
     // the functions below changes the size of the font and the bars according to the window size
@@ -79,7 +107,7 @@ export default function PricePointAnalysis({
 
     return (
         <div className={styles.component}>
-            <ResponsiveContainer height={400} className={styles.chart}>
+            <ResponsiveContainer height={height || 400} className={styles.chart}>
                 <BarChart 
                     data={sortedData}
                     margin={{ bottom: 70, left: 0, right: 5, top: 0 }}
@@ -123,6 +151,14 @@ export default function PricePointAnalysis({
                             dataKey='id'
                             content={CustomLabel}
                         />
+
+                        {showAllNumbers && (
+                            <LabelList
+                                dataKey='count'
+                                content={CustomValueLabel}
+                            />
+                        )}
+
                     </Bar>
                     
                 </BarChart>

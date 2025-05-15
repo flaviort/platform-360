@@ -32,23 +32,27 @@ export interface PriceDistributionByBrandProps {
         regions?: string
         priceRange?: string
     }
+    height?: number
+    showAllNumbers?: boolean
 }
 
-const CustomLabel = (props: any) => {
-    const { x, y, width, height, value } = props
-
+const CustomValueLabel = (props: any) => {
+    const { x, y, width, value } = props
+    
+    // Calculate position for rotated text
+    const positionX = x + (width / 2)
+    const rotationY = y - 7
+    
     return (
-        <foreignObject
-            x={x - 45}
-            y={y + height + 1}
-            width='50'
-            height='30'
-            transform={`rotate(-90 ${x + width/2} ${y + height + 10})`}
+        <text
+            x={positionX}
+            y={rotationY}
+            fill='#333'
+            textAnchor='middle'
+            className='text-14 medium'
         >
-            <div className={clsx(styles.bottomLabel, 'text-12 gray-600')}>
-                {value}
-            </div>
-        </foreignObject>
+            {formatPrice(value)}
+        </text>
     )
 }
 
@@ -74,7 +78,9 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export default function PriceDistributionByBrand({
     data,
-    reportSummary
+    reportSummary,
+    height,
+    showAllNumbers
 }: PriceDistributionByBrandProps) {
     //console.log('DEBUGGING RAW DATA:')
     //console.log('Original reportSummary:', reportSummary)
@@ -142,7 +148,7 @@ export default function PriceDistributionByBrand({
                 <Warning text="Some brands you've selected do not have enough data to completely generate this chart. For a more accurate chart, please change the queries when creating the report." />
             )}
 
-            <ResponsiveContainer height={400} className={styles.chart}>
+            <ResponsiveContainer height={height || 400} className={styles.chart}>
                 <BarChart 
                     data={processedData}
                     margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
@@ -195,7 +201,15 @@ export default function PriceDistributionByBrand({
                         barSize={20}
                         spacing={20}
                         fill='url(#verticalBarsGradient)'
-                    />
+                    >
+
+                        {showAllNumbers && (
+                            <LabelList
+                                dataKey='price'
+                                content={CustomValueLabel}
+                            />
+                        )}
+                    </Bar>
                     
                 </BarChart>
             </ResponsiveContainer>

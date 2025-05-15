@@ -34,6 +34,7 @@ export interface PricePointByRetailerProps {
 		regions?: string
 		priceRange?: string
     }
+    height?: number
 }
 
 interface RetailerData {
@@ -65,9 +66,38 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null
 }
 
+// Custom Label component for rotated labels
+const CustomValueLabel = (props: any) => {
+    const { x, y, width, value, fill } = props
+    
+    // Skip rendering if value is null or undefined
+    if (value === null || value === undefined) return null
+    
+    // Format the value
+    const formattedValue = formatPrice(value)
+    
+    // Calculate position for rotated text
+    const rotationX = x + (width / 2 + 4)
+    const rotationY = y - 10
+    
+    return (
+        <text
+            x={rotationX}
+            y={rotationY}
+            fill={fill || '#333'}
+            textAnchor="start"
+            transform={`rotate(-90, ${rotationX}, ${rotationY})`}
+            className='text-12 medium'
+        >
+            {formattedValue}
+        </text>
+    )
+}
+
 export default function PricePointByRetailer({
     data,
-    reportSummary
+    reportSummary,
+    height
 }: PricePointByRetailerProps) {
     const windowSize = useWindowSize()
     const fontSize = windowSize.width < 575 ? 8 : 12
@@ -151,10 +181,10 @@ export default function PricePointByRetailer({
                 <Warning text="Some retailers you've selected do not have enough data to completely generate this chart. For a more accurate chart, please change the queries when creating the report." />
             )}
 
-            <ResponsiveContainer height={400} className={styles.chart}>
+            <ResponsiveContainer height={height || 400} className={styles.chart}>
                 <BarChart 
                     data={processedData}
-                    margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
+                    margin={{ bottom: 0, left: 0, right: 0, top: 20 }}
                     barGap={15}
                 >
                     <defs>
@@ -228,12 +258,7 @@ export default function PricePointByRetailer({
                     >
                         <LabelList 
                             dataKey='min'
-                            position='top'
-                            formatter={(value: number) => {
-                                return formatPrice(value)
-                            }}
-                            fontSize={12}
-                            offset={5}
+                            content={<CustomValueLabel />}
                         />
                     </Bar>
                     
@@ -246,12 +271,7 @@ export default function PricePointByRetailer({
                     >
                         <LabelList 
                             dataKey='avg'
-                            position='top'
-                            formatter={(value: number) => {
-                                return formatPrice(value)
-                            }}
-                            fontSize={12}
-                            offset={5}
+                            content={<CustomValueLabel />}
                         />
                     </Bar>
                     
@@ -264,12 +284,7 @@ export default function PricePointByRetailer({
                     >
                         <LabelList 
                             dataKey='max'
-                            position='top'
-                            formatter={(value: number) => {
-                                return formatPrice(value)
-                            }}
-                            fontSize={12}
-                            offset={5}
+                            content={<CustomValueLabel />}
                         />
                     </Bar>
                     

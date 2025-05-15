@@ -16,6 +16,8 @@ export interface ColorsProps {
         color: string | null
         count: number
     }>
+    height?: number
+    showAllNumbers?: boolean
 }
 
 // process and filter data to remove empty/null colors
@@ -113,8 +115,34 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null
 }
 
+const CustomValueLabel = (props: any) => {
+    const { x, y, width, value } = props
+    
+    // format number with US locale (adds commas as thousand separators)
+    const formattedValue = typeof value === 'number' ? value.toLocaleString('en-US') : value
+    
+    // Calculate position for rotated text
+    const rotationX = x + (width / 2 + 4)
+    const rotationY = y - 7
+    
+    return (
+        <text
+            x={rotationX}
+            y={rotationY}
+            fill='#333'
+            //textAnchor="left"
+            transform={`rotate(-90, ${rotationX}, ${rotationY})`}
+            className='text-12 medium'
+        >
+            {formattedValue}
+        </text>
+    )
+}
+
 export default function Colors({
-    data
+    data,
+    height,
+    showAllNumbers
 }: ColorsProps) {
     
     // filter out null or empty colors
@@ -140,7 +168,7 @@ export default function Colors({
 
     return (
         <div className={styles.component}>
-            <ResponsiveContainer height={400} className={styles.chart}>
+            <ResponsiveContainer height={height || 400} className={styles.chart}>
                 <BarChart 
                     data={filteredData}
                     margin={{ bottom: 70, left: 10, right: 5, top: 0 }}
@@ -201,6 +229,14 @@ export default function Colors({
                             content={CustomLabel}
                             position='bottom'
                         />
+
+                        {showAllNumbers && (
+                            <LabelList
+                                dataKey='count'
+                                content={CustomValueLabel}
+                            />
+                        )}
+
                     </Bar>
                     
                 </BarChart>

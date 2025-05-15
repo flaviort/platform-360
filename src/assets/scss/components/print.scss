@@ -1,0 +1,23 @@
+@media print {
+    body {
+        margin: 0;
+        background-color: #fff;
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+
+        [data-top-menu],
+        [data-fs-menu],
+        [data-footer],
+        [data-grid],
+        [data-breakpoint] {
+            display: none;
+        }
+    }
+}
+
+@page {
+    size: A4 landscape;
+    margin: 0;
+    padding: 0;
+}
