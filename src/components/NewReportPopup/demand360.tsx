@@ -3,7 +3,7 @@
 // libraries
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 // components
 import PopupForm from './form'
@@ -21,6 +21,8 @@ import { Sparkles } from 'lucide-react'
 
 // utils
 import { createReport, CreateReportData, getProjectAndCategoryIds } from '@/utils/reports'
+import { useChartSuggestion } from '@/utils/hooks'
+import loadingMessages from '@/utils/loadingMessages'
 
 // css
 import styles from './index.module.scss'
@@ -37,19 +39,116 @@ interface PopupDemand360Props {
 	className?: string
 }
 
-// loading messages to display during report generation
-const loadingMessages = [
-	"Generating your report...",
-	"Saving data to the database...",
-	"Syncing your data...",
-	"Analyzing colors and patterns...",
-	"Generating charts...",
-	"Populating fields...",
-	"Processing retailers data...",
-	"Preparing brand information...",
-	"Almost there...",
-	"Creating beautiful visualizations..."
+// Chart definitions for creating charts after report creation
+const getChartDefinitions = (baseChartData: any) => [
+	{ 
+		name: 'Category Trend', 
+		data: {
+			...baseChartData,
+			title: 'Category Trend',
+			description: 'Category trend analysis',
+			preferences: {
+				chart_type: 'vertical',
+				box_size: 'full'
+			},
+			query: {
+				...baseChartData.query,
+				operator: {
+					...baseChartData.query.operator,
+					limit: 10,
+					aggregate: 'all',
+					operates_on: 'time'
+				}
+			}
+		} 
+	},
+	/*
+	{ 
+		name: 'Price Distribution by Brand', 
+		data: {
+			...baseChartData,
+			title: 'Price Distribution by Brand',
+			description: 'Average price distribution by brand',
+			preferences: {
+				chart_type: 'price_distribution_by_brand'
+			},
+			query: {
+				...baseChartData.query,
+				operator: {
+					...baseChartData.query.operator,
+					limit: 10,
+					aggregate: 'average',
+					operates_on: 'brand'
+				}
+			}
+		} 
+	},
+	{ 
+		name: 'SKU Analysis', 
+		data: {
+			...baseChartData,
+			title: 'SKU Analysis',
+			description: 'Number of SKUs associated with each retailer',
+			preferences: {
+				chart_type: 'sku_analysis' 
+			},
+			query: {
+				...baseChartData.query,
+				operator: {
+					...baseChartData.query.operator,
+					limit: 8,
+					aggregate: 'count',
+					operates_on: 'company'
+				}
+			}
+		} 
+	},
+	{ 
+		name: 'Color Analysis', 
+		data: {
+			...baseChartData,
+			title: 'Color Analysis',
+			description: 'Analysis of product colors distribution',
+			preferences: {
+				chart_type: 'colors',
+				box_size: 'full'
+			},
+			query: {
+				...baseChartData.query,
+				operator: {
+					...baseChartData.query.operator,
+					limit: 20,
+					aggregate: 'count',
+					operates_on: 'color'
+				}
+			}
+		} 
+	}
+	*/
 ]
+
+// Helper function to extract selected items from form checkbox state
+const extractSelectedItems = (items: Record<string, boolean> = {}) => 
+	Object.entries(items)
+		.filter(([_, selected]) => selected)
+		.map(([name, _]) => name)
+
+// Helper function to format dates for API
+const formatISODate = (date: Date | string): string => {
+	const isoString = date instanceof Date ? date.toISOString() : new Date(date).toISOString()
+	return isoString.substring(0, 19)
+}
+
+// Format date for display
+const formatDisplayDate = (date: string) => {
+	if (!date) return ''
+	const d = new Date(date)
+	return d.toLocaleDateString('en-US', { 
+		year: 'numeric', 
+		month: 'short', 
+		day: 'numeric' 
+	})
+}
 
 export default function PopupDemand360({
 	icon: Icon,
@@ -59,6 +158,14 @@ export default function PopupDemand360({
 
 	const router = useRouter()
 	const [isGenerating, setIsGenerating] = useState(false)
+
+	const { getSuggestions, loading, error } = useChartSuggestion()
+	
+	// Track the current suggestion index for rotation
+	const [suggestionIndex, setSuggestionIndex] = useState(0)
+	
+	// Track the last form data to detect changes
+	const [lastFormData, setLastFormData] = useState<any>(null)
 
 	const handleSuccess = async (data: any) => {
 		
@@ -76,13 +183,17 @@ export default function PopupDemand360({
 				category: data.category
 			})
 
-			// selected fields
-			const selectedCategory = [data.category || '']
-			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
-			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
-			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
-			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
-			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
+			// Process selected fields
+			let selectedCategory = [data.category || '']
+			
+			// Special case for footwear category
+			if (selectedCategory.includes('Footwear')) {
+				selectedCategory = ['running shoes', 'heels', 'sandals', 'loafers', 'sneakers', 'shoes', 'flats', 'slippers', 'boots', 'clogs', 'oxfords']
+			}
+
+			// Format dates for API
+			const selectedStartDate = formatISODate(data.timePeriodStart)
+			const selectedEndDate = formatISODate(data.timePeriodEnd)
 
 			const selectedRegions = Object.entries(data.regions || {})
 				.filter(([_, selected]) => selected === true)
@@ -100,7 +211,7 @@ export default function PopupDemand360({
 					return region ? region.label : name
 			})
 
-			// transform form data to match API format
+			// Prepare report data for API
 			const reportData: CreateReportData = {
 				name: data.reportName,
 				product_type: 'demand360',
@@ -111,8 +222,10 @@ export default function PopupDemand360({
 				product_settings: {
 					start_date: selectedStartDate,
 					end_date: selectedEndDate,
-					location: data.location,
-					regions: selectedRegions
+					//location: data.location,
+					location: 'US',
+					//regions: selectedRegions
+					category: ['']
 				}
 			}
 
@@ -128,15 +241,9 @@ export default function PopupDemand360({
 			// Step 2: Verify report exists in database
 			console.log(`Verifying report ${report.id} exists in database...`)
 			
-			// Use the helper to get auth token
-			//const reportAuthToken = getAuthToken()
-			
 			const verifyReportResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${report.id}`, {
 				method: 'GET',
-				headers: {
-					'Accept': 'application/json',
-					//'Authorization': `Bearer ${reportAuthToken}` // Add authorization token
-				}
+				headers: { 'Accept': 'application/json' }
 			})
 
 			if (!verifyReportResponse.ok) {
@@ -147,134 +254,120 @@ export default function PopupDemand360({
 
 			const reportCharts = await verifyReportResponse.json()
 			console.log('Report verification successful:', reportCharts)
+			
+			// Step 3: Create charts for the report
+			console.log('Creating charts for report ID:', report.id)
+			
+			// Add a delay to ensure DB consistency
+			await new Promise(resolve => setTimeout(resolve, 1000))
 
-			// Debug time period data from form
-			console.log('Raw form data:', data)
-
-			// Format dates correctly from the form data
-			let startDate = "2022-01-01"
-			let endDate = "2025-01-01"
-			
-			// TimePeriod component uses timePeriodStart and timePeriodEnd fields
-			// Check for these fields directly in the form data
-			if (data.timePeriodStart) {
-				if (data.timePeriodStart instanceof Date) {
-					startDate = data.timePeriodStart.toISOString().split('T')[0]
-				} else if (typeof data.timePeriodStart === 'string') {
-					startDate = data.timePeriodStart
-				}
-			}
-			
-			if (data.timePeriodEnd) {
-				if (data.timePeriodEnd instanceof Date) {
-					endDate = data.timePeriodEnd.toISOString().split('T')[0]
-				} else if (typeof data.timePeriodEnd === 'string') {
-					endDate = data.timePeriodEnd
-				}
-			}
-			
-			// Step 3: Create chart using the report ID
-			/*
-			const chartData = {
-				title: "sample chart",
-				description: "this chart is coming from the DB",
-				preferences: {
-					chart_type: "vertical",
-				},
+			// Base data for all charts
+			const baseChartData = {
+				report_id: report.id,
 				query: {
-					categories: [data.category || ""],
-					// Ensure these are always arrays
-					companies: Array.isArray(reportData.product_settings.retailers) ? 
-						reportData.product_settings.retailers : [],
-					brands: Array.isArray(reportData.product_settings.brands) ? 
-						reportData.product_settings.brands : [],
-					sex: Array.isArray(data.genders) ? 
-						data.genders : (data.genders ? [data.genders] : []),
-					range: {
-						start_date: startDate,
-						end_date: endDate
-					},
-					limit: 10
-				},
-				report_id: report.id
-			}
-
-			console.log('Creating chart with data:', JSON.stringify(chartData, null, 2))
-			
-			// Add a delay before creating the chart to ensure DB consistency
-			console.log('Waiting for database to synchronize before creating chart...')
-			await new Promise(resolve => setTimeout(resolve, 2000))
-			
-			// Use the same fetch format as createReport for consistency
-			const chartResponse = await fetch('/api/proxy?endpoint=/api/charts', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-				},
-				body: JSON.stringify(chartData)
-			})
-			
-			console.log('Chart response status:', chartResponse.status)
-			const responseText = await chartResponse.text()
-			console.log('Raw chart response:', responseText)
-			
-			if (!chartResponse.ok) {
-				// Log detailed error information
-				if (chartResponse.status === 401) {
-					console.error('Authentication failed (401 Unauthorized). Auth token may be invalid or expired.')
-					//console.error('Current auth token:', chartAuthToken ? `${chartAuthToken.substring(0, 10)}...` : 'None')
+					category: selectedCategory,
+					location: data.location,
+					regions: selectedRegions,
+					operator: {
+						start_date: selectedStartDate,
+						end_date: selectedEndDate
+					}
 				}
-				
-				console.error(`Chart creation failed with status: ${chartResponse.status}`)
-				console.error('Request headers:', {
-					'Content-Type': 'application/json',
-					//'Authorization': chartAuthToken ? 'Bearer token present' : 'No authorization'
-				})
-				console.error('Request data sent:', JSON.stringify(chartData, null, 2))
-				console.error('Response:', responseText)
-				
-				// Report was created but chart creation failed
-				console.error(`Report ID ${report.id} was created but chart creation failed. Operation aborted.`)
-				
-				// Create a helpful error message based on the error type
-				const errorType = chartResponse.status === 401 ? '401 Authentication Error' : 
-								 chartResponse.status === 500 ? '500 Server Error' : 
-								 `${chartResponse.status} ${chartResponse.statusText}`;
-								 
-				const authHelp = chartResponse.status === 401 ? 
-					'Authentication token may be invalid. Try logging out and back in to refresh your session.' : 
-					'';
-				
-				document.dispatchEvent(new Event('formError'))
-				throw new Error(
-					`Failed to create chart. Report was created with ID ${report.id}, but chart creation failed with ${errorType}. ` +
-					`${authHelp} Please check the console logs and contact the developer with this report ID.`
-				)
 			}
-			
-			// Chart creation succeeded
-			const chart = responseText ? JSON.parse(responseText) : {}
-			console.log('Created chart:', chart)
-			
-			// Only redirect if both report and chart were created successfully
-			console.log('Both report and chart created successfully. Redirecting to report page...')
-			*/
 
-            document.dispatchEvent(new Event('formSent'))
-			router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
+			// Define all charts to create
+			const chartsToCreate = getChartDefinitions(baseChartData)
+			
+			// Create all charts in parallel
+			const chartPromises = chartsToCreate.map(chart => {
+				console.log(`Creating ${chart.name} chart...`)
+				
+				return fetch('/api/proxy?endpoint=/api/charts', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+					},
+					body: JSON.stringify(chart.data)
+				})
+				.then(async chartResponse => {
+					console.log(`${chart.name} chart response status:`, chartResponse.status)
+					const responseText = await chartResponse.text()
+					
+					if (!chartResponse.ok) {
+						console.error(`Failed to create ${chart.name} chart:`, responseText)
+						return { ok: false, name: chart.name }
+					}
+					
+					const chartData = responseText ? JSON.parse(responseText) : {}
+					
+					return { 
+						ok: true, 
+						data: chartData, 
+						name: chart.name,
+						hasData: chartData && chartData.results && chartData.results.length > 0
+					}
+				})
+				.catch(error => {
+					console.error(`Error creating ${chart.name} chart:`, error)
+					return { ok: false, name: chart.name }
+				})
+			})
+
+			// Wait for all chart creations to complete
+			const results = await Promise.all(chartPromises)
+
+			// Process results
+			const chartResults = results
+				.filter(r => r.ok && 'data' in r)
+				.map(r => (r as { data: any }).data)
+				
+			const atleastOneChartHasData = results.some(r => 'hasData' in r && r.hasData)
+			
+			if (!atleastOneChartHasData) {
+				console.log('⚠️ All charts have empty results. Deleting report.')
+				
+				// Delete the report that was just created
+				try {
+					console.log(`Deleting report ${report.id} due to empty chart results`)
+					const deleteResponse = await fetch(`/api/delete-report`, {
+						method: 'POST',
+						headers: {
+							'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({ reportId: report.id })
+					})
+					
+					if (deleteResponse.ok) {
+						console.log('Report deleted successfully')
+					} else {
+						console.error('Failed to delete report:', await deleteResponse.text())
+					}
+					
+					// Notify user
+					alert('No data found for the selected criteria. Please try different filters or time period.')
+					document.dispatchEvent(new Event('formError'))
+					return // Don't redirect
+				} catch (deleteError) {
+					console.error('Error deleting report with empty charts:', deleteError)
+				}
+			} else {
+				// Success - redirect to the report page
+				console.log('Report and charts creation completed successfully')
+				document.dispatchEvent(new Event('formSent'))
+				router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
+			}
 		} catch (error) {
 			console.error('Error during report/chart creation process:', error)
 			document.dispatchEvent(new Event('formError'))
 			
-			// If we created a report but chart creation failed, log the report ID for reference
+			// Log orphaned report
 			if (report && report.id) {
-				console.warn(`Report was created (ID: ${report.id}) but chart creation failed. Operation aborted.`)
-				// We could add code here to delete the orphaned report if needed
+				console.warn(`Report was created (ID: ${report.id}) but chart creation failed`)
 			}
 			
-			// Always throw the error - never redirect on failure
-			throw error // Will be handled by handleError
+			throw error
 		}
 	}
 
@@ -283,94 +376,110 @@ export default function PopupDemand360({
         document.dispatchEvent(new Event('formError'))
 	}
 
-	// This function will be called when the Generate Goal button is clicked
-	const generateGoal = () => {
-		try {
-			setIsGenerating(true)
+	// Create a fallback goal text based on form data
+	const createFallbackGoalText = useCallback((
+		category: string | undefined, 
+		location: string | undefined, 
+		regions: string[],
+		startDate: string | undefined, 
+		endDate: string | undefined
+	): string => {
+		const timeRangeText = startDate && endDate 
+			? `during ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}`
+			: 'during the selected time period'
 			
-			// Create a custom event to request the form data
-			const event = new CustomEvent('requestFormDataForGoal', {
-				detail: { productType: 'demand360' }
-			})
-			document.dispatchEvent(event)
-			
-			// Set a timeout to reset the generating state if no response comes back
-			setTimeout(() => {
-				setIsGenerating(false)
-			}, 2000)
-		} catch (error) {
-			console.error('Error generating goal:', error)
-			setIsGenerating(false)
-		}
-	}
-	
-	// Listen for the form data event and handle generating the goal
+		return `Analyze ${category} data from ${regions.join(', ')} ${timeRangeText}. Identify key trends, competitive insights, and strategic opportunities.`
+	}, [])
+
+	// handle form data for goal generation
 	useEffect(() => {
-		const handleFormData = (e: any) => {
-			// Make sure this event is for us
+		const handleFormData = async (e: any) => {
+			// Verify this event is for our component
 			if (e.detail.productType !== 'demand360') return
 			
 			try {
 				const {
-					category = 'Unknown Category',
-					location = '',
-					regions = {},
+					category,
+					location,
+					regions = [],
 					timePeriodStart,
 					timePeriodEnd,
-					setGoalValue
+					setGoalValue,
+					goal
 				} = e.detail
 				
-				// Parse regions
-				const regionsList = Object.entries(regions || {})
-					.filter(([_, selected]) => selected)
-					.map(([name, _]) => {
-						// Get all regions from all location sources
-						const allRegions = [
-							...canadaProvinces,
-							...usaStates,
-							...europeanCountries,
-							...ukRegions
-						]
-						// Find the region object by name and return its label
-						const region = allRegions.find(r => r.name === name)
-						return region ? region.label : name
-					})
+				// Extract selected values
+				const selectedRegions = extractSelectedItems(regions)
 				
-				// Format time period
-				let timePeriod = "recent time period"
-				if (timePeriodStart && timePeriodEnd) {
-					const startDate = new Date(timePeriodStart)
-					const endDate = new Date(timePeriodEnd)
-					
-					timePeriod = `period from ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`
+				// Create form data summary for change detection
+				const currentFormData = {
+					category,
+					location,
+					regions: selectedRegions.join(','),
+					timePeriod: `${timePeriodStart}-${timePeriodEnd}`,
+					goal: goal || ''
 				}
 				
-				// Generate goal text
-				let goalText = `Analyze ${category} data`
+				// Check if form data has changed
+				const formDataChanged = !lastFormData || JSON.stringify(currentFormData) !== JSON.stringify(lastFormData)
 				
-				// Add location if available
-				if (location) {
-					goalText += ` in ${location}`
-				}
-				
-				// Add regions if available
-				if (regionsList.length > 0) {
-					goalText += ` from ${regionsList.length > 1 ? 'the following regions:' : 'the following region:'} ${regionsList.join(', ')}`
-				}
-				
-				// Add time period
-				goalText += ` during the ${timePeriod}.`
-				
-				// Add action statement
-				goalText += ` Identify key trends, competitive insights, and strategic opportunities to optimize product positioning and marketing strategies.`
-				
-				// Set the goal value using the provided function
-				if (typeof setGoalValue === 'function') {
-					setGoalValue(goalText)
-					console.log('Generated goal:', goalText)
+				// Reset or increment suggestion index
+				if (formDataChanged) {
+					setSuggestionIndex(0)
+					setLastFormData(currentFormData)
 				} else {
-					console.error('setGoalValue is not a function', setGoalValue)
+					setSuggestionIndex(prevIndex => (prevIndex + 1))
 				}
+
+				// Create dynamic fallback goal text based on current form data
+				const fallbackGoalText = createFallbackGoalText(
+					category,
+					location,
+					selectedRegions,
+					timePeriodStart,
+					timePeriodEnd
+				)
+				
+				// Use direct DOM access as a last resort to get the goal value
+				let finalGoalValue = goal
+
+				if (!finalGoalValue) {
+					const goalTextarea = document.getElementById('report-goal') as HTMLTextAreaElement
+					if (goalTextarea && goalTextarea.value) {
+						finalGoalValue = goalTextarea.value
+					} else {
+						finalGoalValue = fallbackGoalText
+					}
+				}
+				
+				// Prepare request for suggestion API
+				const requestParams = {
+					product_name: 'Demand360',
+					category: [category || ''],
+					location: [location || ''],
+					regions: selectedRegions.join(','),
+					comment: finalGoalValue
+				}
+				
+				console.log('Sending to suggestion API:', requestParams)
+
+				// Call the suggestion API
+				await getSuggestions(requestParams, (data) => {
+					//console.log('API response:', data)
+					
+					if (data && data.goal_suggestion && Array.isArray(data.goal_suggestion) && data.goal_suggestion.length > 0) {
+						// Select suggestion based on current index
+						const currentIndex = suggestionIndex % data.goal_suggestion.length
+						const selectedSuggestion = data.goal_suggestion[currentIndex]
+						
+						setGoalValue(selectedSuggestion)
+						//console.log(`Using suggestion ${currentIndex + 1}/${data.goal_suggestion.length}:`, selectedSuggestion)
+					} else {
+						// Fall back to the basic goal text
+						setGoalValue(fallbackGoalText)
+						console.log('No suggestions received, using fallback:', fallbackGoalText)
+					}
+				})
 			} catch (error) {
 				console.error('Error processing form data for goal:', error)
 			} finally {
@@ -378,23 +487,43 @@ export default function PopupDemand360({
 			}
 		}
 		
-		// Listen for incomplete form data events
+		// Handle incomplete form data
 		const handleIncompleteData = (e: any) => {
-			// Only handle events for this product type
-			if (e.detail.productType !== 'demand360') return
-			
 			console.log('Incomplete form data:', e.detail)
 			setIsGenerating(false)
 		}
 		
+		// Set up event listeners
 		document.addEventListener('formDataForGoal', handleFormData)
 		document.addEventListener('formDataForGoalIncomplete', handleIncompleteData)
 		
+		// Clean up event listeners
 		return () => {
 			document.removeEventListener('formDataForGoal', handleFormData)
 			document.removeEventListener('formDataForGoalIncomplete', handleIncompleteData)
 		}
-	}, [])
+	}, [getSuggestions, suggestionIndex, lastFormData, createFallbackGoalText])
+
+	// Generate a goal statement using the AI suggestion API
+	const generateGoal = () => {
+		try {
+			setIsGenerating(true)
+			
+			// Request form data through custom event
+			console.log('DEBUG demand360.tsx - Dispatching requestFormDataForGoal event')
+			const event = new CustomEvent('requestFormDataForGoal', {
+				detail: { 
+					productType: 'demand360',
+					// Include that we need the current goal value
+					includeCurrentGoal: true
+				}
+			})
+			document.dispatchEvent(event)
+		} catch (error) {
+			console.error('Error triggering goal generation:', error)
+			setIsGenerating(false)
+		}
+	}
 
 	return (
 		<PopupForm
@@ -421,7 +550,7 @@ export default function PopupDemand360({
 
 			<Location />
 
-			<div className={styles.goal}>
+			<div className='relative'>
 
 				<Goal />
 
@@ -429,9 +558,9 @@ export default function PopupDemand360({
 					type='button'
 					className={clsx(styles.ai, 'button button--gradient-purple')}
 					onClick={generateGoal}
-					disabled={isGenerating}
+					disabled={isGenerating || loading}
 				>
-					{isGenerating ? (
+					{isGenerating || loading ? (
 						<Loading
 							simple
 							noContainer
@@ -440,11 +569,11 @@ export default function PopupDemand360({
 						/>
 					) : (
 						<>
-							<Sparkles /> Generate Goal
+							<Sparkles /> Improve Goal
 						</>
 					)}
 				</button>
-
+				
 			</div>
 			
 		</PopupForm>

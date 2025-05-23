@@ -179,7 +179,7 @@ export default function CustomSearch({
                     <button
                         ref={buttonRef}
                         type='button'
-                        className={styles.input}
+                        className={clsx(styles.input, 'capitalize')}
                         id={id}
                         onClick={() => setIsDropdownVisible(!isDropdownVisible)}
                     >
@@ -232,19 +232,24 @@ export default function CustomSearch({
                                 <>
                                     {selectedItems.map((item, i) => (
                                         <label className={styles.item} key={`selected-${i}`}>
+                                            
                                             <input
                                                 type='checkbox'
                                                 className={styles.checkbox}
                                                 checked={true}
                                                 onChange={() => handleCheckboxChange(item.name, false)}
                                             />
+
                                             <span className={styles.checkboxWrapper}>
+                                                
                                                 <span className={styles.check}>
                                                     <Check />
                                                 </span>
-                                                <span className={clsx(styles.text, 'text-16')}>
+
+                                                <span className={clsx(styles.text, 'text-16 capitalize')}>
                                                     {typeof item.label === 'string' ? item.label : String(item.label || '')}
                                                 </span>
+
                                             </span>
                                         </label>
                                     ))}

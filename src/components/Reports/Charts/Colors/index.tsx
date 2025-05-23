@@ -18,12 +18,13 @@ export interface ColorsProps {
     }>
     height?: number
     showAllNumbers?: boolean
+    showAsPercentage?: boolean
 }
 
 // process and filter data to remove empty/null colors
 const processData = (data: ColorsProps['data']) => {
     
-    // make sure we filter out any items with empty, null, whitespace-only, or "Unknown" colors
+    // make sure we filter out any items with empty, null, whitespace-only, or 'Unknown' colors
     return data.filter(item => {
         if (item.color === null || item.color === undefined) return false
         if (item.color === '') return false
@@ -92,6 +93,10 @@ const CustomTooltip = ({ active, payload }: any) => {
         // don't show tooltip for empty/null values
         if (!payload[0].payload.color) return null
         
+        // Get percentage value if available
+        const percentage = payload[0].payload.percentage ? 
+            `${payload[0].payload.percentage.toFixed(1)}%` : null
+        
         return (
             <div className={styles.tooltip}>
 
@@ -106,6 +111,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 
                 <p className='text-14 bold gray-600'>
                     How many: {payload[0].payload.count.toLocaleString('en-US')}
+                    {percentage && ` (${percentage})`}
                 </p>
 
             </div>
@@ -116,10 +122,20 @@ const CustomTooltip = ({ active, payload }: any) => {
 }
 
 const CustomValueLabel = (props: any) => {
-    const { x, y, width, value } = props
+    const { x, y, width, value, index, showAsPercentage, data } = props
     
-    // format number with US locale (adds commas as thousand separators)
-    const formattedValue = typeof value === 'number' ? value.toLocaleString('en-US') : value
+    // Log to see what's available in the props
+    console.log('CustomValueLabel props:', { value, index, data })
+    
+    // Format the count value with thousands separator
+    const countValue = typeof value === 'number' 
+        ? value.toLocaleString('en-US')
+        : value
+    
+    // Get percentage directly from the data array using index
+    const percentageValue = data && index !== undefined && data[index]?.percentage
+        ? `(${data[index].percentage.toFixed(1)}%)`
+        : ''
     
     // Calculate position for rotated text
     const rotationX = x + (width / 2 + 4)
@@ -130,11 +146,13 @@ const CustomValueLabel = (props: any) => {
             x={rotationX}
             y={rotationY}
             fill='#333'
-            //textAnchor="left"
-            transform={`rotate(-90, ${rotationX}, ${rotationY})`}
-            className='text-12 medium'
+            transform={`rotate(-90, ${rotationX}, ${rotationY}) translate(0, -7)`}
+            className='text-12 bold'
         >
-            {formattedValue}
+            {countValue}
+            <tspan x={rotationX} dy='14' className='medium'>
+                {percentageValue}
+            </tspan>
         </text>
     )
 }
@@ -142,7 +160,8 @@ const CustomValueLabel = (props: any) => {
 export default function Colors({
     data,
     height,
-    showAllNumbers
+    showAllNumbers,
+    showAsPercentage = false
 }: ColorsProps) {
     
     // filter out null or empty colors
@@ -161,16 +180,28 @@ export default function Colors({
         )
     }
     
+    // Calculate the total sum for percentage calculations
+    const totalCount = filteredData.reduce((sum, item) => sum + item.count, 0)
+    
+    // Add percentage values to the data with a more accessible property name
+    const dataWithPercentages = filteredData.map(item => {
+        const itemPercentage = (item.count / totalCount) * 100
+        return {
+            ...item,
+            percentage: itemPercentage
+        }
+    })
+    
     // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
     const fontSize = windowSize.width < 575 ? 10 : 12
-    const barSize = filteredData.length > 10 ? (windowSize.width < 575 ? 10 : windowSize.width < 992 ? 15 : 22) : 15
+    const barSize = dataWithPercentages.length > 10 ? (windowSize.width < 575 ? 10 : windowSize.width < 992 ? 15 : 22) : 15
 
     return (
         <div className={styles.component}>
             <ResponsiveContainer height={height || 400} className={styles.chart}>
                 <BarChart 
-                    data={filteredData}
+                    data={dataWithPercentages}
                     margin={{ bottom: 70, left: 10, right: 5, top: 0 }}
                 >
 
@@ -200,6 +231,10 @@ export default function Colors({
                         width={45}
                         domain={[0, 'dataMax']}
                         tickFormatter={(value) => {
+                            if (showAsPercentage) {
+                                const percentage = (value / totalCount) * 100
+                                return `${percentage.toFixed(1)}%`
+                            }
                             return value.toLocaleString('en-US')
                         }}
                     />
@@ -215,7 +250,7 @@ export default function Colors({
                         barSize={barSize}
                         spacing={20}
                     >
-                        {filteredData.map((entry, index) => (
+                        {dataWithPercentages.map((entry, index) => (
                             <Cell
                                 key={`cell-${index}`}
                                 fill={getColorCode(entry.color)}
@@ -233,7 +268,13 @@ export default function Colors({
                         {showAllNumbers && (
                             <LabelList
                                 dataKey='count'
-                                content={CustomValueLabel}
+                                content={(props) => (
+                                    <CustomValueLabel 
+                                        {...props} 
+                                        showAsPercentage={showAsPercentage}
+                                        data={dataWithPercentages}
+                                    />
+                                )}
                             />
                         )}
 

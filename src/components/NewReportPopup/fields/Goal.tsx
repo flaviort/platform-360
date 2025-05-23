@@ -15,8 +15,13 @@ export default function Goal() {
 		const handleRequestData = async (e: Event) => {
 			// Cast the event to CustomEvent to access detail
 			const customEvent = e as CustomEvent<any>
+			
 			// Get the product type from the event detail
 			const productType = customEvent.detail?.productType || getValues('productType') || 'shop360'
+			
+			// Try to directly get the goal value from the textarea element
+			const goalTextarea = document.getElementById('report-goal') as HTMLTextAreaElement
+			const goalValueFromDom = goalTextarea ? goalTextarea.value : null
 			
 			// Get common form values
 			const category = getValues('category')
@@ -206,6 +211,8 @@ export default function Goal() {
 			}
 			
 			// All required fields are present, prepare the data
+			const currentGoal = getValues('goal') || goalValueFromDom || ''
+			
 			const formData = {
 				productType,
 				category,
@@ -220,7 +227,7 @@ export default function Goal() {
 				age,
 				minPrice,
 				maxPrice,
-				// Pass a function to set the goal value
+				goal: currentGoal,
 				setGoalValue: (value: string) => {
 					setValue('goal', value, { shouldValidate: true })
 				}
@@ -230,6 +237,7 @@ export default function Goal() {
 			const responseEvent = new CustomEvent('formDataForGoal', {
 				detail: formData
 			})
+
 			document.dispatchEvent(responseEvent)
 		}
 
@@ -252,7 +260,7 @@ export default function Goal() {
 
 			<div className={styles.input}>
 				<Textarea
-					placeholder='Specify the goal of the report or use AI to generate one'
+					placeholder='Specify the goal of the report and/or use AI to improve it'
 					required
 					label='Goal'
 					name='goal'

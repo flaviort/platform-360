@@ -330,11 +330,14 @@ export default function List({
                                             className={clsx(styles.button, 'button button--gradient-blue white')}
                                         />
 
+                                        {/*
                                         <PopupFeedback360
                                             icon={FilePenLine}
                                             text='Feedback360'
                                             className={clsx(styles.button, 'button button--gradient-blue white')}
                                         />
+                                        */}
+                                        
                                     </div>
                                 </div>
                             </div>

@@ -16,8 +16,7 @@ import TopButtons from './topButtons'
 import styles from './index.module.scss'
 
 // utils
-import { slugify, formatDateForReport } from '@/utils/functions'
-import { formatChartData, ChartResultItem } from '@/utils/chartUtils'
+import { formatChartData } from '@/utils/chartUtils'
 
 interface Report {
 	id: string
@@ -104,11 +103,23 @@ export default function DashboardMyReports() {
 			}
 			
 			const chartsData = await chartsResponse.json()
-			console.log('Charts data:', chartsData)
+			console.table('Charts data:', chartsData)
 			return chartsData
 		} catch (error) {
 			console.error('Error fetching charts:', error)
 			return []
+		}
+	}
+
+	// Function to refresh charts data when a new chart is added
+	const refreshCharts = async () => {
+		if (report?.id) {
+			try {
+				const updatedCharts = await fetchCharts(report.id)
+				setCharts(updatedCharts)
+			} catch (error) {
+				console.error('Error refreshing charts:', error)
+			}
 		}
 	}
 
@@ -508,6 +519,7 @@ export default function DashboardMyReports() {
 									projectId={project?.id || ''}
 									reportId={report?.id || ''}
 									howManyCharts={charts.length}
+									onChartAdded={refreshCharts}
 								/>
 								
 								<div className={styles.allCharts}>
@@ -571,11 +583,12 @@ export default function DashboardMyReports() {
 													id={chart.id}
 													boxSize={chart.preferences?.box_size || 'half'}
 													title={chart.title || 'Chart Title'}
-													description={chart.description || 'Chart Description'}
+													description={chart.description || ''}
 													AIGenerated={chart.chat_generated || false}
 													chart={chartData}
 													chartType={chartType}
 													reportSummary={getChartSummary()}
+													switchToPercentage={chartType === 'colors' ? true : false}
 												/>
 											)
 										})

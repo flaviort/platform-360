@@ -17,11 +17,13 @@ import styles from './index.module.scss'
 export default function TopButtons({
 	projectId,
 	reportId,
-	howManyCharts
+	howManyCharts,
+	onChartAdded
 }: {
 	projectId?: string,
 	reportId?: string,
-	howManyCharts: number
+	howManyCharts: number,
+	onChartAdded: () => void
 }) {
 	
 	const [aiChatOpen, setAIChatOpen] = useState(false)
@@ -79,6 +81,7 @@ export default function TopButtons({
 				isOpen={aiChatOpen} 
 				onClose={() => setAIChatOpen(false)}
 				reportId={reportId}
+				onChartAdded={onChartAdded}
 			/>
 			
 		</div>

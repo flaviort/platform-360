@@ -131,10 +131,12 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 										icon: Search,
 										text: 'insight360' as ProductFilter
 									},
+									/*
 									{
 										icon: FilePenLine,
 										text: 'feedback360' as ProductFilter
 									}
+									*/
 								].map((item, i) => (
 									<button
 										type='button'
@@ -197,11 +199,12 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 										name: 'insight360' as ProductFilter,
 										width: 315
 									},
+									/*
 									{
 										image: feedback360.src,
 										name: 'feedback360' as ProductFilter,
 										width: 420
-									}
+									}*/
 								].map((item, i) => (
 									<button
 										type='button'

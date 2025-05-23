@@ -234,7 +234,7 @@ export default function PricePointByRetailer({
                         width={50}
                         domain={[0, 'dataMax']}
                         tickFormatter={(value) => {
-                            return `$${value.toFixed(0)}`
+                            return `$${value.toFixed(2)}`
                         }}
                     />
 

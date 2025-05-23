@@ -176,6 +176,27 @@ export default function SingleDatePicker({
                             <div className='react-datepicker__custom-header'>
                                 
                                 <div className='react-datepicker__selects'>
+                    
+                                    <div className='select-wrapper'>
+
+                                        <select
+                                            value={getYear(date)}
+                                            onChange={({ target: { value } }) => handleYearChange(Number(value))}
+                                            className={clsx(styles.input, styles.select)}
+                                        >
+                                            {years.map((option: any) => (
+                                                <option key={option} value={option}>
+                                                    {option}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        <span className='side-icon'>
+                                            <ChevronDown />
+                                        </span>
+
+                                    </div>
+
                                     <div className='select-wrapper'>
 
                                         <select
@@ -197,26 +218,7 @@ export default function SingleDatePicker({
                                         </span>
 
                                     </div>
-                    
-                                    <div className='select-wrapper'>
-
-                                        <select
-                                            value={getYear(date)}
-                                            onChange={({ target: { value } }) => handleYearChange(Number(value))}
-                                            className={clsx(styles.input, styles.select)}
-                                        >
-                                            {years.map((option: any) => (
-                                                <option key={option} value={option}>
-                                                    {option}
-                                                </option>
-                                            ))}
-                                        </select>
-
-                                        <span className='side-icon'>
-                                            <ChevronDown />
-                                        </span>
-
-                                    </div>
+                                    
                                 </div>
                     
                                 {!hideArrows && (

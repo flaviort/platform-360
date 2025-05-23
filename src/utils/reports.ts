@@ -20,6 +20,7 @@ export interface CreateReportData {
 		// demand360 specific fields
 		location?: string
 		regions?: string[]
+		category?: string[]
 
 		// feedback360 specific fields
 		audience_size?: number

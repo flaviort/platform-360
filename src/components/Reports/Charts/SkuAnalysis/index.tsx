@@ -11,7 +11,7 @@ import Warning from '@/components/Reports/components/Warning'
 import styles from './index.module.scss'
 
 // interface
-export interface HorizontalBarsProps {
+export interface SkuAnalysisProps {
     data: Array<{
         company: string
         count: number
@@ -29,54 +29,25 @@ export interface HorizontalBarsProps {
 		priceRange?: string
     }
     height?: number
-}
-
-const CustomLabel = (props: any) => {
-    const { x, y, width, value, height, payload } = props
-
-    // safe access to company name, fallback to the value prop if payload is undefined
-    const companyName = payload && payload.company ? payload.company : value
-
-    return (
-        <foreignObject
-            x={0}
-            y={y}
-            width='70'
-            height={height}
-            alignmentBaseline='middle'
-        >
-            <div className={styles.companyLabel}>
-                <p className='text-12 medium gray-600'>
-                    {companyName}
-                </p>
-            </div>
-        </foreignObject>
-    )
+    showAllNumbers?: boolean
 }
 
 const CustomValueLabel = (props: any) => {
-    const { x, y, width, value, height } = props
+    const { x, y, width, value } = props
     
-    // Safely handle potential NaN values
-    const xPosition = (x !== undefined && !isNaN(x) ? x : 0) + 
-                      (width !== undefined && !isNaN(width) ? width : 0) + 10
-    
-    const yPosition = y + height / 2
-    
-    // Format number with US locale (adds commas as thousand separators)
-    const formattedValue = typeof value === 'number' 
-        ? value.toLocaleString('en-US')
-        : value
+    // Calculate position for rotated text
+    const positionX = x + (width / 2)
+    const rotationY = y - 7
     
     return (
         <text
-            x={xPosition.toString()} // Convert to string to avoid React warning
-            y={yPosition}
+            x={positionX}
+            y={rotationY}
             fill='#333'
-            alignmentBaseline='middle'
-            className='text-12 medium'
+            textAnchor='middle'
+            className='text-14 medium'
         >
-            {formattedValue}
+            {value !== null && value !== undefined ? value.toLocaleString('en-US') : ''}
         </text>
     )
 }
@@ -86,7 +57,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         return (
             <div className={styles.tooltip}>
 
-                <p className='text-14 medium'>
+                <p className='text-14 medium gray-600 capitalize'>
                     Retailer: {payload[0].payload.company}
                 </p>
 
@@ -101,11 +72,12 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null
 }
 
-export default function HorizontalBars({
+export default function SkuAnalysis({
     data,
     reportSummary,
-    height
-}: HorizontalBarsProps) {
+    height,
+    showAllNumbers
+}: SkuAnalysisProps) {
     //console.log('DEBUGGING RAW DATA:')
     //console.log('Original reportSummary:', reportSummary)
     
@@ -163,7 +135,7 @@ export default function HorizontalBars({
     const hasMissingData = processedData.some(item => item.count === null)
     
     // Calculate a better domain max based on actual data
-    const calculateXAxisMax = () => {
+    const calculateYAxisMax = () => {
         // Find the actual max value in the data
         const maxCount = Math.max(...processedData
             .filter(item => item.count !== null)
@@ -184,7 +156,7 @@ export default function HorizontalBars({
         return Math.ceil(maxCount / 100) * 100
     }
     
-    const xAxisMax = calculateXAxisMax()
+    const yAxisMax = calculateYAxisMax()
     
     // Generate appropriate tick values
     const generateTicks = (max: number) => {
@@ -193,7 +165,7 @@ export default function HorizontalBars({
         return Array.from({length: numTicks}, (_, i) => Math.round(i * step))
     }
     
-    const xAxisTicks = generateTicks(xAxisMax)
+    const yAxisTicks = generateTicks(yAxisMax)
 
     return (
         <div className={styles.component}>
@@ -214,27 +186,35 @@ export default function HorizontalBars({
 
             </div>
 
-            <ResponsiveContainer height={height || processedData.length * 50} className={styles.chart} data-chart-main-inner>
+            <ResponsiveContainer height={height || 400} className={styles.chart} data-chart-main-inner>
                 <BarChart
                     data={processedData}
-                    layout='vertical'
-                    margin={{
-                        left: 90,
-                        bottom: -30,
-                        right: 20,
-                        top: 0
-                    }}
+                    margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
                 >
                     <defs>
-                        <linearGradient id='horizontalBarsGradient' x1='0' y1='0' x2='1' y2='0'>
+                        <linearGradient id='verticalBarsGradient' x1='0' y1='1' x2='0' y2='0'>
                             <stop offset='0%' stopColor='#48238F' />
                             <stop offset='100%' stopColor='#3691E1' />
                         </linearGradient>
                     </defs>
 
-                    <CartesianGrid strokeDasharray='3 3' horizontal={false} />
+                    <CartesianGrid strokeDasharray='3 3' vertical={false} />
 
-                    <XAxis
+                    <XAxis 
+                        dataKey='company' 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{
+                            fill: '#666',
+                            fontSize: 12
+                        }}
+                        className='text-12 capitalize'
+                        textAnchor='middle'
+                    />
+
+                    <YAxis
+                        axisLine={false}
+                        tickLine={false}
                         type='number'
                         dataKey='count'
                         tickFormatter={(value) => value.toLocaleString('en-US')}
@@ -242,15 +222,8 @@ export default function HorizontalBars({
                             fill: '#666',
                             fontSize: 10
                         }}
-                        domain={[0, xAxisMax]}
-                        ticks={xAxisTicks}
-                        tickMargin={10}
-                    />
-
-                    <YAxis
-                        hide
-                        type='category'
-                        dataKey='company'
+                        domain={[0, yAxisMax]}
+                        ticks={yAxisTicks}
                     />
 
                     <Tooltip
@@ -260,22 +233,17 @@ export default function HorizontalBars({
 
                     <Bar
                         dataKey='count'
-                        radius={[0, 20, 20, 0]}
-                        barSize={22}
-                        fill='url(#horizontalBarsGradient)'
+                        radius={[20, 20, 0, 0]}
+                        barSize={20}
+                        spacing={20}
+                        fill='url(#verticalBarsGradient)'
                     >
-                        
-                        <LabelList
-                            dataKey='company'
-                            content={CustomLabel}
-                            position='left'
-                        />
-
-                        <LabelList
-                            dataKey='count'
-                            content={CustomValueLabel}
-                        />
-
+                        {showAllNumbers && (
+                            <LabelList
+                                dataKey='count'
+                                content={CustomValueLabel}
+                            />
+                        )}
                     </Bar>
 
                 </BarChart>

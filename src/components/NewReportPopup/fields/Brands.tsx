@@ -51,8 +51,8 @@ export default function Brands() {
 		// Combine the lists
 		const allItems = [...apiItems, ...selectedItems]
 		
-		console.log('API Search Results:', searchResults.map(b => b.name))
-		console.log('Items for Search component:', allItems.map(i => i.label))
+		//console.log('API Search Results:', searchResults.map(b => b.name))
+		//console.log('Items for Search component:', allItems.map(i => i.label))
 		
 		return allItems
 	}, [searchResults, selectedBrands])
@@ -65,11 +65,11 @@ export default function Brands() {
 		
 		setIsLoading(true)
 		try {
-			console.log('Fetching brands for query:', query)
+			//console.log('Fetching brands for query:', query)
 			const response = await fetch(`/api/proxy?endpoint=/api/brands?query=${encodeURIComponent(query)}`)
 			const data = await response.json()
 			
-			console.log('API response for query:', query, data)
+			//console.log('API response for query:', query, data)
 			
 			// Store the search results
 			setSearchResults(data)

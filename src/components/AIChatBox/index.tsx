@@ -10,9 +10,10 @@ import * as motion from 'motion/react-client'
 import Portal from '@/components/Utils/Portal'
 import Avatar from '@/components/Avatar'
 import ChartBox from '@/components/ChartBox'
+import Fancybox from '@/components/Utils/Fancybox'
 
 // svg
-import { Sparkle, X, SendHorizontal } from 'lucide-react'
+import { Sparkle, X, SendHorizontal, LoaderCircle } from 'lucide-react'
 
 // styles
 import styles from './index.module.scss'
@@ -20,11 +21,15 @@ import styles from './index.module.scss'
 // context
 import { useUser } from '@/contexts/UserContext'
 
+// utils
+import { formatFlexibleChartData } from '@/utils/chartUtils'
+
 // types
 interface AIChatBoxProps {
     isOpen: boolean
     onClose: () => void
-    reportId?: string // Add reportId as a prop
+    reportId?: string
+    onChartAdded?: () => void
 }
 
 interface Message {
@@ -42,16 +47,28 @@ interface ApiResponse {
     chat_history_id?: string
 }
 
+// Add new interface for add chart response
+interface AddChartResponse {
+    id: string
+    title: string
+    description?: string
+    preferences?: any
+    success?: boolean
+    error?: string
+}
+
 // constants
-const API_BASE_URL = '/api/proxy?endpoint=/api'  // Update to use proxy pattern instead of direct URL
+const API_BASE_URL = '/api/proxy?endpoint=/api'
 
 export default function AIChatBox({
     isOpen,
     onClose,
-    reportId = '' // Default to empty string if not provided
+    reportId,
+    onChartAdded
 }: AIChatBoxProps) {
     const [messages, setMessages] = useState<Message[]>([])
     const [isLoading, setIsLoading] = useState(false)
+    const [isAddingChart, setIsAddingChart] = useState(false)
     const [inputValue, setInputValue] = useState('')
     const [chatHistoryId, setChatHistoryId] = useState<string | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -191,7 +208,6 @@ export default function AIChatBox({
                         body: JSON.stringify({
                             question: query,
                             report_id: reportId,
-                            // Include chat_history_id if we have one
                             ...(chatHistoryId ? { chat_history_id: chatHistoryId } : {})
                         }),
                         signal: abortController.signal
@@ -199,14 +215,12 @@ export default function AIChatBox({
                 )
                 
                 clearTimeout(timeoutId)
-                console.log('Response received:', response.status)
                 
                 if (!response.ok) {
                     throw new Error(`API error: ${response.status}`)
                 }
 
                 const responseText = await response.text()
-                console.log('Response text:', responseText)
                 
                 // Parse response - handle potential parsing issues
                 let data: ApiResponse
@@ -216,8 +230,6 @@ export default function AIChatBox({
                     console.error('Failed to parse response as JSON:', parseError)
                     throw new Error('Invalid JSON response from server')
                 }
-                
-                console.log('Parsed data:', data)
                 
                 // Store chat_history_id for future requests
                 if (data.chat_history_id) {
@@ -279,40 +291,121 @@ export default function AIChatBox({
         if (inputValue.trim()) {
             continueChatConversation(inputValue)
             setInputValue('')
-            focusInput() // Focus input after sending
+            focusInput()
         }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         // Handle Shift+Enter to add a new line
         if (e.key === 'Enter' && e.shiftKey) {
-            e.preventDefault() // Prevent form submission
+            e.preventDefault()
             setInputValue(prev => prev + '\n')
             return
         }
         
         // Regular Enter key to send message
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault() // Prevent adding a new line
+            e.preventDefault()
             handleSendMessage()
         }
     }
 
     // Clear chat history and start a new conversation
     const clearChatHistory = async () => {
-        setIsLoading(true)
-
         try {
-            // Clear local messages and chat history ID
+            setIsLoading(true)
+            // Clear messages state
             setMessages([])
+            // Clear chat history ID
             setChatHistoryId(null)
-            
-            // Start a new conversation
-            startChatConversation()
+            // Start a new conversation with welcome message
+            await startChatConversation()
+            // Focus the input field
+            focusInput()
         } catch (error) {
             console.error('Error during chat reset:', error)
+            throw error
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    // Add chart to dashboard
+    const addChartToDashboard = async (messageId: string, messageData: any[]) => {
+        if (!chatHistoryId || !reportId) {
+            console.error('Cannot add chart: missing chat_history_id or report_id')
+            return
+        }
+
+        try {
+            setIsAddingChart(true)
+            
+            // Get authentication token
+            const authToken = getAuthToken()
+            if (!authToken) {
+                throw new Error('Authentication required')
+            }
+
+            // Prepare chart data
+            const chartData = {
+                title: 'AI Generated Chart',
+                chat_history_id: chatHistoryId,
+                description: `Generated at ${new Date().toLocaleString()}`,
+                preferences: {
+                    box_size: 'full',
+                    chart_type: 'vertical'
+                }
+            }
+            
+            // Call API to create chart
+            const response = await fetch(`${API_BASE_URL}/charts/create/from_chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(chartData)
+            })
+            
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.error('Failed to add chart:', errorText)
+                throw new Error(`API error: ${response.status}`)
+            }
+
+            const responseData: AddChartResponse = await response.json()
+
+            // Update UI to show success
+            const successMessageId = Date.now().toString()
+            const successMessage: Message = {
+                id: successMessageId,
+                text: `Chart successfully added to your dashboard! You can view it in the report.`,
+                isUser: false,
+                timestamp: new Date()
+            }
+            
+            setMessages(prev => [...prev, successMessage])
+            
+            // Call the onChartAdded callback if provided
+            if (onChartAdded) {
+                onChartAdded()
+            }
+            
+        } catch (error) {
+            console.error('Error adding chart to dashboard:', error)
+            
+            // Add error message
+            const errorMessageId = Date.now().toString()
+            const errorMessage: Message = {
+                id: errorMessageId,
+                text: `Failed to add chart to dashboard: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                isUser: false,
+                timestamp: new Date()
+            }
+            
+            setMessages(prev => [...prev, errorMessage])
+        } finally {
+            setIsAddingChart(false)
         }
     }
 
@@ -323,7 +416,7 @@ export default function AIChatBox({
                 startChatConversation()
             }
             document.body.classList.add('no-scroll')
-            focusInput() // Focus input when chat opens
+            focusInput()
         } else {
             document.body.classList.remove('no-scroll')
         }
@@ -384,14 +477,100 @@ export default function AIChatBox({
 
                                     <div className={styles.actions}>
 
-                                        <button 
-                                            className={styles.clearChat}
-                                            onClick={clearChatHistory}
-                                            title="Clear conversation"
-                                            type="button"
+                                        <Fancybox
+                                            options={{
+                                                on: {
+                                                    done: (fancybox: any) => {
+                                                        const no = fancybox.container.querySelector('.no')
+                                                        const yes = fancybox.container.querySelector('.yes')
+                                                        
+                                                        no?.addEventListener('click', () => {
+                                                            // Just close the dialog, do nothing
+                                                        })
+                                                        
+                                                        yes?.addEventListener('click', async () => {
+                                                            try {
+                                                                // Show loading state on button
+                                                                const yesButton = fancybox.container.querySelector('.yes')
+                                                                if (yesButton) {
+                                                                    yesButton.classList.add('loading')
+                                                                }
+                                                                
+                                                                // Clear chat history
+                                                                await clearChatHistory()
+                                                                
+                                                                // Remove loading state
+                                                                if (yesButton) {
+                                                                    yesButton.classList.remove('loading')
+                                                                }
+                                                            } catch (error) {
+                                                                console.error('Error starting new chat:', error)
+                                                                
+                                                                // Remove loading state if present
+                                                                const yesButton = fancybox.container.querySelector('.yes')
+                                                                if (yesButton) {
+                                                                    yesButton.classList.remove('loading')
+                                                                }
+                                                            }
+                                                        })
+                                                    }
+                                                }
+                                            }}
                                         >
-                                            Start new chat
-                                        </button>
+                                            <a
+                                                href='#confirm-new-chat'
+                                                data-fancybox
+                                                className={clsx(
+                                                    styles.clearChat,
+                                                    (isLoading || isAddingChart) && styles.disabled
+                                                )}
+                                                onClick={(e) => {
+                                                    if (isLoading || isAddingChart) {
+                                                        e.preventDefault()
+                                                    }
+                                                }}
+                                                title="Clear conversation"
+                                            >
+                                                Start new chat
+                                            </a>
+                                            
+                                            <div className={styles.popup} id='confirm-new-chat'>
+                                                <h2 className='text-45 bold'>
+                                                    Are you sure?
+                                                </h2>
+                                                
+                                                <p className='text-16'>
+                                                    Starting a new chat will <strong className='red uppercase bold'><u>erase</u></strong> your current conversation history. This action is irreversible. Do you want to continue?
+                                                </p>
+                                                
+                                                <div className={styles.buttons}>
+                                                    <button
+                                                        className='button button--gradient-blue text-16 no'
+                                                        data-fancybox-close
+                                                    >
+                                                        No
+                                                    </button>
+                                                    
+                                                    <button
+                                                        className={clsx(
+                                                            styles.confirm,
+                                                            'button button--hollow text-16 yes'
+                                                        )}
+                                                        data-fancybox-close
+                                                    >
+                                                        <span className='button__text'>
+                                                            Yes
+                                                        </span>
+                                                        
+                                                        <span className='button__loading'>
+                                                            <span className='rotation' style={{ '--speed': '.5' } as any}>
+                                                                <LoaderCircle />
+                                                            </span>
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </Fancybox>
 
                                         <button
                                             className={styles.close}
@@ -450,12 +629,19 @@ export default function AIChatBox({
                                                                 {message.data && message.data.length > 0 && (
                                                                     <>
                                                                         <div className={styles.messageData}>
-                                                                            
-                                                                            {/*
-                                                                            <pre className='bg-gray-800 white p-1'>
-                                                                                {JSON.stringify(message.data, null, 2)}
-                                                                            </pre>
-                                                                            */}
+
+                                                                            {/*process.env.NODE_ENV === 'development' && (
+                                                                                <div className='relative'>
+                                                                                    
+                                                                                    <p className={styles.devOnly}>
+                                                                                        Dev only
+                                                                                    </p>
+
+                                                                                    <pre className='bg-gray-800 white p-1'>
+                                                                                        {JSON.stringify(message.data, null, 2)}
+                                                                                    </pre>
+                                                                                </div>
+                                                                            )*/}
 
                                                                             <ChartBox
                                                                                 id={`ai-chart-${message.id}`}
@@ -463,10 +649,7 @@ export default function AIChatBox({
                                                                                 AIChatChart
                                                                                 chartType='vertical'
                                                                                 chart={{
-                                                                                    vertical: message.data?.map(item => ({
-                                                                                        label: item.product_name,
-                                                                                        value: item.price
-                                                                                    }))
+                                                                                    vertical: formatFlexibleChartData(message.data)
                                                                                 }}
                                                                                 reportSummary={{
                                                                                     retailers: [],
@@ -477,8 +660,12 @@ export default function AIChatBox({
                                                                             />
                                                                         </div>
 
-                                                                        <button className='mt-half text-14 button button--gradient-purple button--small'>
-                                                                            Add chart to dashboard
+                                                                        <button 
+                                                                            className='mt-half text-14 button button--gradient-purple button--small'
+                                                                            onClick={() => addChartToDashboard(message.id, message.data || [])} 
+                                                                            disabled={isLoading || isAddingChart || !reportId}
+                                                                        >
+                                                                            {isAddingChart ? 'Adding chart...' : 'Add chart to dashboard'}
                                                                         </button>
                                                                     </>
                                                                 )}

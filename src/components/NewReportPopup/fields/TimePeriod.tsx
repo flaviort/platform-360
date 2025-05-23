@@ -3,7 +3,7 @@
 // libraries
 import clsx from 'clsx'
 import { useFormContext } from 'react-hook-form'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 // components
 import SingleDatePicker from '@/components/Form/SingleDatePicker'
@@ -12,7 +12,7 @@ import SingleDatePicker from '@/components/Form/SingleDatePicker'
 import styles from '../index.module.scss'
 
 export default function TimePeriod() {
-	const { watch, formState: { errors }, trigger, setValue, register } = useFormContext()
+	const { watch, formState: { errors }, trigger, register } = useFormContext()
 	
 	// Watch both date values
 	const startDate = watch('timePeriodStart')
@@ -20,6 +20,7 @@ export default function TimePeriod() {
 	
 	// Register the fields with required validation at the form level
 	useEffect(() => {
+		
 		// Register the date fields with required validation
 		register('timePeriodStart', { 
 			required: 'This field is required',

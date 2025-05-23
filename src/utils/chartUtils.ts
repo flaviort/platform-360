@@ -3,6 +3,9 @@ export interface ChartResultItem {
     [key: string]: any
 }
 
+// Import the formatPrice utility
+import { formatPrice } from '@/utils/functions'
+
 // Format chart data based on chart type
 export function formatChartData(chart: any) {
     let chartData = {}
@@ -103,10 +106,57 @@ export function formatChartData(chart: any) {
         case 'vertical':
             chartData = {
                 vertical: Array.isArray(chart.results) ? 
-                    chart.results.map((item: ChartResultItem) => ({
-                        label: item.product_name || 'Unknown',
-                        value: typeof item.price === 'number' ? item.price : 0
-                    })) : []
+                    chart.results.map((item: ChartResultItem) => {
+                        // Detect which fields to use as label
+                        const labelKey = item.brand ? 'brand' : 
+                                        item.company ? 'company' : 
+                                        item.product_name ? 'product_name' : 
+                                        Object.keys(item).find(key => key !== 'price' && key !== 'value') || '';
+                        
+                        // Determine label type based on the field
+                        const labelType = labelKey === 'brand' ? 'Brand' :
+                                        labelKey === 'company' ? 'Retailer' :
+                                        labelKey === 'product_name' ? 'Product' :
+                                        'Item';
+                        
+                        // Get and capitalize the label (brand/company name)
+                        let labelValue = String(item[labelKey] || 'Unknown');
+                        
+                        // Capitalize each word in the label
+                        const label = labelValue
+                            .split(' ')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                            .join(' ');
+                        
+                        // Get the value - prefer price if available
+                        let value = 0;
+                        if (typeof item.price === 'number') {
+                            // Handle large integer prices (if stored in cents)
+                            if (item.price > 1000 && Number.isInteger(item.price)) {
+                                value = item.price / 100;
+                            } else {
+                                value = item.price;
+                            }
+                            // Round price values to exactly 2 decimal places
+                            value = Math.round(value * 100) / 100;
+                        } else if (typeof item.value === 'number') {
+                            value = item.value;
+                        }
+                        
+                        // Format display value for prices
+                        let displayValue;
+                        if (item.price !== undefined) {
+                            displayValue = formatPrice(value);
+                        }
+                        
+                        return {
+                            label,
+                            labelTitle: item.price !== undefined ? 'Price' : 'Value',
+                            value,
+                            labelType,
+                            ...(displayValue ? { displayValue } : {})
+                        };
+                    }) : []
             }
             break
             
@@ -153,4 +203,66 @@ export function getChartSummary(report: any, formatDateForReport: (date: string)
             ? `$${report.product_settings.min_price} - $${report.product_settings.max_price}` 
             : undefined
     }
+}
+
+/**
+ * Formats raw data from API into a standardized format for vertical bar charts
+ * Flexibly handles different data formats (company/brand/etc. as labels, price/value as values)
+ */
+export const formatFlexibleChartData = (rawData: any[] = []) => {
+    if (!Array.isArray(rawData) || rawData.length === 0) {
+        return []
+    }
+    
+    return rawData.map(item => {
+        // Detect which fields to use as label and value
+        const labelKey = item.brand ? 'brand' : 
+                         item.company ? 'company' : 
+                         item.product_name ? 'product_name' : 
+                         Object.keys(item).find(key => key !== 'price' && key !== 'value') || ''
+        
+        // Detect value field (price or value)
+        const valueKey = item.price !== undefined ? 'price' : 'value'
+        
+        // Get the raw numeric value
+        let numericValue = 0
+        if (item[valueKey] !== undefined) {
+            // Convert to number type
+            numericValue = Number(item[valueKey])
+            
+            // Handle large integer prices (if stored in cents)
+            if (valueKey === 'price' && numericValue > 1000 && Number.isInteger(numericValue)) {
+                numericValue = numericValue / 100
+            }
+            
+            // Round price values to exactly 2 decimal places
+            if (valueKey === 'price') {
+                numericValue = Math.round(numericValue * 100) / 100
+            }
+        }
+        
+        // Format the display value for price fields
+        let formattedValue = undefined
+        if (valueKey === 'price') {
+            // Format as currency with $ and commas using formatPrice utility
+            formattedValue = formatPrice(numericValue)
+        }
+        
+        // Get and capitalize the label (brand/company name)
+        let labelValue = String(item[labelKey] || '')
+        
+        // Capitalize each word in the label
+        const capitalizedLabel = labelValue
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ')
+            
+        // Create the chart item with the optional displayValue
+        return {
+            label: capitalizedLabel,
+            labelTitle: valueKey === 'price' ? 'Price' : 'Value',
+            value: numericValue,
+            ...(formattedValue ? { displayValue: formattedValue } : {})
+        }
+    })
 } 
