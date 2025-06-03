@@ -273,6 +273,8 @@ export default function List({
                                 <DeleteProject
                                     id={group.projectId}
                                     onComplete={refreshList}
+                                    showMoreOptions
+                                    onGenerateReport={openGenerateReport}
                                 />
                             </div>
                         </div>
@@ -330,13 +332,12 @@ export default function List({
                                             className={clsx(styles.button, 'button button--gradient-blue white')}
                                         />
 
-                                        {/*
                                         <PopupFeedback360
                                             icon={FilePenLine}
                                             text='Feedback360'
                                             className={clsx(styles.button, 'button button--gradient-blue white')}
+                                            disabled
                                         />
-                                        */}
                                         
                                     </div>
                                 </div>
@@ -487,6 +488,7 @@ export function ListItem({
             <DeleteReport
                 id={item.id}
                 onComplete={refreshList}
+                className={styles.actionCol}
             />
         </div>
     )

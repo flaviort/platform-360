@@ -2,6 +2,7 @@
 
 // libraries
 import clsx from 'clsx'
+import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 
 // components
@@ -19,12 +20,14 @@ interface DeleteReportProps {
     internalDelete?: boolean
 	id: string
     onComplete: () => void
+    className?: string
 }
 
 export default function DeleteReport({
     internalDelete,
     id,
-    onComplete
+    onComplete,
+    className
 }: DeleteReportProps) {
 
     // options
@@ -83,7 +86,7 @@ export default function DeleteReport({
 	}, [optionsSub])
 
 	return (
-		<div className={styles.component} ref={optionsSubRef}>
+		<div className={clsx(styles.component, className)} ref={optionsSubRef}>
 				
             <button
                 className={clsx(
@@ -266,6 +269,7 @@ export default function DeleteReport({
                                     }
                                 }}
                             >
+
                                 <a
                                     href='#confirm-delete'
                                     data-fancybox

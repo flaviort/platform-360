@@ -3,7 +3,7 @@
 // libraries
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback } from 'react'
 
 // components
 import PopupForm from './form'
@@ -24,8 +24,15 @@ import InputHidden from '@/components/Form/InputHidden'
 import { Sparkles } from 'lucide-react'
 
 // utils
-import { createReport, CreateReportData, getProjectAndCategoryIds } from '@/utils/reports'
-import { useChartSuggestion } from '@/utils/hooks'
+import { 
+	CreateReportData, 
+	getProjectAndCategoryIds,
+	useGoalGeneration,
+	createReportWithCharts,
+	extractSelectedItems,
+	formatISODate,
+	createTimeRangeText
+} from '@/utils/reports'
 import loadingMessages from '@/utils/loadingMessages'
 
 // css
@@ -37,7 +44,7 @@ interface PopupShop360Props {
 	className?: string
 }
 
-// Chart definitions for creating charts after report creation
+// chart definitions for creating charts after report creation
 const getChartDefinitions = (baseChartData: any) => [
 	{ 
 		name: 'Price Point Analysis', 
@@ -52,6 +59,7 @@ const getChartDefinitions = (baseChartData: any) => [
 			query: {
 				...baseChartData.query,
 				operator: {
+					...baseChartData.query.operator,
 					limit: 30,
 					aggregate: 'distribution',
 					operates_on: 'price',
@@ -144,44 +152,31 @@ const getChartDefinitions = (baseChartData: any) => [
 	}
 ]
 
-// Helper function to extract selected items from form checkbox state
-const extractSelectedItems = (items: Record<string, boolean> = {}) => 
-	Object.entries(items)
-		.filter(([_, selected]) => selected)
-		.map(([name, _]) => name)
-
-// Helper function to transform gender values
+// helper function to transform gender values
 const transformGender = (gender: string): string => {
 	const lowercased = gender.toLowerCase()
 
-	if (lowercased === "kids") {
-		return "kids"
+	if (lowercased === 'kids') {
+		return 'kids'
 	}
 	
 	if (lowercased.endsWith("'s")) {
 		return lowercased.slice(0, -2)
-	} else if (lowercased.endsWith("s")) {
+	} else if (lowercased.endsWith('s')) {
 		return lowercased.slice(0, -1)
 	}
 
 	return lowercased
 }
 
-// Helper function to format dates for API
-const formatISODate = (date: Date | string): string => {
-	const isoString = date instanceof Date ? date.toISOString() : new Date(date).toISOString()
-	return isoString.substring(0, 19)
-}
-
-// Format date for display
-const formatDisplayDate = (date: string) => {
-	if (!date) return ''
-	const d = new Date(date)
-	return d.toLocaleDateString('en-US', { 
-		year: 'numeric', 
-		month: 'short', 
-		day: 'numeric' 
-	})
+// form data type for shop360
+interface Shop360FormData {
+	category: string
+	retailers: string[]
+	brands: string[]
+	genders: string[]
+	timePeriodStart: string
+	timePeriodEnd: string
 }
 
 export default function PopupShop360({
@@ -191,205 +186,144 @@ export default function PopupShop360({
 }: PopupShop360Props) {
 
 	const router = useRouter()
-	const [isGenerating, setIsGenerating] = useState(false)
-	
-	const { getSuggestions, loading, error } = useChartSuggestion()
-	
-	// Track the current suggestion index for rotation
-	const [suggestionIndex, setSuggestionIndex] = useState(0)
-	
-	// Track the last form data to detect changes
-	const [lastFormData, setLastFormData] = useState<any>(null)
 
-	const handleSuccess = async (data: any) => {
-
-		let report: any = null
+	// create base chart data
+	const createBaseChartData = useCallback((data: any, report: any) => {
 		
-		try {
-			console.log('Form data received:', data)
-			console.log('Project goal from form:', data.projectGoal)
-			
-			// get project and category IDs
-			const { projectId, categoryId } = await getProjectAndCategoryIds({
-				selectedProject: data.selectedProject,
-				newProjectName: data.newProjectName,
-				projectGoal: data.projectGoal,
-				category: data.category
-			})
+		// process fields the same way as in formatFormData
+		let selectedCategory = [data.category || '']
 
-			// Process selected fields
-			let selectedCategory = [data.category || '']
-			
-			// Special case for footwear category
-			if (selectedCategory.includes('Footwear')) {
-				selectedCategory = ['running shoes', 'heels', 'sandals', 'loafers', 'sneakers', 'shoes', 'flats', 'slippers', 'boots', 'clogs', 'oxfords']
-			}
-			
-			const selectedRetailers = extractSelectedItems(data.retailers)
-			const selectedBrands = extractSelectedItems(data.brands)
-			
-			// Transform and prepare gender values
-			const selectedGenders = Array.isArray(data.genders) 
-				? data.genders.map(transformGender) 
-				: (data.genders ? [transformGender(data.genders)] : [])
-			
-			// Format dates for API
-			const selectedStartDate = formatISODate(data.timePeriodStart)
-			const selectedEndDate = formatISODate(data.timePeriodEnd)
+		if (selectedCategory.includes('Footwear')) {
+			selectedCategory = ['running shoes', 'heels', 'sandals', 'loafers', 'sneakers', 'shoes', 'flats', 'slippers', 'boots', 'clogs', 'oxfords', 'athletic shoes', 'wedges', 'mules clogs']
+		}
+		
+		const selectedRetailers = extractSelectedItems(data.retailers)
+		const selectedBrands = extractSelectedItems(data.brands)
+		const selectedGenders = Array.isArray(data.genders) 
+			? data.genders.map(transformGender) 
+			: (data.genders ? [transformGender(data.genders)] : [])
+		
+		const selectedStartDate = formatISODate(data.timePeriodStart)
+		const selectedEndDate = formatISODate(data.timePeriodEnd)
 
-			// Prepare report data for API
-			const reportData: CreateReportData = {
-				name: data.reportName,
-				product_type: 'shop360',
-				category_id: categoryId,
-				status: false,
-				goal: data.goal,
-				project_id: projectId,
-				product_settings: {
-					retailers: selectedRetailers,
-					brands: selectedBrands,
-					genders: selectedGenders,
-					type_store: [data.type],
-					include_images: data.includeImages,
+		return {
+			report_id: report.id,
+			query: {
+				category: selectedCategory,
+				company: selectedRetailers,
+				brand: selectedBrands,
+				gender: selectedGenders,
+				operator: {
 					start_date: selectedStartDate,
 					end_date: selectedEndDate
 				}
 			}
+		}
+	}, [])
 
-			// Step 1: Create the report
-			console.log('Creating report with data:', reportData)
-			report = await createReport(reportData)
-			console.log('Report created:', report)
+	// create request parameters for suggestion API
+	const createRequestParams = useCallback((formData: Shop360FormData, goalValue: string) => ({
+		product_name: 'Shop360',
+		category: [formData.category || ''],
+		company: formData.retailers,
+		brand: formData.brands,
+		gender: formData.genders,
+		comment: goalValue
+	}), [])
 
-			if (!report || !report.id) {
-				throw new Error('Report creation failed or returned invalid data')
+	// format form data for report creation
+	const formatFormData = useCallback(async (data: any): Promise<CreateReportData> => {
+		//console.log('Form data received:', data)
+		//console.log('Project goal from form:', data.projectGoal)
+		
+		// get project and category IDs
+		const { projectId, categoryId } = await getProjectAndCategoryIds({
+			selectedProject: data.selectedProject,
+			newProjectName: data.newProjectName,
+			projectGoal: data.projectGoal,
+			category: data.category
+		})
+
+		// process selected fields
+		let selectedCategory = [data.category || '']
+		
+		// special case for footwear category
+		if (selectedCategory.includes('Footwear')) {
+			selectedCategory = ['running shoes', 'heels', 'sandals', 'loafers', 'sneakers', 'shoes', 'flats', 'slippers', 'boots', 'clogs', 'oxfords', 'athletic shoes', 'wedges', 'mules clogs']
+		}
+		
+		const selectedRetailers = extractSelectedItems(data.retailers)
+		const selectedBrands = extractSelectedItems(data.brands)
+		
+		// transform and prepare gender values
+		const selectedGenders = Array.isArray(data.genders) 
+			? data.genders.map(transformGender) 
+			: (data.genders ? [transformGender(data.genders)] : [])
+		
+		// format dates for API
+		const selectedStartDate = formatISODate(data.timePeriodStart)
+		const selectedEndDate = formatISODate(data.timePeriodEnd)
+
+		return {
+			name: data.reportName,
+			product_type: 'shop360',
+			category_id: categoryId,
+			status: false,
+			goal: data.goal,
+			project_id: projectId,
+			product_settings: {
+				retailers: selectedRetailers,
+				brands: selectedBrands,
+				genders: selectedGenders,
+				type_store: [data.type],
+				include_images: data.includeImages,
+				start_date: selectedStartDate,
+				end_date: selectedEndDate
 			}
+		}
+	}, [])
 
-			// Step 2: Verify report exists in database
-			console.log(`Verifying report ${report.id} exists in database...`)
-			
-			const verifyReportResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${report.id}`, {
-				method: 'GET',
-				headers: { 'Accept': 'application/json' }
+	// extract form data for goal generation
+	const extractFormData = useCallback((eventDetail: any): Shop360FormData => {
+		const selectedRetailers = extractSelectedItems(eventDetail.retailers || {})
+		const selectedBrands = extractSelectedItems(eventDetail.brands || {})
+		
+		return {
+			category: eventDetail.category || '',
+			retailers: selectedRetailers,
+			brands: selectedBrands,
+			genders: eventDetail.genders || [],
+			timePeriodStart: eventDetail.timePeriodStart || '',
+			timePeriodEnd: eventDetail.timePeriodEnd || ''
+		}
+	}, [])
+
+	// create a fallback goal text based on form data
+	const createFallbackGoalText = useCallback((formData: Shop360FormData): string => {
+		const timeRangeText = createTimeRangeText(formData.timePeriodStart, formData.timePeriodEnd)
+		return `Analyze ${formData.category} data from ${formData.retailers.join(', ')} for ${formData.brands.join(', ')} targeting ${formData.genders.join(' and ')} ${timeRangeText}. Identify key trends, competitive insights, and strategic opportunities.`
+	}, [])
+
+	// initialize goal generation hook
+	const { generateGoal, isGenerating } = useGoalGeneration<Shop360FormData>({
+		productType: 'shop360',
+		productName: 'Shop360',
+		createFallbackText: createFallbackGoalText,
+		createRequestParams,
+		extractFormData
+	})
+
+	const handleSuccess = async (data: any) => {
+		try {
+			await createReportWithCharts(data, {
+				productType: 'shop360',
+				chartDefinitionsFactory: getChartDefinitions,
+				formatFormData,
+				createBaseChartData,
+				router
 			})
-
-			if (!verifyReportResponse.ok) {
-				const errorText = await verifyReportResponse.text()
-				console.error('Report verification failed:', errorText)
-				throw new Error(`Failed to verify report existence: ${verifyReportResponse.statusText}`)
-			}
-
-			const reportCharts = await verifyReportResponse.json()
-			console.log('Report verification successful:', reportCharts)
-			
-			// Step 3: Create charts for the report
-			console.log('Creating charts for report ID:', report.id)
-			
-			// Add a delay to ensure DB consistency
-			await new Promise(resolve => setTimeout(resolve, 1000))
-			
-			// Base data for all charts
-			const baseChartData = {
-				report_id: report.id,
-				query: {
-					category: selectedCategory,
-					company: selectedRetailers,
-					brand: selectedBrands,
-					gender: selectedGenders,
-					operator: {
-						start_date: selectedStartDate,
-						end_date: selectedEndDate
-					}
-				}
-			}
-
-			// Define all charts to create
-			const chartsToCreate = getChartDefinitions(baseChartData)
-			
-			// Create all charts in parallel
-			const chartPromises = chartsToCreate.map(chart => {
-				console.log(`Creating ${chart.name} chart...`)
-				
-				return fetch('/api/proxy?endpoint=/api/charts', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-					},
-					body: JSON.stringify(chart.data)
-				})
-				.then(async chartResponse => {
-					console.log(`${chart.name} chart response status:`, chartResponse.status)
-					const responseText = await chartResponse.text()
-					
-					if (!chartResponse.ok) {
-						console.error(`Failed to create ${chart.name} chart:`, responseText)
-						return { ok: false, name: chart.name }
-					}
-					
-					const chartData = responseText ? JSON.parse(responseText) : {}
-					
-					return { 
-						ok: true, 
-						data: chartData, 
-						name: chart.name,
-						hasData: chartData && chartData.results && chartData.results.length > 0
-					}
-				})
-				.catch(error => {
-					console.error(`Error creating ${chart.name} chart:`, error)
-					return { ok: false, name: chart.name }
-				})
-			})
-
-			// Wait for all chart creations to complete
-			const results = await Promise.all(chartPromises)
-				
-			const atleastOneChartHasData = results.some(r => 'hasData' in r && r.hasData)
-			
-			if (!atleastOneChartHasData) {
-				console.log('⚠️ All charts have empty results. Deleting report.')
-				
-				// Delete the report that was just created
-				try {
-					console.log(`Deleting report ${report.id} due to empty chart results`)
-					const deleteResponse = await fetch(`/api/delete-report`, {
-						method: 'POST',
-						headers: {
-							'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({ reportId: report.id })
-					})
-					
-					if (deleteResponse.ok) {
-						console.log('Report deleted successfully')
-					} else {
-						console.error('Failed to delete report:', await deleteResponse.text())
-					}
-					
-					// Notify user
-					alert('No data found for the selected criteria. Please try different filters or time period.')
-					document.dispatchEvent(new Event('formError'))
-					return // Don't redirect
-				} catch (deleteError) {
-					console.error('Error deleting report with empty charts:', deleteError)
-				}
-			} else {
-				// Success - redirect to the report page
-				console.log('Report and charts creation completed successfully')
-				document.dispatchEvent(new Event('formSent'))
-				router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
-			}
 		} catch (error) {
-			console.error('Error during report/chart creation process:', error)
-			document.dispatchEvent(new Event('formError'))
-			
-			// Log orphaned report
-			if (report && report.id) {
-				console.warn(`Report was created (ID: ${report.id}) but chart creation failed`)
-			}
-			
+			console.error('Error during report creation:', error)
 			throw error
 		}
 	}
@@ -397,161 +331,6 @@ export default function PopupShop360({
 	const handleError = (error: any) => {
 		console.error('Form submission error:', error)
 		document.dispatchEvent(new Event('formError'))
-	}
-
-	// Create a fallback goal text based on form data
-	const createFallbackGoalText = useCallback((
-		category: string | undefined, 
-		retailers: string[], 
-		brands: string[], 
-		genders: string[],
-		startDate: string | undefined, 
-		endDate: string | undefined
-	): string => {
-		const timeRangeText = startDate && endDate 
-			? `from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}`
-			: 'during the selected time period'
-			
-		return `Analyze ${category} data from ${retailers.join(', ')} for ${brands.join(', ')} targeting ${genders.join(' and ')} ${timeRangeText}. Identify key trends, competitive insights, and strategic opportunities.`
-	}, [])
-
-	// handle form data for goal generation
-	useEffect(() => {
-		const handleFormData = async (e: any) => {
-			// Verify this event is for our component
-			if (e.detail.productType !== 'shop360') return
-			
-			try {
-				const {
-					category,
-					retailers = {},
-					brands = {},
-					genders = [],
-					timePeriodStart,
-					timePeriodEnd,
-					setGoalValue,
-					goal
-				} = e.detail
-				
-				// Extract selected values
-				const selectedRetailers = extractSelectedItems(retailers)
-				const selectedBrands = extractSelectedItems(brands)
-				
-				// Create form data summary for change detection
-				const currentFormData = {
-					category,
-					retailers: selectedRetailers.join(','),
-					brands: selectedBrands.join(','),
-					genders: genders.join(','),
-					timePeriod: `${timePeriodStart}-${timePeriodEnd}`,
-					goal: goal || '' // Set a default empty string if goal is undefined
-				}
-				
-				// Check if form data has changed
-				const formDataChanged = !lastFormData || JSON.stringify(currentFormData) !== JSON.stringify(lastFormData)
-				
-				// Reset or increment suggestion index
-				if (formDataChanged) {
-					setSuggestionIndex(0)
-					setLastFormData(currentFormData)
-				} else {
-					setSuggestionIndex(prevIndex => (prevIndex + 1))
-				}
-
-				// Create dynamic fallback goal text based on current form data
-				const fallbackGoalText = createFallbackGoalText(
-					category,
-					selectedRetailers,
-					selectedBrands,
-					genders,
-					timePeriodStart,
-					timePeriodEnd
-				)
-				
-				// Use direct DOM access as a last resort to get the goal value
-				let finalGoalValue = goal
-
-				if (!finalGoalValue) {
-					const goalTextarea = document.getElementById('report-goal') as HTMLTextAreaElement
-					if (goalTextarea && goalTextarea.value) {
-						finalGoalValue = goalTextarea.value
-					} else {
-						finalGoalValue = fallbackGoalText
-					}
-				}
-				
-				// Prepare request for suggestion API
-				const requestParams = {
-					product_name: 'Shop360',
-					category: [category || ''],
-					company: selectedRetailers,
-					brand: selectedBrands,
-					gender: genders,
-					comment: finalGoalValue
-				}
-				
-				console.log('Sending to suggestion API:', requestParams)
-
-				// Call the suggestion API
-				await getSuggestions(requestParams, (data) => {
-					//console.log('API response:', data)
-					
-					if (data && data.goal_suggestion && Array.isArray(data.goal_suggestion) && data.goal_suggestion.length > 0) {
-						// Select suggestion based on current index
-						const currentIndex = suggestionIndex % data.goal_suggestion.length
-						const selectedSuggestion = data.goal_suggestion[currentIndex]
-						
-						setGoalValue(selectedSuggestion)
-						//console.log(`Using suggestion ${currentIndex + 1}/${data.goal_suggestion.length}:`, selectedSuggestion)
-					} else {
-						// Fall back to the basic goal text
-						setGoalValue(fallbackGoalText)
-						console.log('No suggestions received, using fallback:', fallbackGoalText)
-					}
-				})
-			} catch (error) {
-				console.error('Error processing form data for goal:', error)
-			} finally {
-				setIsGenerating(false)
-			}
-		}
-		
-		// Handle incomplete form data
-		const handleIncompleteData = (e: any) => {
-			console.log('Incomplete form data:', e.detail)
-			setIsGenerating(false)
-		}
-		
-		// Set up event listeners
-		document.addEventListener('formDataForGoal', handleFormData)
-		document.addEventListener('formDataForGoalIncomplete', handleIncompleteData)
-		
-		// Clean up event listeners
-		return () => {
-			document.removeEventListener('formDataForGoal', handleFormData)
-			document.removeEventListener('formDataForGoalIncomplete', handleIncompleteData)
-		}
-	}, [getSuggestions, suggestionIndex, lastFormData, createFallbackGoalText])
-
-	// Generate a goal statement using the AI suggestion API
-	const generateGoal = () => {
-		try {
-			setIsGenerating(true)
-			
-			// Request form data through custom event
-			console.log('DEBUG shop360.tsx - Dispatching requestFormDataForGoal event')
-			const event = new CustomEvent('requestFormDataForGoal', {
-				detail: { 
-					productType: 'shop360',
-					// Include that we need the current goal value
-					includeCurrentGoal: true
-				}
-			})
-			document.dispatchEvent(event)
-		} catch (error) {
-			console.error('Error triggering goal generation:', error)
-			setIsGenerating(false)
-		}
 	}
 
 	return (
@@ -593,9 +372,9 @@ export default function PopupShop360({
 						type='button'
 						className={clsx(styles.ai, 'button button--gradient-purple')}
 						onClick={generateGoal}
-						disabled={isGenerating || loading}
+						disabled={isGenerating}
 					>
-						{isGenerating || loading ? (
+						{isGenerating ? (
 							<Loading
 								simple
 								noContainer

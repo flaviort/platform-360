@@ -9,6 +9,9 @@ import { useRouter } from 'next/navigation'
 import MultipleAvatar from '@/components/MultipleAvatar'
 import DeleteReport from '@/components/DeleteReport'
 
+// utils
+import { convertLocationCode } from '@/utils/chartUtils'
+
 // img
 import demand360 from '@/assets/img/logos-no-margin/demand-360.png'
 import feedback360 from '@/assets/img/logos-no-margin/feedback-360.png'
@@ -32,6 +35,7 @@ interface ProjectDetailsProps {
 		name: string
 		audienceSize?: string
 		category: string
+		subCategory: string
 		retailers?: string[]
 		brands?: string[]
 		genders?: string[]
@@ -60,6 +64,8 @@ export default function ProjectDetails({
 }: ProjectDetailsProps) {
 
 	const router = useRouter()
+
+	console.log(summary)
 
 	return (
 		<div className={styles.detailsArea}>
@@ -175,6 +181,20 @@ export default function ProjectDetails({
 									</>
 								)}
 
+								{summary?.subCategory && (
+									<>
+										<p className='text-14 gray-700 bold'>
+											Sub-category:
+										</p>
+
+										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
+											<p>
+												{summary.subCategory}
+											</p>
+										</div>
+									</>
+								)}
+
 								{summary?.retailers && (
 									<>
 										<p className='text-14 gray-700 bold'>
@@ -281,7 +301,7 @@ export default function ProjectDetails({
 
 										<div className={clsx(styles.content, 'text-14 gray-500 capitalize')}>
 											<p>
-												{summary.location}
+												{convertLocationCode(summary.location)}
 											</p>
 										</div>
 									</>

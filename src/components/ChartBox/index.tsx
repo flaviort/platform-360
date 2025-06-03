@@ -12,6 +12,7 @@ import Colors from '@/components/Reports/Charts/Colors'
 import VerticalBars from '@/components/Reports/Charts/VerticalBars'
 import HorizontalBars from '@/components/Reports/Charts/HorizontalBars'
 import PositiveNegativeBars from '@/components/Reports/Charts/PositiveNegativeBars'
+import MapUSA from '@/components/Reports/NonCharts/Maps/USA'
 
 // non-chart components
 import ProductPrice from '@/components/Reports/NonCharts/ProductPrice'
@@ -35,6 +36,7 @@ interface ChartBoxProps {
     showAllNumbers?: boolean
     switchToPercentage?: boolean
     chart: {
+        // shop360 default charts
         pricePointAnalysis?: Array<{
             id: string
             count: number
@@ -55,6 +57,12 @@ interface ChartBoxProps {
         }>
         colors?: Array<{
             color: string
+            count: number
+        }>
+
+        // demand360 default charts
+        mapUSA?: Array<{
+            state: string
             count: number
         }>
 
@@ -185,6 +193,8 @@ export default function ChartBox({
                 data-chart-main
             >
 
+                {/* --- shop360 default charts  --- */}
+
                 {chart.pricePointAnalysis && (
                     <PricePointAnalysis
                         data={chart.pricePointAnalysis}
@@ -234,6 +244,14 @@ export default function ChartBox({
                         height={chartHeight}
                         showAllNumbers={showAllNumbers}
                         showAsPercentage={showAsPercentage}
+                    />
+                )}
+
+                {/* --- demand360 default charts  --- */}
+
+                {chart.mapUSA && (
+                    <MapUSA
+                        data={chart.mapUSA}
                     />
                 )}
 

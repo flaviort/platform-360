@@ -510,6 +510,10 @@
     .list {
         position: relative;
         overflow: hidden;
+
+        @media #{$mq-sm-max} {
+            overflow: visible;
+        }
             
         &:after {
             content: '';
@@ -575,6 +579,12 @@
                     width: 100%;
                     font-size: .9rem;
 
+                    &:disabled {
+                        opacity: .275;
+                        cursor: not-allowed;
+                        filter: grayscale(1);
+                    }
+
                     svg {
                         min-width: 1rem;
                         width: 1rem;
@@ -588,6 +598,7 @@
             position: relative;
             padding-bottom: 1rem;
 
+            /*
             @media #{$mq-lg-max} {
                 width: calc(100% + 3rem);
                 padding-right: 2.75rem;
@@ -600,13 +611,9 @@
             }
 
             @media #{$mq-sm-max} {
-                width: calc(100% + 1.75rem);
-                padding-right: 2rem;
-            }
-
-            @media #{$mq-xs-max} {
-                width: calc(100% + 1rem);
-                padding-right: 1.1rem;
+                width: 100%;
+                padding-right: 0;
+                overflow-x: visible;
             }
 
             &::-webkit-scrollbar {
@@ -625,6 +632,7 @@
             &::-webkit-scrollbar-thumb:hover {
                 cursor: grab;
             }
+            */
 
             > * {
                 &:last-child {
@@ -651,8 +659,12 @@
                 padding: 1rem 0;
                 border-top: var(--1px) solid $gray-200;
                 border-bottom: var(--1px) solid $gray-200;
-                min-width: 50rem;
+                //min-width: 50rem;
                 margin-bottom: calc(var(--1px) * -1);
+
+                @media #{$mq-sm-max} {
+                    display: none;
+                }
 
                 button {
                     display: flex;
@@ -672,10 +684,14 @@
                 .listGroupTitle {
                     @include gradient-left-right($blue, $blue-light);
                     padding: 1rem;
-                    min-width: 50rem;
+                    //min-width: 50rem;
                     display: flex;
                     align-items: center;
                     justify-content: flex-start;
+
+                    @media #{$mq-sm-max} {
+                        min-width: 100%;
+                    }
                     
                     h2 {
                         margin-right: auto;
@@ -698,6 +714,10 @@
                             color: $white;
                             background-color: $purple;
                             transition: .3s ease-in-out;
+
+                            @media #{$mq-sm-max} {
+                                display: none;
+                            }
                             
                             &:hover {
                                 background: $purple-dark;
@@ -725,13 +745,22 @@
                     border-top: var(--1px) solid $gray-200;
                     border-bottom: var(--1px) solid $gray-200;
                     transition: .1s ease-in-out;
-                    min-width: 50rem;
+                    //min-width: 50rem;
+
+                    @media #{$mq-sm-max} {
+                        min-width: 100%;
+                        display: flex;
+                        flex-wrap: wrap;
+                        padding: 1rem;
+                        border: var(--1px) solid $gray-200;
+                        border-radius: .125rem;
+                        margin-block: .5rem;
+                    }
     
                     &:hover,
                     &:focus-visible {
                         background-color: $gray-100;
                     }
-    
                     
                     .nameCol {
                         position: relative;
@@ -740,6 +769,11 @@
                         align-items: center;
                         flex-wrap: wrap;
                         gap: .5rem;
+
+                        @media #{$mq-sm-max} {
+                            width: 100%;
+                            padding-left: 0;
+                        }
     
                         button {
                             display: flex;
@@ -839,10 +873,16 @@
                     }
     
                     .categoryCol {
-    
+                        @media #{$mq-sm-max} {
+                            width: 100%;
+                        }
                     }
     
                     .dateCol {
+                        @media #{$mq-sm-max} {
+                            width: 100%;
+                        }
+
                         .at {
                             @media #{$mq-xl-max} {
                                 display: none;
@@ -858,6 +898,10 @@
     
                     .productCol {
                         text-transform: capitalize;
+
+                        @media #{$mq-sm-max} {
+                            width: 100%;
+                        }
                     }
     
                     .createdByCol {
@@ -870,6 +914,18 @@
                         position: relative;
                         display: flex;
                         justify-content: flex-end;
+
+                        @media #{$mq-sm-max} {
+                            position: absolute;
+                            top: 1rem;
+                            right: 1rem;
+                            z-index: 2;
+                        }
+
+                        > button {
+                            //background-color: $gray-200;
+                            border: var(--1px) solid $gray-200;
+                        }
     
                         .ellipsis {
                             display: flex;
@@ -908,7 +964,7 @@
 
             .noReportsItem {
                 padding: 1rem;
-                min-width: 50rem;
+                //min-width: 50rem;
             }
         }
     }

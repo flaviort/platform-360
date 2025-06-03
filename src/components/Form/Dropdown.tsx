@@ -29,6 +29,7 @@ interface DropdownProps {
     name: string
     id: string
     showHideAll?: boolean
+    alphabetical?: boolean
 }
 
 export default function Dropdown({
@@ -44,9 +45,10 @@ export default function Dropdown({
     name,
     id,
     showHideAll,
+    alphabetical
 }: DropdownProps) {
 
-    const { register, watch, trigger, formState: { errors }, setValue, control } = useFormContext()
+    const { watch, formState: { errors }, setValue, control } = useFormContext()
 
     const [selectedCount, setSelectedCount] = useState(0)
     const [buttonText, setButtonText] = useState<string | JSX.Element>(defaultValue)
@@ -63,7 +65,8 @@ export default function Dropdown({
         if (selectedCount === 0) {
             setButtonText(defaultValue)
         } else {
-            // Find selected items and create buttons for each
+            
+            // find selected items and create buttons for each
             const selectedItemsArray = items.filter(item => groupValue[item.name])
             
             setButtonText(
@@ -283,7 +286,16 @@ export default function Dropdown({
                         // Safely check if label is a string before calling toLowerCase
                         const itemLabel = typeof item.label === 'string' ? item.label : String(item.label || '')
                         return itemLabel.toLowerCase().includes(searchValue.toLowerCase())
-                    }).map((item, i) => (
+                    })
+                    .sort((a, b) => {
+                        if (!alphabetical) return 0 // maintain original order if alphabetical is false
+                        
+                        const labelA = typeof a.label === 'string' ? a.label : String(a.label || '')
+                        const labelB = typeof b.label === 'string' ? b.label : String(b.label || '')
+                        
+                        return labelA.toLowerCase().localeCompare(labelB.toLowerCase())
+                    })
+                    .map((item, i) => (
                         <label
                             className={styles.item}
                             key={i}

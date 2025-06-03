@@ -32,12 +32,17 @@
         width: 60rem;
         max-width: calc(100vw - 2rem);
         border-radius: .5rem;
-        padding: 2rem;
+        padding: 1.5rem 1rem;
         flex-direction: column;
         gap: .5rem;
 
+        @media #{$mq-sm-min} {
+            padding: 1.5rem;
+        }
+
         @media #{$mq-md-min} {
             max-width: calc(100vw - 4rem);
+            padding: 2rem;
         }
 
         .topPart {
@@ -47,8 +52,8 @@
             .close {
                 position: absolute;
                 z-index: 2;
-                top: -.75rem;
-                right: -.75rem;
+                top: -.5rem;
+                right: -.25rem;
                 display: flex;
                 background-color: transparent;
                 border: none;
@@ -56,6 +61,11 @@
                 justify-content: center;
                 width: 1.5rem;
                 height: 1.5rem;
+
+                @media #{$mq-sm-min} {
+                    top: -.75rem;
+                    right: -.75rem;
+                }
 
                 &:hover,
                 &:focus-visible {

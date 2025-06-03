@@ -1,4 +1,24 @@
 const backendUrl = 'http://shop36-testb-a0u5doexwffx-959882810.us-east-1.elb.amazonaws.com'
+// Set timeout to 2 minutes (120,000ms) for chart generation requests
+const TIMEOUT_MS = 120000
+
+// Helper function to add timeout to fetch requests
+const fetchWithTimeout = async (url: string, options: RequestInit, timeout: number = TIMEOUT_MS) => {
+    const controller = new AbortController()
+    const id = setTimeout(() => controller.abort(), timeout)
+    
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        })
+        clearTimeout(id)
+        return response
+    } catch (error) {
+        clearTimeout(id)
+        throw error
+    }
+}
 
 export async function POST(request: Request) {
     const url = new URL(request.url)
@@ -37,7 +57,11 @@ export async function POST(request: Request) {
         // Log request body for debugging
         console.log('Request body:', body)
 
-        const response = await fetch(
+        // Use extended timeout for chart generation requests
+        const isChartRequest = targetEndpoint.includes('/api/charts')
+        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+
+        const response = await fetchWithTimeout(
             `${backendUrl}${targetEndpoint}`,
             {
                 method: 'POST',
@@ -48,7 +72,8 @@ export async function POST(request: Request) {
                 body: typeof body === 'string' ? body : 
                       body instanceof URLSearchParams ? body.toString() : 
                       JSON.stringify(body)
-            }
+            },
+            timeout
         )
 
         // Log response details for debugging
@@ -144,6 +169,18 @@ export async function POST(request: Request) {
         })
     } catch (error) {
         console.error('Proxy error:', error)
+        
+        // Handle abort errors (timeouts)
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            return new Response(
+                JSON.stringify({ 
+                    message: 'Request timed out. The server took too long to respond.',
+                    error: 'timeout'
+                }),
+                { status: 504 }
+            )
+        }
+        
         return new Response(
             JSON.stringify({ 
                 message: 'An error occurred while processing your request',
@@ -166,14 +203,20 @@ export async function GET(request: Request) {
     }
 
     try {
-        const response = await fetch(
-            `${backendUrl}${targetEndpoint}`,{
+        // Use extended timeout for chart requests
+        const isChartRequest = targetEndpoint.includes('/api/charts')
+        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+
+        const response = await fetchWithTimeout(
+            `${backendUrl}${targetEndpoint}`,
+            {
                 method: 'GET',
                 headers: {
                     'Authorization': request.headers.get('Authorization') || '',
                     'Content-Type': 'application/json'
                 }
-            }
+            },
+            timeout
         )
 
         const data = await response.json()
@@ -186,6 +229,18 @@ export async function GET(request: Request) {
         })
     } catch (error) {
         console.error('Proxy error:', error)
+        
+        // Handle abort errors (timeouts)
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            return new Response(
+                JSON.stringify({ 
+                    message: 'Request timed out. The server took too long to respond.',
+                    error: 'timeout'
+                }),
+                { status: 504 }
+            )
+        }
+        
         return new Response(
             JSON.stringify({ 
                 message: 'Proxy error', 
@@ -222,7 +277,11 @@ export async function PATCH(request: Request) {
             body = await request.json().catch(() => ({}))
         }
 
-        const response = await fetch(
+        // Use extended timeout for chart requests
+        const isChartRequest = targetEndpoint.includes('/api/charts')
+        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+
+        const response = await fetchWithTimeout(
             `${backendUrl}${targetEndpoint}`,
             {
                 method: 'PATCH',
@@ -233,7 +292,8 @@ export async function PATCH(request: Request) {
                 body: typeof body === 'string' ? body : 
                       body instanceof URLSearchParams ? body.toString() : 
                       JSON.stringify(body)
-            }
+            },
+            timeout
         )
 
         const data = await response.json().catch(() => ({}))
@@ -257,7 +317,6 @@ export async function PATCH(request: Request) {
             )
         }
 
-        // Handle successful response
         return new Response(JSON.stringify(data), {
             status: response.status,
             headers: {
@@ -266,9 +325,22 @@ export async function PATCH(request: Request) {
         })
     } catch (error) {
         console.error('Proxy error:', error)
+        
+        // Handle abort errors (timeouts)
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            return new Response(
+                JSON.stringify({ 
+                    message: 'Request timed out. The server took too long to respond.',
+                    error: 'timeout'
+                }),
+                { status: 504 }
+            )
+        }
+        
         return new Response(
             JSON.stringify({ 
-                message: 'An error occurred while processing your request'
+                message: 'Proxy error', 
+                error: error instanceof Error ? error.message : 'Unknown error'
             }),
             { status: 500 }
         )
@@ -287,8 +359,11 @@ export async function DELETE(request: Request) {
     }
 
     try {
-        // For a DELETE request, we typically don't need a body
-        const response = await fetch(
+        // Use extended timeout for chart requests
+        const isChartRequest = targetEndpoint.includes('/api/charts')
+        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+
+        const response = await fetchWithTimeout(
             `${backendUrl}${targetEndpoint}`,
             {
                 method: 'DELETE',
@@ -296,53 +371,35 @@ export async function DELETE(request: Request) {
                     'Authorization': request.headers.get('Authorization') || '',
                     'Content-Type': 'application/json'
                 }
-            }
+            },
+            timeout
         )
 
-        // Try to get response as text first
-        const responseText = await response.text()
-        console.log('DELETE response text:', responseText)
-
-        // Try to parse as JSON if there's content
-        let data = {}
-        if (responseText.trim()) {
-            try {
-                data = JSON.parse(responseText)
-            } catch (parseError) {
-                console.error('Failed to parse DELETE response as JSON:', parseError)
-                // If it's not JSON, use empty object
-            }
-        }
+        const data = await response.json().catch(() => ({}))
         
-        if (!response.ok) {
+        return new Response(JSON.stringify(data), {
+            status: response.status,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+    } catch (error) {
+        console.error('Proxy error:', error)
+        
+        // Handle abort errors (timeouts)
+        if (error instanceof DOMException && error.name === 'AbortError') {
             return new Response(
                 JSON.stringify({ 
-                    message: 'DELETE operation failed',
-                    status: response.status,
-                    error: data
+                    message: 'Request timed out. The server took too long to respond.',
+                    error: 'timeout'
                 }),
-                { 
-                    status: response.status,
-                    headers: { 'Content-Type': 'application/json' }
-                }
+                { status: 504 }
             )
         }
-
-        // Handle successful response
-        return new Response(
-            responseText.trim() ? JSON.stringify(data) : JSON.stringify({ success: true }),
-            {
-                status: response.status,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        )
-    } catch (error) {
-        console.error('Proxy DELETE error:', error)
+        
         return new Response(
             JSON.stringify({ 
-                message: 'An error occurred while processing your DELETE request',
+                message: 'Proxy error', 
                 error: error instanceof Error ? error.message : 'Unknown error'
             }),
             { status: 500 }

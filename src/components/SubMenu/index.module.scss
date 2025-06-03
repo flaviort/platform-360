@@ -23,5 +23,13 @@
             opacity: 1;
             visibility: visible;
         }
+
+        button,
+        a {
+            &:disabled {
+                opacity: .25;
+                cursor: not-allowed;
+            }
+        }
     }
 }

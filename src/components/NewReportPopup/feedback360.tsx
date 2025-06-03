@@ -29,6 +29,7 @@ interface PopupFeedback360Props {
 	icon: React.ComponentType<any>
 	text: string
 	className?: string
+	disabled?: boolean
 }
 
 // loading messages to display during report generation
@@ -48,7 +49,8 @@ const loadingMessages = [
 export default function PopupFeedback360({
 	icon: Icon,
 	text,
-	className
+	className,
+	disabled
 }: PopupFeedback360Props) {
 	const router = useRouter()
 
@@ -120,6 +122,7 @@ export default function PopupFeedback360({
 			onError={handleError}
 			className={className}
 			loadingMessages={loadingMessages}
+			disabled={disabled}
 		>
 			<ProjectName />
 

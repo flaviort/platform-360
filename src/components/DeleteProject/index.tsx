@@ -10,7 +10,7 @@ import usePopoverPosition from '@/components/Utils/Portal/usePopoverPosition'
 import Fancybox from '@/components/Utils/Fancybox'
 
 // img / svg
-import { Ellipsis, Trash2, LoaderCircle } from 'lucide-react'
+import { Ellipsis, Trash2, LoaderCircle, ChartColumn } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -18,12 +18,16 @@ import styles from './index.module.scss'
 interface DeleteProjectProps {
 	id: string
     onComplete: () => void
+    showMoreOptions?: boolean
+    onGenerateReport?: (projectId: string) => void
 }
 
 // create a separate component for project options
 export default function DeleteProject({ 
     id, 
-    onComplete 
+    onComplete,
+    showMoreOptions,
+    onGenerateReport
 }: DeleteProjectProps) {
     const [optionsSub, setOptionsSub] = useState(false)
     const optionsSubRef = useRef<HTMLDivElement>(null)
@@ -349,6 +353,27 @@ export default function DeleteProject({
                                     }
                                 }}
                             >
+
+                                {showMoreOptions && (
+                                    <button
+                                        className='text-14 bold gray-600'
+                                        onClick={() => {
+                                            if (onGenerateReport) {
+                                                onGenerateReport(id)
+                                                closeOptionsSub()
+                                            }
+                                        }}
+                                    >
+
+                                        <ChartColumn />
+
+                                        <span>
+                                            Generate Report
+                                        </span>
+
+                                    </button>
+                                )}
+
                                 <a
                                     href='#confirm-delete-project'
                                     data-fancybox

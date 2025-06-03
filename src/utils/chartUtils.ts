@@ -10,6 +10,7 @@ import { formatPrice } from '@/utils/functions'
 export function formatChartData(chart: any) {
     let chartData = {}
     const chartType = chart.preferences?.chart_type || 'vertical'
+    const svgMap = chart.preferences?.svg_map || 'us'
     
     // format results based on chart type
     switch(chartType) {
@@ -100,6 +101,25 @@ export function formatChartData(chart: any) {
                         color: item.color || 'Unknown',
                         count: typeof item.count === 'number' ? item.count : 0
                     })) : []
+            }
+            break
+
+        // geography trend
+        case 'geography_trend' :
+            if (svgMap === 'us') {
+                chartData = {
+                    mapUSA: Array.isArray(chart.results) ? 
+                        chart.results.map((item: ChartResultItem) => ({
+                            geo: item.geo || 'Unknown',
+                            name: item.name || 'Unknown',
+                            values: Array.isArray(item.values) ? item.values : [
+                                {
+                                    query: item.query || 'Unknown',
+                                    value: typeof item.value === 'number' ? item.value : 0
+                                }
+                            ]
+                        })) : []
+                }
             }
             break
             
@@ -202,6 +222,24 @@ export function getChartSummary(report: any, formatDateForReport: (date: string)
         priceRange: (report.product_settings?.min_price && report.product_settings?.max_price) 
             ? `$${report.product_settings.min_price} - $${report.product_settings.max_price}` 
             : undefined
+    }
+}
+
+/**
+ * Converts location codes to their full display names
+ */
+export const convertLocationCode = (locationCode: string): string => {
+    switch(locationCode) {
+        case 'US':
+            return 'United States'
+        case 'CA':
+            return 'Canada'
+        case 'GB':
+            return 'UK'
+        case 'EU':
+            return 'Europe'
+        default:
+            return locationCode // Return original if no match
     }
 }
 

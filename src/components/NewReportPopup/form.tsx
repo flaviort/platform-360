@@ -27,6 +27,7 @@ interface PopupFormProps {
 	onError?: (error: any) => void
 	className?: string
 	loadingMessages: string | string[]
+	disabled?: boolean
 }
 
 export default function PopupForm({
@@ -37,7 +38,8 @@ export default function PopupForm({
 	onSuccess,
 	onError,
 	className,
-	loadingMessages = 'Processing...'
+	loadingMessages = 'Processing...',
+	disabled
 }: PopupFormProps) {
 	const [optionsSub, setOptionsSub] = useState(false)
 	const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
@@ -127,6 +129,7 @@ export default function PopupForm({
 				className={clsx('text-14 bold', className)}
 				onClick={openNewReportPopup}
 				type='button'
+				disabled={disabled}
 			>
 
 				<Icon />

@@ -57,12 +57,11 @@ export default function NewReportButton() {
                     text='Insight360'
                 />
 
-                {/*
                 <PopupFeedback360
                     icon={FilePenLine}
                     text='Feedback360'
+                    disabled
                 />
-                */}
 
             </Sub>
 

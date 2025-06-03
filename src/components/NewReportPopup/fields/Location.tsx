@@ -33,16 +33,16 @@ export default function Location() {
 		setValue('regions', {}, { shouldValidate: true })
 		
 		switch(value) {
-			case 'United States':
+			case 'US':
 				setRegions(usaStates)
 				break
-			case 'Canada':
+			case 'CA':
 				setRegions(canadaProvinces)
 				break
-			case 'Europe':
+			case 'EU':
 				setRegions(europeanCountries)
 				break
-			case 'UK':
+			case 'GB':
 				setRegions(ukRegions)
 				break
 			default:
@@ -71,10 +71,10 @@ export default function Location() {
 						onChange={(e) => handleLocationChange(e.target.value)}
 					>
 						<option value='' disabled>Select one</option>
-						<option value='United States'>United States</option>
-						<option value='Canada'>Canada</option>
-						<option value='Europe'>Europe</option>
-						<option value='UK'>UK</option>
+						<option value='US'>United States</option>
+						<option value='CA'>Canada</option>
+						<option value='EU'>Europe</option>
+						<option value='GB'>UK</option>
 					</Select>
 				</div>
 

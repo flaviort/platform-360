@@ -130,6 +130,7 @@ export default function TopMenu() {
                                         <Menu />
                                     </button>
 
+                                    {/*
                                     <button
                                         className={styles.icon}
                                         aria-label='Help'
@@ -222,9 +223,11 @@ export default function TopMenu() {
                                         </Sub>
 
                                     </SubWrapper>
+                                    */}
 
                                 </div>
 
+                                {/*
                                 <SubWrapper className={styles.tokens}>
 
                                     <button
@@ -240,7 +243,7 @@ export default function TopMenu() {
                                         {[
                                             {
                                                 icon: Landmark,
-                                                text: 'Edit Payment Method',
+                                                text: 'My Subscription',
                                                 link: '#'
                                             },
                                             {
@@ -265,6 +268,7 @@ export default function TopMenu() {
                                     </Sub>
 
                                 </SubWrapper>
+                                */}
 
                                 <SubWrapper className={styles.user}>
 
@@ -326,9 +330,10 @@ export default function TopMenu() {
                                                 },
                                                 {
                                                     icon: Landmark,
-                                                    text: 'Edit Payment Method',
+                                                    text: 'My Subscription',
                                                     link: '#'
                                                 },
+                                                /*
                                                 {
                                                     icon: Mail,
                                                     text: 'Messages',
@@ -344,6 +349,7 @@ export default function TopMenu() {
                                                     text: 'Help',
                                                     link: '#'
                                                 }
+                                                */
                                             ].map((item, i) => (
                                                 <Link
                                                     className='text-14 bold gray-800'
@@ -489,10 +495,11 @@ export default function TopMenu() {
                                     },
                                     {
                                         icon: Landmark,
-                                        name: 'Edit Payment Method',
+                                        name: 'My Subscription',
                                         href: '#',
                                         mobile: true
                                     },
+                                    /*
                                     {
                                         icon: CircleHelp,
                                         name: 'Help',
@@ -508,6 +515,7 @@ export default function TopMenu() {
                                         name: 'Notifications',
                                         href: '#'
                                     }
+                                    */
                                 ].map((item, i) => (
                                     <li key={i}>
                                         <Link

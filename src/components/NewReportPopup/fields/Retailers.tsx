@@ -58,6 +58,7 @@ export default function Retailers() {
 						}))}
 						searchable
 						required
+						alphabetical
 						name='retailers'
 						id='report-retailers'
 					/>

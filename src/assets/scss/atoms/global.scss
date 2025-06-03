@@ -166,3 +166,12 @@ body:has(dialog[open]),
 body.no-scroll {
     overflow: hidden;
 }
+
+[data-balloon-pos] {
+	&:before,
+	&:after {
+		@media #{$mq-sm-max} {
+			display: none;
+		}
+	}
+}
