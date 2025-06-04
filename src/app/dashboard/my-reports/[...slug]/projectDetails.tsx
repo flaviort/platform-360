@@ -65,7 +65,7 @@ export default function ProjectDetails({
 
 	const router = useRouter()
 
-	console.log(summary)
+	//console.log(summary)
 
 	return (
 		<div className={styles.detailsArea}>
@@ -181,7 +181,7 @@ export default function ProjectDetails({
 									</>
 								)}
 
-								{summary?.subCategory && (
+								{(summary?.subCategory !== undefined) && (
 									<>
 										<p className='text-14 gray-700 bold'>
 											Sub-category:
@@ -307,7 +307,7 @@ export default function ProjectDetails({
 									</>
 								)}
 
-								{summary?.regions && (
+								{/*summary?.regions && (
 									<>
 										<p className='text-14 gray-700 bold'>
 											Regions:
@@ -319,7 +319,7 @@ export default function ProjectDetails({
 											</p>
 										</div>
 									</>
-								)}
+								)*/}
 
 								{summary?.priceRange && (
 									<>

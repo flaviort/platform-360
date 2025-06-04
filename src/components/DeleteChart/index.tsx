@@ -129,7 +129,7 @@ export default function DeleteChart({
                                                         yesButton.classList.add('loading')
                                                     }
                                                     
-                                                    console.log('Deleting chart with ID:', id)
+                                                    //console.log('Deleting chart with ID:', id)
                                                     
                                                     // Delete the specific chart by ID
                                                     const response = await fetch(`/api/proxy?endpoint=/api/charts/${id}`, {
@@ -139,7 +139,7 @@ export default function DeleteChart({
                                                         }
                                                     })
 
-                                                    console.log('Delete chart response status:', response.status)
+                                                    //console.log('Delete chart response status:', response.status)
 
                                                     if (!response.ok) {
                                                         let errorMessage = 'Failed to delete chart'

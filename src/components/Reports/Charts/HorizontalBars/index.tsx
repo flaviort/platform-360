@@ -75,6 +75,7 @@ export default function HorizontalBars({
     return (
         <div className={styles.component}>
 
+            {/*
             <div className={styles.header}>
                 
                 <h4 className='text-14 gray-600'>
@@ -86,6 +87,7 @@ export default function HorizontalBars({
                 </span>
 
             </div>
+            */}
 
             <ResponsiveContainer height={data.length * 50} className={styles.chart}>
                 <BarChart

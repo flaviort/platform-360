@@ -145,11 +145,11 @@ export default function DeleteReport({
                                                     }
                                                     
                                                     // Log the report we want to delete by ID
-                                                    console.log('Attempting to delete report with ID:', id)
+                                                    //console.log('Attempting to delete report with ID:', id)
                                                     
                                                     // Try to delete associated charts, but continue even if API isn't available
                                                     try {
-                                                        console.log('Checking for associated charts...')
+                                                        //console.log('Checking for associated charts...')
                                                         // Attempt to get charts using the proxy endpoint
                                                         const chartsResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${id}`, {
                                                             method: 'GET',
@@ -163,12 +163,12 @@ export default function DeleteReport({
                                                             const charts = await chartsResponse.json()
                                                             
                                                             if (charts && charts.length > 0) {
-                                                                console.log(`Found ${charts.length} charts to delete for report ${id}`)
+                                                                //console.log(`Found ${charts.length} charts to delete for report ${id}`)
                                                                 
                                                                 // Delete all charts in parallel
                                                                 const deletePromises = charts.map((chart: { id: string }) => {
                                                                     const chartId = chart.id
-                                                                    console.log(`Queueing deletion for chart with ID: ${chartId}`)
+                                                                    //console.log(`Queueing deletion for chart with ID: ${chartId}`)
                                                                     
                                                                     return fetch(`/api/proxy?endpoint=/api/charts/${chartId}`, {
                                                                         method: 'DELETE',
@@ -177,7 +177,7 @@ export default function DeleteReport({
                                                                         }
                                                                     }).then(response => {
                                                                         if (response.ok) {
-                                                                            console.log(`Successfully deleted chart: ${chartId}`)
+                                                                            //console.log(`Successfully deleted chart: ${chartId}`)
                                                                             return { chartId, success: true }
                                                                         } else {
                                                                             console.warn(`Warning: Failed to delete chart ${chartId}`)
@@ -189,20 +189,20 @@ export default function DeleteReport({
                                                                 // Wait for all deletions to complete
                                                                 const results = await Promise.all(deletePromises)
                                                                 const successCount = results.filter(r => r.success).length
-                                                                console.log(`Successfully deleted ${successCount} out of ${charts.length} charts`)
+                                                                //console.log(`Successfully deleted ${successCount} out of ${charts.length} charts`)
                                                                 
                                                                 // Add a small delay to ensure database consistency
                                                                 await new Promise(resolve => setTimeout(resolve, 500))
                                                             } else {
-                                                                console.log('No charts found for this report')
+                                                                //console.log('No charts found for this report')
                                                             }
                                                         } else if (chartsResponse.status === 404) {
                                                             // 404 is expected if endpoint isn't implemented yet
-                                                            console.log('Chart listing endpoint not available - skipping chart deletion')
+                                                            //console.log('Chart listing endpoint not available - skipping chart deletion')
                                                         }
                                                     } catch (error) {
                                                         // Silently continue - chart deletion is optional
-                                                        console.log('Could not process charts, continuing with report deletion')
+                                                        console.error(error)
                                                     }
                                                     
                                                     // Delete the report
@@ -217,7 +217,7 @@ export default function DeleteReport({
                                                         })
                                                     })
 
-                                                    console.log('Delete response status:', response.status)
+                                                    //console.log('Delete response status:', response.status)
 
                                                     if (!response.ok) {
                                                         let errorMessage = 'Failed to delete report'

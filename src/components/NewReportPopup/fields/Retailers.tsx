@@ -56,7 +56,7 @@ export default function Retailers() {
 							name: retailer.slug,
 							label: retailer.name
 						}))}
-						searchable
+						//searchable
 						required
 						alphabetical
 						name='retailers'

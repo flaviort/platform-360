@@ -121,7 +121,7 @@ export default function Form({
             .then(async (response) => {
                 // First get the response as text
                 const responseText = await response.text()
-                console.log('Response text:', responseText)
+                //console.log('Response text:', responseText)
 
                 // Try to parse as JSON
                 let data

@@ -125,7 +125,7 @@ const CustomValueLabel = (props: any) => {
     const { x, y, width, value, index, showAsPercentage, data } = props
     
     // Log to see what's available in the props
-    console.log('CustomValueLabel props:', { value, index, data })
+    //console.log('CustomValueLabel props:', { value, index, data })
     
     // Format the count value with thousands separator
     const countValue = typeof value === 'number' 

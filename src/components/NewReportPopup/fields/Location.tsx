@@ -74,13 +74,12 @@ export default function Location() {
 						<option value='US'>United States</option>
 						<option value='CA'>Canada</option>
 						<option value='EU'>Europe</option>
-						<option value='GB'>UK</option>
 					</Select>
 				</div>
 
 			</div>
 
-			{selectedLocation && (
+			{/*selectedLocation && (
 				<div className={styles.group}>
 					<div className={styles.label}>
 						<p className='text-16 semi-bold'>
@@ -100,7 +99,7 @@ export default function Location() {
 						/>
 					</div>
 				</div>
-			)}
+			)*/}
         </>
 	)
 }

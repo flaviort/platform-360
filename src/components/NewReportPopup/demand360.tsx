@@ -28,7 +28,9 @@ import {
 	extractSelectedItems,
 	formatISODate,
 	createDuringTimeRangeText,
-	formatDisplayDate
+	formatDisplayDate,
+	getAllRegionsForLocation,
+	createDemand360FallbackGoalText
 } from '@/utils/reports'
 import loadingMessages from '@/utils/loadingMessages'
 
@@ -42,25 +44,42 @@ interface PopupDemand360Props {
 }
 
 // chart definitions for creating charts after report creation
-const getChartDefinitions = (baseChartData: any) => [
-	{ 
-		name: 'Geography Trend', 
-		data: {
-			...baseChartData,
-			title: 'Geography Trend',
-			description: 'Geography trend analysis',
-			preferences: {
-				chart_type: 'geography_trend',
-				svg_map: 'us',
-				box_size: 'full'
-			},
-			query: {
-				...baseChartData.query,
-				chart_type: 'geography_trend'
+const getChartDefinitions = (baseChartData: any) => {
+	return [
+		{ 
+			name: 'Geography Trend', 
+			data: {
+				...baseChartData,
+				title: 'Geography Trend',
+				description: 'Level of interest in the selected category, broken down by regions. 0 means no interest while 100 means highest interest.',
+				preferences: {
+					chart_type: 'geography_trend',
+					box_size: 'full'
+				},
+				query: {
+					...baseChartData.query,
+					chart_type: 'geography_trend'
+				}
+			} 
+		},
+		{
+			name: 'Category Trend',
+			data: {
+				...baseChartData,
+				title: 'Category Trend',
+				description: 'Interest in the selected category over time, from 0 (lowest) to 100 (highest).',
+				preferences: {
+					chart_type: 'category_trend',
+					box_size: 'half'
+				},
+				query: {
+					...baseChartData.query,
+					chart_type: 'category_trend'
+				}
 			}
-		} 
-	},
-]
+		}
+	]
+}
 
 // form data type for demand360
 interface Demand360FormData {
@@ -79,20 +98,15 @@ export default function PopupDemand360({
 
 	const router = useRouter()
 
-	// create a fallback goal text based on form data
-	const createFallbackGoalText = useCallback((formData: Demand360FormData): string => {
-		const timeRangeText = createDuringTimeRangeText(formData.timePeriodStart, formData.timePeriodEnd)
-		return `Analyze ${formData.category} data from ${formData.regions.join(', ')} ${timeRangeText}. Identify key trends, competitive insights, and strategic opportunities.`
-	}, [])
-
 	// extract form data for goal generation
 	const extractFormData = useCallback((eventDetail: any): Demand360FormData => {
-		const selectedRegions = extractSelectedItems(eventDetail.regions || {})
+		const location = eventDetail.location || ''
+		const regions = getAllRegionsForLocation(location)
 		
 		return {
 			category: eventDetail.category || '',
-			location: eventDetail.location || '',
-			regions: selectedRegions,
+			location: location,
+			regions: regions,
 			timePeriodStart: eventDetail.timePeriodStart || '',
 			timePeriodEnd: eventDetail.timePeriodEnd || ''
 		}
@@ -111,13 +125,15 @@ export default function PopupDemand360({
 	const { generateGoal, isGenerating } = useGoalGeneration<Demand360FormData>({
 		productType: 'demand360',
 		productName: 'Demand360',
-		createFallbackText: createFallbackGoalText,
+		createFallbackText: createDemand360FallbackGoalText,
 		createRequestParams,
 		extractFormData
 	})
 
 	// format form data for report creation
 	const formatFormData = useCallback(async (data: any): Promise<CreateReportData> => {
+
+		const regions = getAllRegionsForLocation(data.location)
 		
 		// get project and category IDs
 		const { projectId, categoryId } = await getProjectAndCategoryIds({
@@ -136,10 +152,6 @@ export default function PopupDemand360({
 		const selectedStartDate = formatISODate(data.timePeriodStart)
 		const selectedEndDate = formatISODate(data.timePeriodEnd)
 
-		const selectedRegions = Object.entries(data.regions || {})
-			.filter(([_, selected]) => selected === true)
-			.map(([name, _]) => name)
-
 		return {
 			name: data.reportName,
 			product_type: 'demand360',
@@ -151,25 +163,27 @@ export default function PopupDemand360({
 				start_date: selectedStartDate,
 				end_date: selectedEndDate,
 				location: data.location,
-				regions: selectedRegions,
+				regions: regions,
 				category: selectedCategory
 			}
 		}
 	}, [])
 
 	// create base chart data
-	const createBaseChartData = useCallback((data: any, report: any) => ({
-		report_id: report.id,
-		query: {
-			category: [data.subCategory || ''].filter(Boolean),
-			location: data.location,
-			regions: Object.entries(data.regions || {})
-				.filter(([_, selected]) => selected === true)
-				.map(([name, _]) => name),
-			start_date: new Date(data.timePeriodStart).toISOString(),
-			end_date: new Date(data.timePeriodEnd).toISOString()
+	const createBaseChartData = useCallback((data: any, report: any) => {
+		const regions = getAllRegionsForLocation(data.location)
+
+		return {
+			report_id: report.id,
+			query: {
+				category: [data.subCategory || ''].filter(Boolean),
+				location: data.location,
+				regions: regions,
+				start_date: new Date(data.timePeriodStart).toISOString(),
+				end_date: new Date(data.timePeriodEnd).toISOString()
+			}
 		}
-	}), [])
+	}, [])
 
 	const handleSuccess = async (data: any) => {
 		try {

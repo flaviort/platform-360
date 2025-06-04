@@ -31,7 +31,8 @@ import {
 	createReportWithCharts,
 	extractSelectedItems,
 	formatISODate,
-	createTimeRangeText
+	createTimeRangeText,
+	createShop360FallbackGoalText
 } from '@/utils/reports'
 import loadingMessages from '@/utils/loadingMessages'
 
@@ -172,6 +173,7 @@ const transformGender = (gender: string): string => {
 // form data type for shop360
 interface Shop360FormData {
 	category: string
+	subCategories: string[]
 	retailers: string[]
 	brands: string[]
 	genders: string[]
@@ -190,12 +192,11 @@ export default function PopupShop360({
 	// create base chart data
 	const createBaseChartData = useCallback((data: any, report: any) => {
 		
-		// process fields the same way as in formatFormData
-		let selectedCategory = [data.category || '']
-
-		if (selectedCategory.includes('Footwear')) {
-			selectedCategory = ['running shoes', 'heels', 'sandals', 'loafers', 'sneakers', 'shoes', 'flats', 'slippers', 'boots', 'clogs', 'oxfords', 'athletic shoes', 'wedges', 'mules clogs']
-		}
+		// get selected sub-categories (use multiple subcategories from dropdown)
+		const selectedSubCategories = extractSelectedItems(data.subCategories || {})
+		
+		// Use subcategories if selected, otherwise use the main category
+		const selectedCategory = selectedSubCategories.length > 0 ? selectedSubCategories : [data.category]
 		
 		const selectedRetailers = extractSelectedItems(data.retailers)
 		const selectedBrands = extractSelectedItems(data.brands)
@@ -224,7 +225,7 @@ export default function PopupShop360({
 	// create request parameters for suggestion API
 	const createRequestParams = useCallback((formData: Shop360FormData, goalValue: string) => ({
 		product_name: 'Shop360',
-		category: [formData.category || ''],
+		category: formData.subCategories.length > 0 ? formData.subCategories : [formData.category || ''],
 		company: formData.retailers,
 		brand: formData.brands,
 		gender: formData.genders,
@@ -233,9 +234,7 @@ export default function PopupShop360({
 
 	// format form data for report creation
 	const formatFormData = useCallback(async (data: any): Promise<CreateReportData> => {
-		//console.log('Form data received:', data)
-		//console.log('Project goal from form:', data.projectGoal)
-		
+
 		// get project and category IDs
 		const { projectId, categoryId } = await getProjectAndCategoryIds({
 			selectedProject: data.selectedProject,
@@ -244,13 +243,8 @@ export default function PopupShop360({
 			category: data.category
 		})
 
-		// process selected fields
-		let selectedCategory = [data.category || '']
-		
-		// special case for footwear category
-		if (selectedCategory.includes('Footwear')) {
-			selectedCategory = ['running shoes', 'heels', 'sandals', 'loafers', 'sneakers', 'shoes', 'flats', 'slippers', 'boots', 'clogs', 'oxfords', 'athletic shoes', 'wedges', 'mules clogs']
-		}
+		// get selected sub-categories (use multiple subcategories from dropdown)
+		const selectedSubCategories = extractSelectedItems(data.subCategories || {})
 		
 		const selectedRetailers = extractSelectedItems(data.retailers)
 		const selectedBrands = extractSelectedItems(data.brands)
@@ -272,6 +266,7 @@ export default function PopupShop360({
 			goal: data.goal,
 			project_id: projectId,
 			product_settings: {
+				category: selectedSubCategories.length > 0 ? selectedSubCategories : [data.category],
 				retailers: selectedRetailers,
 				brands: selectedBrands,
 				genders: selectedGenders,
@@ -287,9 +282,11 @@ export default function PopupShop360({
 	const extractFormData = useCallback((eventDetail: any): Shop360FormData => {
 		const selectedRetailers = extractSelectedItems(eventDetail.retailers || {})
 		const selectedBrands = extractSelectedItems(eventDetail.brands || {})
+		const selectedSubCategories = extractSelectedItems(eventDetail.subCategories || {})
 		
 		return {
 			category: eventDetail.category || '',
+			subCategories: selectedSubCategories,
 			retailers: selectedRetailers,
 			brands: selectedBrands,
 			genders: eventDetail.genders || [],
@@ -298,17 +295,11 @@ export default function PopupShop360({
 		}
 	}, [])
 
-	// create a fallback goal text based on form data
-	const createFallbackGoalText = useCallback((formData: Shop360FormData): string => {
-		const timeRangeText = createTimeRangeText(formData.timePeriodStart, formData.timePeriodEnd)
-		return `Analyze ${formData.category} data from ${formData.retailers.join(', ')} for ${formData.brands.join(', ')} targeting ${formData.genders.join(' and ')} ${timeRangeText}. Identify key trends, competitive insights, and strategic opportunities.`
-	}, [])
-
 	// initialize goal generation hook
 	const { generateGoal, isGenerating } = useGoalGeneration<Shop360FormData>({
 		productType: 'shop360',
 		productName: 'Shop360',
-		createFallbackText: createFallbackGoalText,
+		createFallbackText: createShop360FallbackGoalText,
 		createRequestParams,
 		extractFormData
 	})
@@ -352,7 +343,10 @@ export default function PopupShop360({
 
 				<TimePeriod />
 
-				<Category />
+				<Category
+					hasSubCategories
+					multipleSubCategories
+				/>
 
 				<Retailers />
 

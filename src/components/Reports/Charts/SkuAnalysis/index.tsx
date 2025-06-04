@@ -174,6 +174,7 @@ export default function SkuAnalysis({
                 <Warning text="Some retailers you've selected do not have enough data to completely generate this chart. For a more accurate chart, please change the queries when creating the report." />
             )}
 
+            {/*
             <div className={styles.header} data-chart-header-inner>
                 
                 <h4 className='text-14 gray-600'>
@@ -185,6 +186,7 @@ export default function SkuAnalysis({
                 </span>
 
             </div>
+            */}
 
             <ResponsiveContainer height={height || 400} className={styles.chart} data-chart-main-inner>
                 <BarChart

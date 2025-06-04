@@ -1,17 +1,18 @@
 'use client'
 
 // libraries
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 // components
 import Select from '@/components/Form/Select'
+import Dropdown from '@/components/Form/Dropdown'
 
 // css
 import styles from '../index.module.scss'
 
 // db
-import { footwear } from '@/db/sub-categories'
+import { footwear, apparel, bagsAndCarriers, accessories, nutritionAndHealth, sportsAndActivities } from '@/db/sub-categories'
 
 interface Category {
 	id: string
@@ -25,12 +26,13 @@ interface SubCategory {
 
 interface CategoryProps {
     hasSubCategories?: boolean
+    multipleSubCategories?: boolean
 }
 
 export default function Category({
-    hasSubCategories = false
+    hasSubCategories = false,
+    multipleSubCategories = false
 }: CategoryProps) {
-    /*
 	const [categories, setCategories] = useState<Category[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 
@@ -49,7 +51,6 @@ export default function Category({
 
 		fetchCategories()
 	}, [])
-    */
 
     const [selectedCategory, setSelectedCategory] = useState('')
 	const [subCategories, setSubCategories] = useState<SubCategory[]>([])
@@ -63,6 +64,24 @@ export default function Category({
 		switch(value) {
 			case 'Footwear':
 				setSubCategories(footwear)
+				break
+			case 'Apparel':
+				setSubCategories(apparel)
+				break
+			case 'Electronics':
+				setSubCategories([])
+				break
+			case 'Bags & Carriers':
+				setSubCategories(bagsAndCarriers)
+				break
+			case 'Accessories':
+				setSubCategories(accessories)
+				break
+			case 'Nutrition & Health':
+				setSubCategories(nutritionAndHealth)
+				break
+			case 'Sports & Activities':
+				setSubCategories(sportsAndActivities)
 				break
 			default:
 				setSubCategories([])
@@ -90,7 +109,6 @@ export default function Category({
                         selectClassName='capitalize'
                         onChange={(e) => handleCategoryChange(e.target.value)}
                     >
-                        {/*   
                         <option value='' disabled>
                             {isLoading ? 'Loading categories...' : 'Select one'}
                         </option>
@@ -100,22 +118,23 @@ export default function Category({
                                 {category.name}
                             </option>
                         ))}
-                        */}
+                        
+                        {/*
                         <option value=''>Select one</option>
                         <option value='Footwear'>Footwear</option>
-                        <option value='Apparel' disabled>Apparel</option>
-                        <option value='Equipment' disabled>Equipment</option>
-                        <option value='Accessories' disabled>Accessories</option>
-                        <option value='Work' disabled>Work</option>
-                        <option value='Home' disabled>Home</option>
-                        <option value='In Home' disabled>In Home</option>
-                        <option value='Electronics' disabled>Electronics</option>
+                        <option value='Apparel'>Apparel</option>
+                        <option value='Electronics'>Electronics</option>
+                        <option value='Bags & Carriers'>Bags & Carriers</option>
+                        <option value='Accessories'>Accessories</option>
+                        <option value='Nutrition & Health'>Nutrition & Health</option>
+                        <option value='Sports & Activities'>Sports & Activities</option>
+                        */}
                     </Select>
                 </div>
 
             </div>
 
-            {hasSubCategories && selectedCategory && (
+            {hasSubCategories && !multipleSubCategories && selectedCategory && subCategories.length > 0 && (
                 <div className={styles.group}>
 
                     <div className={styles.label}>
@@ -128,7 +147,7 @@ export default function Category({
                         <Select
                             defaultValue=''
                             required
-                            label='Sub-category'
+                            label='sub-category'
                             name='subCategory'
                             hideLabel
                             id='report-sub-category'
@@ -136,12 +155,36 @@ export default function Category({
                         >
                             <option value=''>Select one</option>
 
-                            {footwear.map((subCategory) => (
+                            {subCategories.map((subCategory) => (
                                 <option key={subCategory.name} value={subCategory.name}>
                                     {subCategory.label}
                                 </option>
                             ))}
                         </Select>
+                    </div>
+
+                </div>
+            )}
+
+            {hasSubCategories && multipleSubCategories && selectedCategory && subCategories.length > 0 && (
+                <div className={styles.group}>
+
+                    <div className={styles.label}>
+                        <label htmlFor='report-sub-categories' className='text-16 semi-bold'>
+                            Sub-categories <span className='red'>*</span>
+                        </label>
+                    </div>
+
+                    <div className={styles.input}>
+                        <Dropdown
+                            defaultValue='Select up to 5...'
+                            limitSelected={5}
+                            alphabetical
+                            items={subCategories}
+                            required
+                            name='subCategories'
+                            id='subCategories'
+                        />
                     </div>
 
                 </div>

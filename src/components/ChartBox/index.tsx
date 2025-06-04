@@ -12,7 +12,8 @@ import Colors from '@/components/Reports/Charts/Colors'
 import VerticalBars from '@/components/Reports/Charts/VerticalBars'
 import HorizontalBars from '@/components/Reports/Charts/HorizontalBars'
 import PositiveNegativeBars from '@/components/Reports/Charts/PositiveNegativeBars'
-import MapUSA from '@/components/Reports/NonCharts/Maps/USA'
+import Maps from '@/components/Reports/NonCharts/Maps'
+import CategoryTrend from '@/components/Reports/Charts/CategoryTrend'
 
 // non-chart components
 import ProductPrice from '@/components/Reports/NonCharts/ProductPrice'
@@ -61,9 +62,20 @@ interface ChartBoxProps {
         }>
 
         // demand360 default charts
-        mapUSA?: Array<{
-            state: string
-            count: number
+        geographyTrend?: Array<{
+            geo: string
+            name: string
+            values: Array<{
+                query: string
+                value: number
+            }>
+        }>
+        categoryTrend?: Array<{
+            date: string
+            values: Array<{
+                query: string
+                value: number
+            }>
         }>
 
         // old charts
@@ -118,12 +130,17 @@ export default function ChartBox({
         setShowAsPercentage(prev => !prev)
     }
     
+    // determine the effective box size - override to 'half' for Canada geographic trend charts
+    const effectiveBoxSize = chart.geographyTrend && reportSummary.location === 'CA' || reportSummary.location === 'EU'
+        ? 'half' 
+        : boxSize
+    
     return (
         <div
             className={clsx(
                 styles.component,
-                boxSize === 'full' && styles.full,
-                boxSize === 'half' && styles.half
+                effectiveBoxSize === 'full' && styles.full,
+                effectiveBoxSize === 'half' && styles.half
             )}
             data-chart
         >
@@ -249,9 +266,16 @@ export default function ChartBox({
 
                 {/* --- demand360 default charts  --- */}
 
-                {chart.mapUSA && (
-                    <MapUSA
-                        data={chart.mapUSA}
+                {chart.geographyTrend && (
+                    <Maps
+                        location={reportSummary.location as 'US' | 'CA' | 'EU'}
+                        data={chart.geographyTrend}
+                    />
+                )}
+
+                {chart.categoryTrend && (
+                    <CategoryTrend
+                        data={chart.categoryTrend}
                     />
                 )}
 

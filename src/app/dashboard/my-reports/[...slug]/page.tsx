@@ -29,6 +29,7 @@ interface Report {
 	project_id: string
 	created_at: string
 	product_settings?: {
+		category: string[], // this represents the sub-category
 		retailers?: string[]
 		brands?: string[]
 		genders?: string[]
@@ -71,6 +72,7 @@ export default function DashboardMyReports() {
 	const [reports, setReports] = useState<Report[]>([])
 	const [charts, setCharts] = useState<any[]>([])
 	const [reportDetails, setReportDetails] = useState({
+		subCategory: '',
 		retailers: '',
 		audienceSize: '',
 		brands: '',
@@ -88,7 +90,7 @@ export default function DashboardMyReports() {
 
 	// parse the slug to get projectId and reportId
 	const slug = Array.isArray(params.slug) ? params.slug : []
-	const projectSlug = slug[0] || '' // This is now a project ID, not a slug
+	const projectSlug = slug[0] || '' // This is the project ID
 	const reportSlug = slug[1] || '' // This is the report ID
 
 	// Function to fetch charts for a specific report
@@ -216,7 +218,13 @@ export default function DashboardMyReports() {
 					// Extract report details directly from product_settings
 					if (foundReport.product_settings) {
 						const productSettings = foundReport.product_settings
+
 						const details = {
+							subCategory: Array.isArray(productSettings.category) ? 
+							productSettings.category
+								.map(r => r.replace(/-/g, ' '))
+								.map(r => r.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))
+								.join(', ') : '',
 							retailers: Array.isArray(productSettings.retailers) ? 
 								productSettings.retailers
 									.map(r => r.replace(/-/g, ' '))
@@ -291,6 +299,7 @@ export default function DashboardMyReports() {
 	const extractReportDetailsFromCharts = (charts: any[]): typeof reportDetails => {
 		// Default values - include all fields to match state structure
 		const details = {
+			subCategory: '',
 			retailers: '',
 			audienceSize: '',
 			brands: '',
@@ -369,14 +378,15 @@ export default function DashboardMyReports() {
 	const getProductSummary = () => {
 		const base = {
 			name: report?.name || '--',
-			goal: report?.goal || '--'
+			goal: report?.goal || '--',
+			category: category?.name || '--',
+			subCategory: reportDetails.subCategory || '--',
 		}
 		
 		switch (report?.product_type?.toLowerCase()) {
 			case 'shop360':
 				return {
 					...base,
-					category: category?.name || '--',
 					retailers: reportDetails.retailers ? [reportDetails.retailers] : [],
 					brands: reportDetails.brands ? [reportDetails.brands] : [],
 					genders: reportDetails.genders ? [reportDetails.genders] : [],
@@ -388,7 +398,6 @@ export default function DashboardMyReports() {
 			case 'demand360':
 				return {
 					...base,
-					category: category?.name || '--',
 					timePeriod: reportDetails.timePeriod || '--',
 					location: reportDetails.location || '--',
 					regions: reportDetails.regions ? [reportDetails.regions] : []
@@ -397,7 +406,6 @@ export default function DashboardMyReports() {
 			case 'insight360':
 				return {
 					...base,
-					category: category?.name || '--',
 					brands: reportDetails.brands ? [reportDetails.brands] : [],
 					genders: reportDetails.genders ? [reportDetails.genders] : []
 				}
@@ -411,7 +419,6 @@ export default function DashboardMyReports() {
 					location: reportDetails.location || '--',
 					regions: reportDetails.regions ? [reportDetails.regions] : [],
 					retailers: reportDetails.retailers ? [reportDetails.retailers] : [],
-					category: category?.name || '--',
 					questions: reportDetails.questions ? [reportDetails.questions] : [],
 					priceRange: reportDetails.priceRange || '--',
 					uploadedFiles: reportDetails.uploadedFiles ? [reportDetails.uploadedFiles] : []
@@ -419,8 +426,7 @@ export default function DashboardMyReports() {
 				
 			default:
 				return {
-					...base,
-					category: category?.name || '--'
+					...base
 				}
 		}
 	}
@@ -429,6 +435,7 @@ export default function DashboardMyReports() {
 	const getChartSummary = () => {
 		const summary = getProductSummary()
 		return {
+			subCategory: 'subCategory' in summary ? summary.subCategory : undefined,
 			retailers: 'retailers' in summary ? summary.retailers : [],
 			brands: 'brands' in summary ? summary.brands : [],
 			genders: 'genders' in summary ? summary.genders : [],
@@ -558,20 +565,27 @@ export default function DashboardMyReports() {
 										// Prepare the final order of charts
 										const finalCharts = []
 										
-										// Process half charts (in pairs when possible)
-										for (let i = 0; i < halfCharts.length; i += 2) {
-											if (i + 1 < halfCharts.length) {
-												// We have a pair
-												finalCharts.push(halfCharts[i])
-												finalCharts.push(halfCharts[i + 1])
-											} else {
-												// Last unpaired half chart
-												finalCharts.push(halfCharts[i])
+										// Special case: if we have exactly 1 half chart and 1 full chart, show full first
+										if (halfCharts.length === 1 && fullCharts.length === 1) {
+											finalCharts.push(fullCharts[0])
+											finalCharts.push(halfCharts[0])
+										} else {
+											// Original logic for other cases
+											// Process half charts (in pairs when possible)
+											for (let i = 0; i < halfCharts.length; i += 2) {
+												if (i + 1 < halfCharts.length) {
+													// We have a pair
+													finalCharts.push(halfCharts[i])
+													finalCharts.push(halfCharts[i + 1])
+												} else {
+													// Last unpaired half chart
+													finalCharts.push(halfCharts[i])
+												}
 											}
+											
+											// Add all full charts after the half charts
+											finalCharts.push(...fullCharts)
 										}
-										
-										// Add all full charts after the half charts
-										finalCharts.push(...fullCharts)
 										
 										// Render the charts in the organized order
 										return finalCharts.map((chart) => {
@@ -594,12 +608,15 @@ export default function DashboardMyReports() {
 										})
 									})() : (
 										<div className={styles.noCharts}>
+
 											<h2 className='text-30 semi-bold blue'>
 												This report doesn't contain any charts.
 											</h2>
+
 											<p className='text-16'>
 												You can either generate new charts using the "Generate with AI" button, or you can create a new report on the previous page.
 											</p>
+											
 										</div>
 									)}
 								</div>

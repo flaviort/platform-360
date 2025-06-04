@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useChartSuggestion } from '@/utils/hooks'
 
+// region data imports
+import { usaStates } from '@/db/usa'
+import { ukRegions } from '@/db/uk'
+import { europeanCountries } from '@/db/europe'
+import { canadaProvinces } from '@/db/canada'
+
 export interface CreateReportData {
 	name: string
 	product_type: 'shop360' | 'demand360' | 'insight360' | 'feedback360'
@@ -45,6 +51,22 @@ interface ProjectAndCategoryIds {
 // SHARED UTILITY FUNCTIONS
 // ===============================
 
+// Helper function to get all regions for a given location
+export const getAllRegionsForLocation = (location: string): string[] => {
+	switch (location) {
+		case 'US':
+			return usaStates.map(state => state.name)
+		case 'CA':
+			return canadaProvinces.map(province => province.name)
+		case 'EU':
+			return europeanCountries.map(country => country.name)
+		case 'GB':
+			return ukRegions.map(region => region.name)
+		default:
+			return []
+	}
+}
+
 // Format date for display
 export const formatDisplayDate = (date: string) => {
 	if (!date) return ''
@@ -82,6 +104,41 @@ export const createDuringTimeRangeText = (startDate?: string, endDate?: string) 
 }
 
 // ===============================
+// FALLBACK GOAL TEXTS
+// ===============================
+
+// Create fallback goal text for demand360
+export const createDemand360FallbackGoalText = (formData: {
+	category?: string
+	location?: string
+	timePeriodStart?: string
+	timePeriodEnd?: string
+}): string => {
+	return "The goal of this report is to identify key trends and demographic charts in order to gain competitive insights, and strategic opportunities to launch new products."
+}
+
+// Create fallback goal text for shop360
+export const createShop360FallbackGoalText = (formData: {
+	category?: string
+	retailers?: string[]
+	brands?: string[]
+	genders?: string[]
+	timePeriodStart?: string
+	timePeriodEnd?: string
+}): string => {
+	return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+}
+
+// Create fallback goal text for insight360
+export const createInsight360FallbackGoalText = (formData: {
+	category?: string
+	brands?: string[]
+	genders?: string[]
+}): string => {
+	return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+}
+
+// ===============================
 // GOAL GENERATION FUNCTIONALITY
 // ===============================
 
@@ -104,6 +161,8 @@ export function useGoalGeneration<T = any>(config: GoalGenerationConfig<T>) {
 		const handleFormData = async (e: any) => {
 			// Verify this event is for our component
 			if (e.detail.productType !== config.productType) return
+
+			console.log(e.detail)
 			
 			try {
 				const { setGoalValue, goal, timePeriodStart, timePeriodEnd, ...otherData } = e.detail
@@ -160,9 +219,7 @@ export function useGoalGeneration<T = any>(config: GoalGenerationConfig<T>) {
 						
 						setGoalValue(selectedSuggestion)
 					} else {
-						// Fall back to the basic goal text
 						setGoalValue(fallbackGoalText)
-						console.log('No suggestions received, using fallback:', fallbackGoalText)
 					}
 				})
 			} catch (error) {
@@ -233,6 +290,7 @@ export async function createChartsInParallel(
 		onProgress?.(chart.name, 'creating')
 		console.log(`Creating ${chart.name} chart...`)
 		console.log('Chart data:', chart.data)
+		//console.log('Chart data stringify:', JSON.stringify(chart.data, null, 2))
 		
 		return fetch('/api/proxy?endpoint=/api/charts', {
 			method: 'POST',

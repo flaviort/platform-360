@@ -195,7 +195,7 @@ export default function AIChatBox({
             const timeoutId = setTimeout(() => abortController.abort(), 60000) // Increase timeout to 60 seconds
             
             try {
-                console.log('Sending chat request to API...')
+                //console.log('Sending chat request to API...')
                 // Make API call with the new structure
                 const response = await fetch(
                     `${API_BASE_URL}/chats`,

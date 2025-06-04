@@ -95,13 +95,7 @@ export default function Goal() {
 						fieldsToValidate.push('location')
 						fieldsToShow.push('Location')
 					}
-					
-					// Check regions
-					const hasRegions = Object.values(regions).some(value => value === true)
-					if (!hasRegions) {
-						fieldsToValidate.push('regions')
-						fieldsToShow.push('Regions')
-					}
+
 					break;
 					
 				case 'insight360':
