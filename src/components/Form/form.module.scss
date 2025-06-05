@@ -27,6 +27,14 @@
     width: 100%;
     margin-bottom: 1rem;
 
+    &:has(select:focus) {
+        .label {
+            transform: translate(.625rem, -.55rem)!important;
+            background-color: $pure-white;
+            font-size: .675rem;
+        }
+    }
+
     &.error {
         color: $red;
 
@@ -606,6 +614,10 @@
                 &::-webkit-inner-spin-button {
                     -webkit-appearance: none;
                     margin: 0;
+                }
+
+                &:focus {
+                    color: currentColor;
                 }
             }
 

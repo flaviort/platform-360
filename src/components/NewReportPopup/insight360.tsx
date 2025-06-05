@@ -19,8 +19,7 @@ import {
 	getProjectAndCategoryIds,
 	createReportWithCharts,
 	extractSelectedItems,
-	transformGender,
-	createInsight360Charts
+	transformGender
 } from '@/utils/reports'
 import loadingMessages from '@/utils/loadingMessages'
 
@@ -48,25 +47,7 @@ const getChartDefinitions = (baseChartData: any) => {
 					chart_type: 'pro_features'
 				}
 			} 
-		},
-		/*
-		{
-			name: 'Cons Features',
-			data: {
-				...baseChartData,
-				title: 'Cons Features',
-				description: 'This chart shows all the cons of the selected brand, gender and category.',
-				preferences: {
-					chart_type: 'cons_features',
-					box_size: 'half'
-				},
-				query: {
-					...baseChartData.query,
-					chart_type: 'cons_features'
-				}
-			}
 		}
-		*/
 	]
 }
 
@@ -109,8 +90,7 @@ export default function PopupInsight360({
 				category: selectedCategory.length > 0 ? selectedCategory : [data.category],
 				retailers: [],
 				brands: selectedBrands,
-				genders: selectedGenders,
-				question: data.question
+				genders: selectedGenders
 			}
 		}
 	}, [])
@@ -124,9 +104,9 @@ export default function PopupInsight360({
 		const selectedGenders = Array.isArray(data.genders) ? data.genders.map(transformGender) : (data.genders ? [transformGender(data.genders)] : [])
 
 		return {
+			report_id: report.id,
 			query: {
-				report_id: report.id,
-				question: data.question + ` Use the following fields along with the previous text: Category: ${selectedCategory}, Brand(s): ${selectedBrands}, Gender(s): ${selectedGenders}`
+				product_description: data.question + `. Make a pros and cons list using the following fields along with the previous text: Category: ${selectedCategory}, Brand(s): ${selectedBrands}, Gender(s): ${selectedGenders}`
 			}
 		}
 	}, [])
@@ -138,8 +118,7 @@ export default function PopupInsight360({
 				chartDefinitionsFactory: getChartDefinitions,
 				formatFormData,
 				createBaseChartData,
-				router,
-				customChartCreation: createInsight360Charts
+				router
 			})
 		} catch (error) {
 			console.error('Error during report creation:', error)

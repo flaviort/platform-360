@@ -135,6 +135,21 @@ export function formatChartData(chart: any) {
                     })) : []
             }
             break
+
+        // pro features
+        case 'pro_features' :
+            chartData = {
+                prosAndCons: Array.isArray(chart.results) ? 
+                    chart.results.map((item: ChartResultItem) => ({
+                        title: item.title || 'Unknown',
+                        executive_summary: item.executive_summary || 'Unknown',
+                        features: Array.isArray(item.features) ? item.features : [{
+                            name: item.name || 'Unknown',
+                            description: item.description || 'Unknown'
+                        }]
+                    })) : []
+            }
+            break
             
         case 'vertical':
             chartData = {

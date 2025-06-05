@@ -80,18 +80,14 @@ interface ChartBoxProps {
         }>
 
         // insight360 default charts
-        pros_and_cons?: {
+        prosAndCons?: Array<{
             title: string
             executive_summary: string
-            pros_features: Array<{
+            features: Array<{
                 name: string
                 description: string
             }>
-            cons_features: Array<{
-                name: string
-                description: string
-            }>
-        }
+        }>
 
         // old charts
         vertical?: Array<{
@@ -294,12 +290,9 @@ export default function ChartBox({
                 )}
 
                 {/* --- insight360 default charts  --- */}
-                {chart.pros_and_cons && (
+                {chart.prosAndCons && (
                     <ProsAndCons
-                        title={chart.pros_and_cons.title}
-                        executive_summary={chart.pros_and_cons.executive_summary}
-                        pros_features={chart.pros_and_cons.pros_features}
-                        cons_features={chart.pros_and_cons.cons_features}
+                        data={chart.prosAndCons}
                     />
                 )}
 

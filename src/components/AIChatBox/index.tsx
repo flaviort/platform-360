@@ -192,32 +192,83 @@ export default function AIChatBox({
             
             // Set up abort controller for timeout handling
             const abortController = new AbortController()
-            const timeoutId = setTimeout(() => abortController.abort(), 120000)
+            const timeoutId = setTimeout(() => abortController.abort(), 60000)
+            
+            // Make API call with the new structure
+            const requestPayload = {
+                question: query,
+                report_id: reportId,
+                ...(chatHistoryId ? { chat_history_id: chatHistoryId } : {})
+            }
+            
+            // Retry logic for 504 errors
+            let retryCount = 0
+            const maxRetries = 2
+            
+            const makeRequest = async (): Promise<Response> => {
+                while (retryCount <= maxRetries) {
+                    try {
+                        console.log(`API Request:`, JSON.stringify(requestPayload, null, 2))
+                        
+                        const response = await fetch(
+                            `${API_BASE_URL}/chats`,
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${authToken}`
+                                },
+                                body: JSON.stringify(requestPayload),
+                                signal: abortController.signal
+                            }
+                        )
+                        
+                        // If we get a 504 Gateway Timeout, retry
+                        if (response.status === 504 && retryCount < maxRetries) {
+                            console.warn(`504 Gateway Timeout on attempt ${retryCount + 1}, retrying...`)
+                            retryCount++
+                            // Wait before retrying (exponential backoff)
+                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
+                            continue
+                        }
+                        
+                        return response
+                        
+                    } catch (error: any) {
+                        // If it's a timeout error and we can retry, do so
+                        if (error.name === 'AbortError' && retryCount < maxRetries) {
+                            console.warn(`Request timeout on attempt ${retryCount + 1}, retrying...`)
+                            retryCount++
+                            // Reset the timeout for retry
+                            clearTimeout(timeoutId)
+                            const newTimeoutId = setTimeout(() => abortController.abort(), 60000)
+                            // Wait before retrying
+                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
+                            continue
+                        }
+                        
+                        throw error
+                    }
+                }
+                
+                throw new Error('Max retries exceeded')
+            }
             
             try {
-                //console.log('Sending chat request to API...')
-                // Make API call with the new structure
-                const response = await fetch(
-                    `${API_BASE_URL}/chats`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${authToken}`
-                        },
-                        body: JSON.stringify({
-                            question: query,
-                            report_id: reportId,
-                            ...(chatHistoryId ? { chat_history_id: chatHistoryId } : {})
-                        }),
-                        signal: abortController.signal
-                    }
-                )
+                const response = await makeRequest()
                 
                 clearTimeout(timeoutId)
                 
                 if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`)
+                    let errorMessage = `API error: ${response.status}`
+                    
+                    if (response.status === 504) {
+                        errorMessage = "The AI service is experiencing high load. Please try a simpler question or wait a moment before trying again."
+                    } else if (response.status >= 500) {
+                        errorMessage = "The AI service is temporarily unavailable. Please try again in a few moments."
+                    }
+                    
+                    throw new Error(errorMessage)
                 }
 
                 const responseText = await response.text()
@@ -226,6 +277,7 @@ export default function AIChatBox({
                 let data: ApiResponse
                 try {
                     data = JSON.parse(responseText)
+                    console.log('API Response:', JSON.stringify(data, null, 2))
                 } catch (parseError) {
                     console.error('Failed to parse response as JSON:', parseError)
                     throw new Error('Invalid JSON response from server')
