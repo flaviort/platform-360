@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 // svg
-import { LoaderCircle, ArrowLeft, ArrowRight } from 'lucide-react'
+import { LoaderCircle, ArrowLeft, ArrowRight, Trash } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -39,6 +39,7 @@ export default function List() {
 	const [currentPage, setCurrentPage] = useState(1)
 	const itemsPerPage = 100
 	const [updatingUsers, setUpdatingUsers] = useState<{[key: string]: boolean}>({})
+	const [deletingUsers, setDeletingUsers] = useState<{[key: string]: boolean}>({})
 
 	// Fetch users from API
 	useEffect(() => {
@@ -122,7 +123,10 @@ export default function List() {
 				return
 			}
 
-			const response = await fetch('/api/proxy?endpoint=/api/users/activate', {
+			// Use different endpoints for activation and deactivation
+			const endpoint = newStatus ? '/api/proxy?endpoint=/api/users/activate' : '/api/deactivate-user'
+			
+			const response = await fetch(endpoint, {
 				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${token}`,
@@ -138,22 +142,87 @@ export default function List() {
 					window.location.href = '/account/login'
 					return
 				}
-				throw new Error('Failed to activate user')
+				const errorData = await response.json().catch(() => ({}))
+				const action = newStatus ? 'activate' : 'deactivate'
+				throw new Error(`Failed to ${action} user: ${errorData.details || errorData.error || 'Unknown error'}`)
 			}
 
 			// Update local state
 			setUsers(prevUsers => 
 				prevUsers.map(user => 
 					user.id === userId 
-						? { ...user, is_active: true }
+						? { ...user, is_active: newStatus }
 						: user
 				)
 			)
 
 		} catch (error) {
-			console.error('Error activating user:', error)
+			console.error('Error toggling user status:', error)
+			alert(error instanceof Error ? error.message : 'Failed to update user status')
 		} finally {
 			setUpdatingUsers(prev => ({ ...prev, [userId]: false }))
+		}
+	}
+
+	// Delete user
+	const handleDeleteUser = async (userId: string) => {
+		// Show confirmation dialog
+		const confirmed = window.confirm('Are you sure you want to delete this user? This action cannot be undone.')
+		
+		if (!confirmed) {
+			return
+		}
+
+		try {
+			setDeletingUsers(prev => ({ ...prev, [userId]: true }))
+			
+			const token = localStorage.getItem('auth_token')
+			if (!token) {
+				window.location.href = '/account/login'
+				return
+			}
+
+			const response = await fetch('/api/delete-user', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					userId: userId
+				})
+			})
+			
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}))
+				
+				if (response.status === 401) {
+					window.location.href = '/account/login'
+					return
+				}
+				if (response.status === 403) {
+					alert('You do not have permission to delete users.')
+					return
+				}
+				if (response.status === 404) {
+					alert('User not found.')
+					return
+				}
+				
+				// Show more detailed error message
+				const errorMessage = errorData.details || errorData.error || 'Failed to delete user'
+				alert(`Error: ${errorMessage}`)
+				return
+			}
+
+			// Remove user from local state
+			setUsers(prevUsers => prevUsers.filter(user => user.id !== userId))
+
+		} catch (error) {
+			console.error('Error deleting user:', error)
+			alert('Failed to delete user. Please try again.')
+		} finally {
+			setDeletingUsers(prev => ({ ...prev, [userId]: false }))
 		}
 	}
 
@@ -183,6 +252,9 @@ export default function List() {
 								},
 								{
 									text: 'Country / City / Zipcode'
+								},
+								{
+									text: 'Delete'
 								}
 							].map((item, i) => (
 								<p className='gray-400 uppercase text-12 bold' key={i}>
@@ -217,7 +289,9 @@ export default function List() {
 								key={user.id} 
 								user={user} 
 								onToggleActive={handleToggleActive}
+								onDeleteUser={handleDeleteUser}
 								isUpdating={updatingUsers[user.id]}
+								isDeleting={deletingUsers[user.id]}
 							/>
 						))}
 
@@ -261,22 +335,21 @@ export default function List() {
 interface ListItemProps {
 	user: User
 	onToggleActive: (userId: string, newStatus: boolean) => Promise<void>
+	onDeleteUser: (userId: string) => Promise<void>
 	isUpdating: boolean
+	isDeleting: boolean
 }
 
 export function ListItem({
 	user,
 	onToggleActive,
-	isUpdating
+	onDeleteUser,
+	isUpdating,
+	isDeleting
 }: ListItemProps) {
 	const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		
 		const newStatus = e.target.checked
-
-		// only allow activation, not deactivation
-		if (newStatus) {
-			await onToggleActive(user.id, newStatus)
-		}
+		await onToggleActive(user.id, newStatus)
 	}
 
 	return (
@@ -292,8 +365,7 @@ export function ListItem({
 					htmlFor={`isActive-${user.id}`}
 					className={clsx(
 						styles.checkbox,
-						isUpdating && styles.updating,
-						user.is_active && styles.disabled
+						isUpdating && styles.updating
 					)}
 				>
 					
@@ -302,7 +374,7 @@ export function ListItem({
 						id={`isActive-${user.id}`}
 						checked={user.is_active}
 						onChange={handleChange}
-						disabled={isUpdating || user.is_active}
+						disabled={isUpdating}
 					/>
 
 					<span className={styles.checkboxToggle}>
@@ -397,6 +469,32 @@ export function ListItem({
 					</p>
 				)}
 			</div>
+
+			<div className={styles.item}>
+				<button
+					className={clsx(
+						styles.delete,
+						isDeleting && styles.deleting
+					)}
+					onClick={() => onDeleteUser(user.id)}
+					disabled={isDeleting}
+				>
+
+					{isDeleting ? (
+						<span className='rotation gray-400' style={{ '--speed': '.5' } as any}>
+							<LoaderCircle />
+						</span>
+					) : (
+						<Trash />
+					)}
+
+					<span className='text-14'>
+						{isDeleting ? 'Deleting...' : 'Delete'}
+					</span>
+
+				</button>
+			</div>
+
 		</div>
 	)
 }

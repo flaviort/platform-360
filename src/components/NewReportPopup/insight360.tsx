@@ -1,25 +1,28 @@
+'use client'
+
 // libraries
-import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
+import { useCallback } from 'react'
 
 // components
 import PopupForm from './form'
 import ProjectName from './fields/ProjectName'
 import ReportName from './fields/ReportName'
 import Category from './fields/Category'
-import Goal from './fields/Goal'
-import Dropdown from '@/components/Form/Dropdown'
-import Checkbox from '@/components/Form/Checkbox'
-
-// css
-import styles from './index.module.scss'
-
-// db
-import { brands } from '@/db/brands'
+import Brands from './fields/Brands'
+import Genders from './fields/Genders'
+import Question from './fields/Question'
 
 // utils
-import { slugify } from '@/utils/functions'
-import { createReport, CreateReportData, getProjectAndCategoryIds } from '@/utils/reports'
+import { 
+	CreateReportData, 
+	getProjectAndCategoryIds,
+	createReportWithCharts,
+	extractSelectedItems,
+	transformGender,
+	createInsight360Charts
+} from '@/utils/reports'
+import loadingMessages from '@/utils/loadingMessages'
 
 interface PopupInsight360Props {
 	icon: React.ComponentType<any>
@@ -27,73 +30,126 @@ interface PopupInsight360Props {
 	className?: string
 }
 
-// loading messages to display during report generation
-const loadingMessages = [
-	"Generating your report...",
-	"Saving data to the database...",
-	"Syncing your data...",
-	"Analyzing colors and patterns...",
-	"Generating charts...",
-	"Populating fields...",
-	"Processing retailers data...",
-	"Preparing brand information...",
-	"Almost there...",
-	"Creating beautiful visualizations..."
-]
+// chart definitions for creating charts after report creation
+const getChartDefinitions = (baseChartData: any) => {
+	return [
+		{ 
+			name: 'Pros and Cons', 
+			data: {
+				...baseChartData,
+				title: 'Pros and Cons',
+				description: 'This chart shows all the pros and cons of the selected brand, gender and category.',
+				preferences: {
+					chart_type: 'pros_and_cons',
+					box_size: 'full'
+				},
+				query: {
+					...baseChartData.query,
+					chart_type: 'pro_features'
+				}
+			} 
+		},
+		/*
+		{
+			name: 'Cons Features',
+			data: {
+				...baseChartData,
+				title: 'Cons Features',
+				description: 'This chart shows all the cons of the selected brand, gender and category.',
+				preferences: {
+					chart_type: 'cons_features',
+					box_size: 'half'
+				},
+				query: {
+					...baseChartData.query,
+					chart_type: 'cons_features'
+				}
+			}
+		}
+		*/
+	]
+}
 
 export default function PopupInsight360({
 	icon: Icon,
 	text,
 	className
 }: PopupInsight360Props) {
+	
 	const router = useRouter()
+
+	// format form data for report creation
+	const formatFormData = useCallback(async (data: any): Promise<CreateReportData> => {
+		
+		// get project and category IDs
+		const { projectId, categoryId } = await getProjectAndCategoryIds({
+			selectedProject: data.selectedProject,
+			newProjectName: data.newProjectName,
+			projectGoal: data.projectGoal,
+			category: data.category
+		})
+
+		// get selected sub-category
+		let selectedCategory = [
+			data.subCategory || ''
+		].filter(Boolean)
+
+		// format data for API
+		const selectedBrands = extractSelectedItems(data.brands)
+		const selectedGenders = Array.isArray(data.genders) ? data.genders.map(transformGender) : (data.genders ? [transformGender(data.genders)] : [])
+
+		return {
+			name: data.reportName,
+			product_type: 'insight360',
+			category_id: categoryId,
+			status: false,
+			goal: data.question,
+			project_id: projectId,
+			product_settings: {
+				category: selectedCategory.length > 0 ? selectedCategory : [data.category],
+				retailers: [],
+				brands: selectedBrands,
+				genders: selectedGenders,
+				question: data.question
+			}
+		}
+	}, [])
+
+	// create base chart data
+	const createBaseChartData = useCallback((data: any, report: any) => {
+
+		// format data for API
+		let selectedCategory = [ data.subCategory || '' ].filter(Boolean)
+		const selectedBrands = extractSelectedItems(data.brands)
+		const selectedGenders = Array.isArray(data.genders) ? data.genders.map(transformGender) : (data.genders ? [transformGender(data.genders)] : [])
+
+		return {
+			query: {
+				report_id: report.id,
+				question: data.question + ` Use the following fields along with the previous text: Category: ${selectedCategory}, Brand(s): ${selectedBrands}, Gender(s): ${selectedGenders}`
+			}
+		}
+	}, [])
 
 	const handleSuccess = async (data: any) => {
 		try {
-			// get project and category IDs
-			const { projectId, categoryId } = await getProjectAndCategoryIds({
-				selectedProject: data.selectedProject,
-				newProjectName: data.newProjectName,
-				category: data.category
+			await createReportWithCharts(data, {
+				productType: 'insight360',
+				chartDefinitionsFactory: getChartDefinitions,
+				formatFormData,
+				createBaseChartData,
+				router,
+				customChartCreation: createInsight360Charts
 			})
-
-			// selected fields
-			const selectedCategory = [data.category || '']
-			const selectedRetailers = data.retailers ? Object.keys(data.retailers).filter(key => data.retailers[key] === true) : []
-			const selectedBrands = data.brands ? Object.keys(data.brands).filter(key => data.brands[key] === true) : []
-			const selectedGenders = Array.isArray(data.genders) ? data.genders : (data.genders ? [data.genders] : [])
-			const selectedStartDate = data.timePeriodStart instanceof Date ? data.timePeriodStart.toISOString() : new Date(data.timePeriodStart).toISOString()
-			const selectedEndDate = data.timePeriodEnd instanceof Date ? data.timePeriodEnd.toISOString() : new Date(data.timePeriodEnd).toISOString()
-
-			// transform form data to match API format
-			const reportData: CreateReportData = {
-				name: data.reportName,
-				product_type: 'insight360',
-				category_id: categoryId,
-				status: true,
-				goal: data.goal,
-				project_id: projectId,
-				product_settings: {
-					start_date: selectedStartDate,
-					end_date: selectedEndDate
-				}
-			}
-
-			console.log('Creating report with data:', reportData)
-			const report = await createReport(reportData)
-			
-			// Redirect to the report page
-			router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
 		} catch (error) {
-			console.error('Failed to create report:', error)
-			throw error // Re-throw to be handled by handleError
+			console.error('Error during report creation:', error)
+			throw error
 		}
 	}
 
 	const handleError = (error: any) => {
 		console.error('Form submission error:', error)
-		// You might want to show this error to the user in the UI
-		// For example, using a toast notification or error message component
+        document.dispatchEvent(new Event('formError'))
 	}
 
 	return (
@@ -109,66 +165,14 @@ export default function PopupInsight360({
 			
 			<ReportName />
 
-			<Category />
+			<Category hasSubCategories />
 
-			<div className={styles.group}>
-				<div className={styles.label}>
-					<label htmlFor='report-brands' className='text-16 semi-bold'>
-						Brands <span className='red'>*</span>
-					</label>
-				</div>
+			<Brands />
 
-				<div className={styles.input}>
-					<Dropdown
-						defaultValue='Select up to 10...'
-						limitSelected={10}
-						items={brands.map((brand) => ({
-							name: slugify(brand),
-							label: brand
-						}))}
-						searchable
-						required
-						name='brands'
-						id='report-brands'
-					/>
-				</div>
-			</div>
+			<Genders />
 
-			<div className={styles.group}>
-				<div className={styles.label}>
-					<label className='text-16 semi-bold'>
-						Genders <span className='red'>*</span>
-					</label>
-				</div>
+			<Question />
 
-				<div className={clsx(styles.input, styles.checkboxes)}>
-					<Checkbox
-						type='checkbox'
-						id='report-genders-men'
-						name='genders'
-						label="Men's"
-						required
-					/>
-
-					<Checkbox
-						type='checkbox'
-						id='report-genders-women'
-						name='genders'
-						label="Women's"
-						required
-					/>
-
-					<Checkbox
-						type='checkbox'
-						id='report-genders-kids'
-						name='genders'
-						label="Kids"
-						required
-					/>
-				</div>
-			</div>
-
-			<Goal />
 		</PopupForm>
 	)
 }

@@ -248,7 +248,8 @@ export default function Maps({
                         }}
                     >
                         <p className='text-16'>
-                            {getRegionLabel()}: <strong>{hoveredState.name}</strong>
+                            {getRegionLabel()}: <strong>{hoveredState.name}</strong><br />
+                            Value: {hoveredState.value}
                         </p>
                     </div>
                 )}
@@ -270,12 +271,12 @@ export default function Maps({
                             }}
                         >
                             <p
-                                className='text-14 gray-800'
+                                className='text-12 gray-800'
                                 style={{
                                     color: value === 0 ? '#6B7280' : normalizeValue(value) > 50 ? 'white' : ''
                                 }}
                             >
-                                {item.name}
+                                <strong>{item.name}:</strong> {value}
                             </p>
                         </div>
                     )

@@ -1,0 +1,93 @@
+.component {
+    .summary {
+        display: block;
+        padding: 0 .25rem 1.5rem .25rem;
+    }
+
+    .blocks {
+        display: grid;
+        gap: 1rem;
+
+        @media #{$mq-md-min} {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .column {
+            position: relative;
+            overflow: hidden;
+            border-radius: .5rem;
+            background-color: $white;
+
+            &.pros {
+                //background-color: $blue;
+
+                .title {
+                    @include gradient-left-right($blue, $purple);
+                }
+
+                .innerBlocks {
+                    .block {
+                        border-color: $blue;
+
+                        h4 {
+                            color: $blue;
+                        }
+                    }
+                }
+            }
+
+            &.cons {
+                //background-color: $red;
+
+                .title {
+                    @include gradient-left-right($red, $red-dark);
+                }
+
+                .innerBlocks {
+                    .block {
+                        border-color: $red;
+
+                        h4 {
+                            color: $red;
+                        }
+                    }
+                }
+            }
+
+            .title {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1.5rem;
+                color: $white;
+                border-bottom: var(--1px) solid $white;
+
+                svg {
+                    width: 2rem;
+                    height: 2rem;
+                }
+            }
+
+            .innerBlocks {
+                border: 1px solid $gray-200;
+                padding: 1.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+
+                .block {
+                    display: block;
+                    padding: .5rem 1rem;
+                    //color: $white;
+                    border-left: .125rem solid currentColor;
+
+                    p {                        
+                        @media #{$mq-xl-min} {
+                            padding-right: 2rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

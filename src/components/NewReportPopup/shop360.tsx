@@ -32,9 +32,12 @@ import {
 	extractSelectedItems,
 	formatISODate,
 	createTimeRangeText,
-	createShop360FallbackGoalText
+	createShop360FallbackGoalText,
+	transformGender
 } from '@/utils/reports'
+
 import loadingMessages from '@/utils/loadingMessages'
+import { footwear } from '@/db/sub-categories'
 
 // css
 import styles from './index.module.scss'
@@ -81,9 +84,10 @@ const getChartDefinitions = (baseChartData: any) => [
 			},
 			query: {
 				...baseChartData.query,
+				category: ['shoes', 'boots', 'oxfords', 'sneakers', 'clogs', 'sandals', 'heels'], // temporary fix to send only a few subcategories to the API due some instability problem with this specific chart
 				operator: {
 					...baseChartData.query.operator,
-					limit: 10,
+					limit: 6,
 					aggregate: 'all',
 					operates_on: 'company'
 				}
@@ -103,7 +107,7 @@ const getChartDefinitions = (baseChartData: any) => [
 				...baseChartData.query,
 				operator: {
 					...baseChartData.query.operator,
-					limit: 10,
+					limit: 6,
 					aggregate: 'average',
 					operates_on: 'brand'
 				}
@@ -123,7 +127,7 @@ const getChartDefinitions = (baseChartData: any) => [
 				...baseChartData.query,
 				operator: {
 					...baseChartData.query.operator,
-					limit: 8,
+					limit: 6,
 					aggregate: 'count',
 					operates_on: 'company'
 				}
@@ -153,23 +157,6 @@ const getChartDefinitions = (baseChartData: any) => [
 	}
 ]
 
-// helper function to transform gender values
-const transformGender = (gender: string): string => {
-	const lowercased = gender.toLowerCase()
-
-	if (lowercased === 'kids') {
-		return 'kids'
-	}
-	
-	if (lowercased.endsWith("'s")) {
-		return lowercased.slice(0, -2)
-	} else if (lowercased.endsWith('s')) {
-		return lowercased.slice(0, -1)
-	}
-
-	return lowercased
-}
-
 // form data type for shop360
 interface Shop360FormData {
 	category: string
@@ -193,10 +180,10 @@ export default function PopupShop360({
 	const createBaseChartData = useCallback((data: any, report: any) => {
 		
 		// get selected sub-categories (use multiple subcategories from dropdown)
-		const selectedSubCategories = extractSelectedItems(data.subCategories || {})
+		//const selectedSubCategories = extractSelectedItems(data.subCategories || {})
 		
 		// Use subcategories if selected, otherwise use the main category
-		const selectedCategory = selectedSubCategories.length > 0 ? selectedSubCategories : [data.category]
+		//const selectedCategory = selectedSubCategories.length > 0 ? selectedSubCategories : [data.category]
 		
 		const selectedRetailers = extractSelectedItems(data.retailers)
 		const selectedBrands = extractSelectedItems(data.brands)
@@ -210,7 +197,7 @@ export default function PopupShop360({
 		return {
 			report_id: report.id,
 			query: {
-				category: selectedCategory,
+				category: footwear.map((item) => item.name), // temporary fix to send all footwear sub-categories to the API
 				company: selectedRetailers,
 				brand: selectedBrands,
 				gender: selectedGenders,
@@ -346,6 +333,7 @@ export default function PopupShop360({
 				<Category
 					hasSubCategories
 					multipleSubCategories
+					onlyFootwear
 				/>
 
 				<Retailers />

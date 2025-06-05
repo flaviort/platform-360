@@ -20,6 +20,7 @@ export default function USASVG({
     handleStateMouseLeave, 
     styles 
 }: USASVGProps) {
+    
     // Define all provinces with their data
     const provinces: Province[] = [
         {

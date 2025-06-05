@@ -25,11 +25,13 @@ interface SubCategory {
 }
 
 interface CategoryProps {
+    onlyFootwear?: boolean
     hasSubCategories?: boolean
     multipleSubCategories?: boolean
 }
 
 export default function Category({
+    onlyFootwear = false,
     hasSubCategories = false,
     multipleSubCategories = false
 }: CategoryProps) {
@@ -113,28 +115,30 @@ export default function Category({
                             {isLoading ? 'Loading categories...' : 'Select one'}
                         </option>
 
-                        {categories.map((category) => (
+                        {/*categories.map((category) => (
                             <option key={category.id} value={category.name}>
                                 {category.name}
                             </option>
-                        ))}
+                        ))*/}
                         
-                        {/*
-                        <option value=''>Select one</option>
                         <option value='Footwear'>Footwear</option>
-                        <option value='Apparel'>Apparel</option>
-                        <option value='Electronics'>Electronics</option>
-                        <option value='Bags & Carriers'>Bags & Carriers</option>
-                        <option value='Accessories'>Accessories</option>
-                        <option value='Nutrition & Health'>Nutrition & Health</option>
-                        <option value='Sports & Activities'>Sports & Activities</option>
-                        */}
+
+                        {!onlyFootwear && (
+                            <>
+                                <option value='Apparel'>Apparel</option>
+                                <option value='Electronics'>Electronics</option>
+                                <option value='Bags & Carriers'>Bags & Carriers</option>
+                                <option value='Accessories'>Accessories</option>
+                                <option value='Nutrition & Health'>Nutrition & Health</option>
+                                <option value='Sports & Activities'>Sports & Activities</option>
+                            </>
+                        )}
                     </Select>
                 </div>
 
             </div>
 
-            {hasSubCategories && !multipleSubCategories && selectedCategory && subCategories.length > 0 && (
+            {hasSubCategories && !multipleSubCategories && !onlyFootwear && selectedCategory && subCategories.length > 0 && (
                 <div className={styles.group}>
 
                     <div className={styles.label}>
@@ -166,7 +170,7 @@ export default function Category({
                 </div>
             )}
 
-            {hasSubCategories && multipleSubCategories && selectedCategory && subCategories.length > 0 && (
+            {hasSubCategories && multipleSubCategories && !onlyFootwear && selectedCategory && subCategories.length > 0 && (
                 <div className={styles.group}>
 
                     <div className={styles.label}>

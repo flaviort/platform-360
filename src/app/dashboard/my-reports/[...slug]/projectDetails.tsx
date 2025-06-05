@@ -181,7 +181,7 @@ export default function ProjectDetails({
 									</>
 								)}
 
-								{(summary?.subCategory !== undefined) && (
+								{(summary?.subCategory !== undefined && product !== 'shop360') && (
 									<>
 										<p className='text-14 gray-700 bold'>
 											Sub-category:

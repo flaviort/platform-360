@@ -12,6 +12,9 @@ import ChartBox from '@/components/ChartBox'
 import ProjectDetails from './projectDetails'
 import TopButtons from './topButtons'
 
+// temp
+import ProsAndCons from '@/components/Reports/NonCharts/ProsAndCons'
+
 // css
 import styles from './index.module.scss'
 
@@ -92,6 +95,11 @@ export default function DashboardMyReports() {
 	const slug = Array.isArray(params.slug) ? params.slug : []
 	const projectSlug = slug[0] || '' // This is the project ID
 	const reportSlug = slug[1] || '' // This is the report ID
+
+	useEffect(() => {
+		console.log('charts: ', charts)
+		console.log('report: ', report)
+	}, [charts, report])
 
 	// Function to fetch charts for a specific report
 	const fetchCharts = async (reportId: string) => {
@@ -607,17 +615,95 @@ export default function DashboardMyReports() {
 											)
 										})
 									})() : (
-										<div className={styles.noCharts}>
+										report?.product_type?.toLowerCase() === 'insight360' ? (
+											<ChartBox
+												id='pros-and-cons'
+												boxSize='full'
+												title='Pros and Cons'
+												description='This chart underlines the pros and cons of the selected product.'
+												chart={{
+													pros_and_cons: {
+														title: 'Pros and Cons',
+														executive_summary: 'This strategy focuses on developing a shoe line tailored for women over 40, emphasizing comfort, style, and health benefits. The aim is to create a product that meets the specific needs of this demographic while avoiding features that could lead to discomfort or dissatisfaction.',
+														pros_features: [
+															{
+																name: "Comfortable Fit",
+																description: "Design shoes with cushioned insoles and arch support to provide maximum comfort for all-day wear."
+															},
+															{
+																name: "Stylish Design",
+																description: "Incorporate modern and elegant designs that appeal to mature tastes without compromising on style."
+															},
+															{
+																name: "Durability",
+																description: "Use high-quality materials to ensure the shoes are long-lasting and can withstand regular use."
+															},
+															{
+																name: "Breathable Materials",
+																description: "Select materials that allow for air circulation to keep feet cool and dry, reducing the risk of foot odor and discomfort."
+															},
+															{
+																name: "Adjustable Features",
+																description: "Include adjustable straps or laces to accommodate varying foot shapes and sizes, ensuring a perfect fit."
+															},
+															{
+																name: "Slip-Resistant Soles",
+																description: "Design soles with slip-resistant materials to provide better traction and prevent falls."
+															},
+															{
+																name: "Wide Range of Sizes",
+																description: "Offer a wide range of sizes, including half sizes and wide widths, to cater to different foot shapes and sizes."
+															}
+														],
+														cons_features: [
+															{
+																name: "High Heels",
+																description: "Avoid high heels as they can cause discomfort and health issues such as back pain and foot problems."
+															},
+															{
+																name: "Narrow Toe Box",
+																description: "Steer clear of designs with narrow toe boxes that can lead to bunions and other foot ailments."
+															},
+															{
+																name: "Heavy Materials",
+																description: "Avoid using heavy materials that can make the shoes cumbersome and tiring to wear."
+															},
+															{
+																name: "Complex Fastenings",
+																description: "Refrain from using complex fastenings that can be difficult for older women to manage."
+															},
+															{
+																name: "Lack of Arch Support",
+																description: "Do not design shoes without proper arch support, as this can lead to foot pain and discomfort."
+															},
+															{
+																name: "Non-Breathable Fabrics",
+																description: "Avoid non-breathable fabrics that can cause sweating and discomfort."
+															},
+															{
+																name: "Limited Color Options",
+																description: "Do not limit the color options, as offering a variety of colors can appeal to a broader audience."
+															}
+														]
+													}
+												}}
+												chartType='pros-and-cons'
+												reportSummary={getChartSummary()}
+												switchToPercentage={false}
+											/>
+										) : (
+											<div className={styles.noCharts}>
 
-											<h2 className='text-30 semi-bold blue'>
-												This report doesn't contain any charts.
-											</h2>
+												<h2 className='text-30 semi-bold blue'>
+													This report doesn't contain any charts.
+												</h2>
 
-											<p className='text-16'>
-												You can either generate new charts using the "Generate with AI" button, or you can create a new report on the previous page.
-											</p>
-											
-										</div>
+												<p className='text-16'>
+													You can either generate new charts using the "Generate with AI" button, or you can create a new report on the previous page.
+												</p>
+												
+											</div>
+										)
 									)}
 								</div>
 

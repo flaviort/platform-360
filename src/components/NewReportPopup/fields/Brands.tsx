@@ -91,7 +91,7 @@ export default function Brands() {
 
 			<div className={styles.input}>
 				<CustomSearch
-					defaultValue='Search and select up to 5 brands...'
+					defaultValue='Search up to 5 brands...'
 					limitSelected={5}
 					items={getDisplayItems()}
 					required

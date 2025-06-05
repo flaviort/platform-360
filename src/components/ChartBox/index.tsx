@@ -14,6 +14,7 @@ import HorizontalBars from '@/components/Reports/Charts/HorizontalBars'
 import PositiveNegativeBars from '@/components/Reports/Charts/PositiveNegativeBars'
 import Maps from '@/components/Reports/NonCharts/Maps'
 import CategoryTrend from '@/components/Reports/Charts/CategoryTrend'
+import ProsAndCons from '@/components/Reports/NonCharts/ProsAndCons'
 
 // non-chart components
 import ProductPrice from '@/components/Reports/NonCharts/ProductPrice'
@@ -77,6 +78,20 @@ interface ChartBoxProps {
                 value: number
             }>
         }>
+
+        // insight360 default charts
+        pros_and_cons?: {
+            title: string
+            executive_summary: string
+            pros_features: Array<{
+                name: string
+                description: string
+            }>
+            cons_features: Array<{
+                name: string
+                description: string
+            }>
+        }
 
         // old charts
         vertical?: Array<{
@@ -265,7 +280,6 @@ export default function ChartBox({
                 )}
 
                 {/* --- demand360 default charts  --- */}
-
                 {chart.geographyTrend && (
                     <Maps
                         location={reportSummary.location as 'US' | 'CA' | 'EU'}
@@ -279,8 +293,17 @@ export default function ChartBox({
                     />
                 )}
 
-                {/* --- other charts  --- */}
+                {/* --- insight360 default charts  --- */}
+                {chart.pros_and_cons && (
+                    <ProsAndCons
+                        title={chart.pros_and_cons.title}
+                        executive_summary={chart.pros_and_cons.executive_summary}
+                        pros_features={chart.pros_and_cons.pros_features}
+                        cons_features={chart.pros_and_cons.cons_features}
+                    />
+                )}
 
+                {/* --- other charts  --- */}
                 {chart.vertical && (
                     <VerticalBars
                         data={chart.vertical}

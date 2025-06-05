@@ -66,13 +66,13 @@
     .pills {
         display: flex;
         flex-wrap: wrap;
-        gap: .5rem;
+        gap: .25rem;
 
         .pill {
             display: flex;
             background-color: $blue;
             color: $white;
-            padding: .25rem 1rem;
+            padding: .125rem .5rem;
             width: fit-content;
             border-radius: 2rem;
         }

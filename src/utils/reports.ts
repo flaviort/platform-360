@@ -24,14 +24,17 @@ export interface CreateReportData {
 		genders?: string[]
 		type_store?: string[]
 		include_images?: boolean
-		start_date: Date | string
-		end_date: Date | string
+		start_date?: Date | string
+		end_date?: Date | string
 
 		// demand360 specific fields
 		location?: string
 		regions?: string[]
 		category?: string[]
 		sub_category?: string[]
+
+		// insight360 specific fields
+		question?: string
 
 		// feedback360 specific fields
 		audience_size?: number
@@ -83,6 +86,23 @@ export const extractSelectedItems = (items: Record<string, boolean> = {}) =>
 	Object.entries(items)
 		.filter(([_, selected]) => selected)
 		.map(([name, _]) => name)
+
+// Helper function to transform gender values
+export const transformGender = (gender: string): string => {
+	const lowercased = gender.toLowerCase()
+
+	if (lowercased === 'kids') {
+		return 'kids'
+	}
+	
+	if (lowercased.endsWith("'s")) {
+		return lowercased.slice(0, -2)
+	} else if (lowercased.endsWith('s')) {
+		return lowercased.slice(0, -1)
+	}
+
+	return lowercased
+}
 
 // Helper function to format dates for API
 export const formatISODate = (date: Date | string): string => {
@@ -280,54 +300,182 @@ interface ChartCreationResult {
 	name: string
 	data?: any
 	hasData?: boolean
+	retryCount?: number
 }
 
-export async function createChartsInParallel(
-	chartDefinitions: any[],
-	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error') => void
-): Promise<ChartCreationResult[]> {
-	const chartPromises = chartDefinitions.map(chart => {
-		onProgress?.(chart.name, 'creating')
-		console.log(`Creating ${chart.name} chart...`)
-		console.log('Chart data:', chart.data)
-		//console.log('Chart data stringify:', JSON.stringify(chart.data, null, 2))
+// Robust fetch with timeout and retry logic
+async function fetchWithTimeoutAndRetry(
+	url: string,
+	options: RequestInit,
+	timeoutMs: number = 120000, // 2 minutes default
+	maxRetries: number = 2
+): Promise<Response> {
+	let lastError: Error
+	
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
+		let timeoutId: NodeJS.Timeout | undefined
 		
-		return fetch('/api/proxy?endpoint=/api/charts', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-			},
-			body: JSON.stringify(chart.data)
-		})
-		.then(async chartResponse => {
-			console.log(`${chart.name} chart response status:`, chartResponse.status)
-			const responseText = await chartResponse.text()
+		try {
+			const controller = new AbortController()
+			timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 			
-			if (!chartResponse.ok) {
-				console.error(`Failed to create ${chart.name} chart:`, responseText)
-				onProgress?.(chart.name, 'error')
-				return { ok: false, name: chart.name }
+			const response = await fetch(url, {
+				...options,
+				signal: controller.signal
+			})
+			
+			clearTimeout(timeoutId)
+			
+			// If response is ok or it's the last attempt, return it
+			if (response.ok || attempt === maxRetries) {
+				return response
+			}
+			
+			// If not ok and not the last attempt, continue to retry
+			console.warn(`Attempt ${attempt + 1} failed with status ${response.status}, retrying...`)
+			
+		} catch (error) {
+			if (timeoutId) clearTimeout(timeoutId)
+			lastError = error as Error
+			
+			if (attempt === maxRetries) {
+				throw lastError
+			}
+			
+			console.warn(`Attempt ${attempt + 1} failed with error: ${error}, retrying...`)
+			
+			// Wait before retry (exponential backoff: 1s, 2s, 4s)
+			await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+		}
+	}
+	
+	throw lastError!
+}
+
+// Enhanced chart creation with retry logic
+async function createChartWithRetry(
+	chartDefinition: any,
+	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void,
+	maxRetries: number = 2
+): Promise<ChartCreationResult> {
+	
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
+		try {
+			if (attempt > 0) {
+				onProgress?.(chartDefinition.name, 'retrying')
+				console.log(`Retrying ${chartDefinition.name} chart (attempt ${attempt + 1}/${maxRetries + 1})...`)
+			} else {
+				onProgress?.(chartDefinition.name, 'creating')
+				console.log(`Creating ${chartDefinition.name} chart...`)
+			}
+			
+			console.log('Chart data:', chartDefinition.data)
+			
+			const response = await fetchWithTimeoutAndRetry(
+				'/api/proxy?endpoint=/api/charts',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+					},
+					body: JSON.stringify(chartDefinition.data)
+				},
+				120000, // 2 minutes timeout
+				0 // No additional retries in fetchWithTimeoutAndRetry (we handle retries here)
+			)
+
+			console.log(`${chartDefinition.name} chart response status:`, response.status)
+			const responseText = await response.text()
+			
+			if (!response.ok) {
+				console.error(`Failed to create ${chartDefinition.name} chart:`, responseText)
+				
+				// If this is the last attempt, return failure
+				if (attempt === maxRetries) {
+					onProgress?.(chartDefinition.name, 'error')
+					return { 
+						ok: false, 
+						name: chartDefinition.name,
+						retryCount: attempt
+					}
+				}
+				
+				// Continue to next attempt
+				continue
 			}
 			
 			const chartData = responseText ? JSON.parse(responseText) : {}
-			onProgress?.(chart.name, 'success')
+			onProgress?.(chartDefinition.name, 'success')
 			
 			return { 
 				ok: true, 
 				data: chartData, 
-				name: chart.name,
-				hasData: chartData && chartData.results && chartData.results.length > 0
+				name: chartDefinition.name,
+				hasData: chartData && chartData.results && chartData.results.length > 0,
+				retryCount: attempt
 			}
-		})
-		.catch(error => {
-			console.error(`Error creating ${chart.name} chart:`, error)
-			onProgress?.(chart.name, 'error')
-			return { ok: false, name: chart.name }
-		})
-	})
+			
+		} catch (error) {
+			console.error(`Error creating ${chartDefinition.name} chart (attempt ${attempt + 1}):`, error)
+			
+			if (attempt === maxRetries) {
+				onProgress?.(chartDefinition.name, 'error')
+				return { 
+					ok: false, 
+					name: chartDefinition.name,
+					retryCount: attempt
+				}
+			}
+			
+			// Wait before retry
+			await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+		}
+	}
+	
+	// This should never be reached, but just in case
+	return { 
+		ok: false, 
+		name: chartDefinition.name,
+		retryCount: maxRetries
+	}
+}
 
-	return Promise.all(chartPromises)
+export async function createChartsInParallel(
+	chartDefinitions: any[],
+	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void
+): Promise<ChartCreationResult[]> {
+	
+	console.log(`Starting creation of ${chartDefinitions.length} charts with retry logic...`)
+	
+	// Create all charts in parallel with retry logic
+	const chartPromises = chartDefinitions.map(chart => 
+		createChartWithRetry(chart, onProgress)
+	)
+
+	const results = await Promise.all(chartPromises)
+	
+	const successful = results.filter(r => r.ok && r.hasData)
+	const failed = results.filter(r => !r.ok)
+	const totalRetries = results.reduce((sum, r) => sum + (r.retryCount || 0), 0)
+	
+	console.log(`Chart creation completed: ${successful.length} successful, ${failed.length} failed, ${totalRetries} total retries`)
+	
+	return results
+}
+
+// Background retry function for failed charts
+export async function retryFailedChartsInBackground(
+	failedCharts: any[],
+	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void
+): Promise<ChartCreationResult[]> {
+	console.log(`Retrying ${failedCharts.length} failed charts in background...`)
+	
+	const retryPromises = failedCharts.map(chart => 
+		createChartWithRetry(chart, onProgress)
+	)
+	
+	return Promise.all(retryPromises)
 }
 
 // ===============================
@@ -341,12 +489,19 @@ interface ReportCreationConfig {
 	createBaseChartData: (data: any, report: any) => any
 	router: any
 	onProgress?: (step: string, details?: any) => void
+	customChartCreation?: (
+		formData: any,
+		report: any,
+		chartDefinitions: any[],
+		onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void
+	) => Promise<ChartCreationResult[]>
 }
 
 export async function createReportWithCharts(
 	formData: any,
 	config: ReportCreationConfig
 ): Promise<void> {
+
 	let report: any = null
 	
 	try {
@@ -393,21 +548,31 @@ export async function createReportWithCharts(
 		// Define all charts to create
 		const chartsToCreate = config.chartDefinitionsFactory(baseChartData)
 		
-		// Create all charts in parallel
-		const results = await createChartsInParallel(
-			chartsToCreate,
-			(chartName, status) => config.onProgress?.('chart_progress', { chartName, status })
-		)
+		// Use custom chart creation if provided, otherwise use default
+		const results = config.customChartCreation
+			? await config.customChartCreation(
+				formData,
+				report,
+				chartsToCreate,
+				(chartName, status) => config.onProgress?.('chart_progress', { chartName, status })
+			)
+			: await createChartsInParallel(
+				chartsToCreate,
+				(chartName, status) => config.onProgress?.('chart_progress', { chartName, status })
+			)
 			
-		const atleastOneChartHasData = results.some(r => 'hasData' in r && r.hasData)
+		const successfulCharts = results.filter(r => r.ok && r.hasData)
+		const failedCharts = results.filter(r => !r.ok)
 		
-		if (!atleastOneChartHasData) {
+		console.log(`Chart creation summary: ${successfulCharts.length} successful, ${failedCharts.length} failed`)
+		
+		if (successfulCharts.length === 0) {
 			config.onProgress?.('no_data_cleanup')
-			console.log('⚠️ All charts have empty results. Deleting report.')
+			console.log('⚠️ All charts failed to create or have empty results. Deleting report.')
 			
 			// Delete the report that was just created
 			try {
-				console.log(`Deleting report ${report.id} due to empty chart results`)
+				console.log(`Deleting report ${report.id} due to no successful charts`)
 				const deleteResponse = await fetch(`/api/delete-report`, {
 					method: 'POST',
 					headers: {
@@ -431,14 +596,49 @@ export async function createReportWithCharts(
 				console.error('Error deleting report with empty charts:', deleteError)
 			}
 		} else {
-			// Success - redirect to the report page
+			// Success - at least one chart was created successfully
 			config.onProgress?.('success', { reportId: report.id })
 			console.log('Report and charts creation completed successfully')
 			document.dispatchEvent(new Event('formSent'))
 			
 			// Get project ID from the report data
 			const projectId = reportData.project_id
+			
+			// Navigate to the report page first
 			config.router.push(`/dashboard/my-reports/${projectId}/${report.id}`)
+			
+			// If there are failed charts, retry them in the background
+			if (failedCharts.length > 0) {
+				console.log(`Starting background retry for ${failedCharts.length} failed charts...`)
+				
+				// Create chart definitions for failed charts
+				const failedChartDefinitions = chartsToCreate.filter(chart => 
+					failedCharts.some(failed => failed.name === chart.name)
+				)
+				
+				// Start background retry - don't wait for it
+				setTimeout(async () => {
+					try {
+						const backgroundResults = config.customChartCreation
+							? await config.customChartCreation(
+								formData,
+								report,
+								failedChartDefinitions,
+								(chartName, status) => console.log(`Background retry: ${chartName} - ${status}`)
+							)
+							: await retryFailedChartsInBackground(
+								failedChartDefinitions,
+								(chartName, status) => console.log(`Background retry: ${chartName} - ${status}`)
+							)
+						
+						const backgroundSuccessful = backgroundResults.filter(r => r.ok && r.hasData)
+						console.log(`Background retry completed: ${backgroundSuccessful.length}/${failedCharts.length} charts recovered`)
+						
+					} catch (error) {
+						console.error('Background chart retry failed:', error)
+					}
+				}, 2000) // Start background retry after 2 seconds
+			}
 		}
 	} catch (error) {
 		config.onProgress?.('error', { error })
@@ -451,6 +651,130 @@ export async function createReportWithCharts(
 		}
 		
 		throw error
+	}
+}
+
+// Custom chart creation function for insight360
+export async function createInsight360Charts(
+	formData: any,
+	report: any,
+	chartDefinitions: any[],
+	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void
+): Promise<ChartCreationResult[]> {
+	
+	const results: ChartCreationResult[] = []
+	
+	for (const chartDef of chartDefinitions) {
+		const result = await createInsight360ChartWithRetry(chartDef, formData, report, onProgress)
+		results.push(result)
+	}
+	
+	return results
+}
+
+// Helper function for creating insight360 charts with retry logic
+async function createInsight360ChartWithRetry(
+	chartDef: any,
+	formData: any,
+	report: any,
+	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void,
+	maxRetries: number = 2
+): Promise<ChartCreationResult> {
+	
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
+		try {
+			if (attempt > 0) {
+				onProgress?.(chartDef.name, 'retrying')
+				console.log(`Retrying ${chartDef.name} insight chart (attempt ${attempt + 1}/${maxRetries + 1})...`)
+			} else {
+				onProgress?.(chartDef.name, 'creating')
+				console.log(`Creating ${chartDef.name} insight chart...`)
+			}
+			
+			const chartPayload = {
+				question: formData.question,
+				report_id: report.id
+			}
+
+			console.log('Insight chart payload:', chartPayload)
+			console.log('Form data:', formData)
+			console.log('Report data:', report)
+
+			const response = await fetchWithTimeoutAndRetry(
+				'/api/proxy?endpoint=/api/chats/insight',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+					},
+					body: JSON.stringify(chartPayload)
+				},
+				120000, // 2 minutes timeout
+				0 // No additional retries in fetchWithTimeoutAndRetry (we handle retries here)
+			)
+
+			console.log(`${chartDef.name} insight chart response status:`, response.status)
+
+			if (!response.ok) {
+				const errorText = await response.text()
+				console.error(`Failed to create ${chartDef.name} chart:`, response.status)
+				console.error(`${chartDef.name} error response:`, errorText)
+				
+				// If this is the last attempt, return failure
+				if (attempt === maxRetries) {
+					onProgress?.(chartDef.name, 'error')
+					return { 
+						ok: false, 
+						name: chartDef.name,
+						retryCount: attempt
+					}
+				}
+				
+				// Continue to next attempt
+				continue
+			}
+			
+			const chartData = await response.json()
+			console.log(`${chartDef.name} insight chart response data:`, chartData)
+			onProgress?.(chartDef.name, 'success')
+			
+			// Check if insight360 chart has data (pros_features or cons_features)
+			const hasInsightData = chartData && (
+				(chartData.pros_features && chartData.pros_features.length > 0) ||
+				(chartData.cons_features && chartData.cons_features.length > 0)
+			)
+			
+			return { 
+				ok: true, 
+				name: chartDef.name,
+				data: chartData,
+				hasData: hasInsightData,
+				retryCount: attempt
+			}
+			
+		} catch (error) {
+			console.error(`Error creating ${chartDef.name} chart (attempt ${attempt + 1}):`, error)
+			
+			if (attempt === maxRetries) {
+				onProgress?.(chartDef.name, 'error')
+				return { 
+					ok: false, 
+					name: chartDef.name,
+					retryCount: attempt
+				}
+			}
+			
+			// Wait before retry
+			await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+		}
+	}
+	
+	// This should never be reached, but just in case
+	return { 
+		ok: false, 
+		name: chartDef.name,
+		retryCount: maxRetries
 	}
 }
 
@@ -589,6 +913,7 @@ export function validateReportData(data: CreateReportData): void {
 			if (!data.product_settings.regions?.length) { throw new Error('At least one region must be selected') }
 			break
 		case 'insight360':
+			if (!data.product_settings.sub_category?.length) { throw new Error('At least one sub-category must be selected') }
 			if (!data.product_settings.brands?.length) { throw new Error('At least one brand must be selected') }
 			if (!data.product_settings.genders?.length) { throw new Error('At least one gender must be selected') }
 			break
@@ -623,7 +948,7 @@ export const createReport = async (data: CreateReportData): Promise<any> => {
             }
         }
         
-        //console.log('Sending formatted data to API:', JSON.stringify(data, null, 2))
+        console.log('Sending formatted data to API:', JSON.stringify(data, null, 2))
         
         const response = await fetch('/api/proxy?endpoint=/api/reports', {
             method: 'POST',
@@ -640,9 +965,11 @@ export const createReport = async (data: CreateReportData): Promise<any> => {
 
             try {
                 const errorResponse = await response.json()
+                console.error('Full API error response:', errorResponse)
                 errorDetails = JSON.stringify(errorResponse, null, 2)
             } catch (e) {
                 errorDetails = await response.text()
+                console.error('API error response (text):', errorDetails)
             }
             
             console.error(`API Error (${response.status}): ${errorDetails}`)
@@ -651,7 +978,11 @@ export const createReport = async (data: CreateReportData): Promise<any> => {
         }
         
         const responseData = await response.json()
+
+		console.log('Report created successfully:', responseData)
+
         return responseData
+		
     } catch (error) {
         console.error('Error creating report:', error)
         throw error

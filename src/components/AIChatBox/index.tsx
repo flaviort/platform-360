@@ -192,7 +192,7 @@ export default function AIChatBox({
             
             // Set up abort controller for timeout handling
             const abortController = new AbortController()
-            const timeoutId = setTimeout(() => abortController.abort(), 60000) // Increase timeout to 60 seconds
+            const timeoutId = setTimeout(() => abortController.abort(), 120000)
             
             try {
                 //console.log('Sending chat request to API...')
@@ -630,7 +630,7 @@ export default function AIChatBox({
                                                                     <>
                                                                         <div className={styles.messageData}>
 
-                                                                            {/*process.env.NODE_ENV === 'development' && (
+                                                                            {process.env.NODE_ENV === 'development' && (
                                                                                 <div className='relative'>
                                                                                     
                                                                                     <p className={styles.devOnly}>
@@ -641,7 +641,7 @@ export default function AIChatBox({
                                                                                         {JSON.stringify(message.data, null, 2)}
                                                                                     </pre>
                                                                                 </div>
-                                                                            )*/}
+                                                                            )}
 
                                                                             <ChartBox
                                                                                 id={`ai-chart-${message.id}`}
