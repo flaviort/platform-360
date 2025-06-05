@@ -124,21 +124,11 @@ export const createDuringTimeRangeText = (startDate?: string, endDate?: string) 
 }
 
 // ===============================
-// FALLBACK GOAL TEXTS
+// GOAL TEXTS
 // ===============================
 
-// Create fallback goal text for demand360
-export const createDemand360FallbackGoalText = (formData: {
-	category?: string
-	location?: string
-	timePeriodStart?: string
-	timePeriodEnd?: string
-}): string => {
-	return "The goal of this report is to identify key trends and demographic charts in order to gain competitive insights, and strategic opportunities to launch new products."
-}
-
-// Create fallback goal text for shop360
-export const createShop360FallbackGoalText = (formData: {
+// Create goal text for shop360
+export const generateShop360Goal = (formData: {
 	category?: string
 	retailers?: string[]
 	brands?: string[]
@@ -146,16 +136,17 @@ export const createShop360FallbackGoalText = (formData: {
 	timePeriodStart?: string
 	timePeriodEnd?: string
 }): string => {
-	return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+	return ""
 }
 
-// Create fallback goal text for insight360
-export const createInsight360FallbackGoalText = (formData: {
+// Create goal text for demand360
+export const generateDemand360Goal = (formData: {
 	category?: string
-	brands?: string[]
-	genders?: string[]
+	location?: string
+	timePeriodStart?: string
+	timePeriodEnd?: string
 }): string => {
-	return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+	return ""
 }
 
 // ===============================
@@ -232,13 +223,27 @@ export function useGoalGeneration<T = any>(config: GoalGenerationConfig<T>) {
 				
 				// Call the suggestion API
 				await getSuggestions(requestParams, (data) => {
-					if (data && data.goal_suggestion && Array.isArray(data.goal_suggestion) && data.goal_suggestion.length > 0) {
-						// Select suggestion based on current index
-						const currentIndex = suggestionIndex % data.goal_suggestion.length
-						const selectedSuggestion = data.goal_suggestion[currentIndex]
+					if (data && data.goal_suggestion) {
+						let selectedSuggestion
 						
-						setGoalValue(selectedSuggestion)
+						// Handle both string and array responses
+						if (typeof data.goal_suggestion === 'string') {
+							selectedSuggestion = data.goal_suggestion
+						} else if (Array.isArray(data.goal_suggestion) && data.goal_suggestion.length > 0) {
+							// Select suggestion based on current index for array responses
+							const currentIndex = suggestionIndex % data.goal_suggestion.length
+							selectedSuggestion = data.goal_suggestion[currentIndex]
+						}
+						
+						if (selectedSuggestion) {
+							console.log('Setting goal value to:', selectedSuggestion)
+							setGoalValue(selectedSuggestion)
+						} else {
+							console.log('No valid suggestion found, using fallback')
+							setGoalValue(fallbackGoalText)
+						}
 					} else {
+						console.log('No goal_suggestion in response, using fallback')
 						setGoalValue(fallbackGoalText)
 					}
 				})
@@ -308,7 +313,7 @@ async function fetchWithTimeoutAndRetry(
 	url: string,
 	options: RequestInit,
 	timeoutMs: number = 120000, // 2 minutes default
-	maxRetries: number = 2
+	maxRetries: number = 4
 ): Promise<Response> {
 	let lastError: Error
 	

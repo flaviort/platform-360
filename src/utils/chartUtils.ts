@@ -243,10 +243,8 @@ export function getChartSummary(report: any, formatDateForReport: (date: string)
         brands: Array.isArray(report.product_settings?.brands) ? report.product_settings.brands : [],
         genders: Array.isArray(report.product_settings?.genders) ? report.product_settings.genders : [],
         age: report.product_settings?.age,
-        type: Array.isArray(report.product_settings?.type_store) && report.product_settings.type_store.length > 0 
-            ? report.product_settings.type_store[0] 
-            : undefined,
-        includeImages: report.product_settings?.include_images,
+        //type: Array.isArray(report.product_settings?.type_store) && report.product_settings.type_store.length > 0 ? report.product_settings.type_store[0] : undefined,
+        //includeImages: report.product_settings?.include_images,
         timePeriod: `${formatDateForReport(report.product_settings?.start_date)} - ${formatDateForReport(report.product_settings?.end_date)}`,
         location: report.product_settings?.location,
         regions: Array.isArray(report.product_settings?.regions) ? report.product_settings.regions : [],

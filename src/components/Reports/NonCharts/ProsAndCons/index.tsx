@@ -32,19 +32,11 @@ export default function ProsAndCons({
     // deconstruct the data array
     const prosData = data[0]
     const consData = data[1]
-    const executive_summary = prosData?.executive_summary
     const pros_features = prosData?.features
     const cons_features = consData?.features
 
     return (
         <div className={styles.component}>
-
-            <div className={styles.summary}>
-                <p className='text-18'>
-                    <strong>Executive Summary:</strong><br />
-                    {executive_summary}
-                </p>
-            </div>
 
             <div className={styles.blocks}>
 
@@ -53,11 +45,21 @@ export default function ProsAndCons({
 
                         <div className={styles.title}>
 
-                            <ShieldPlus />
+                            <div className={styles.icon}>
+                                <ShieldPlus />
+                            </div>
 
-                            <h3 className='text-30 bold'>
-                                Pros
-                            </h3>
+                            <div className={styles.inner}>
+
+                                <h3 className='uppercase bold'>
+                                    Pros
+                                </h3>
+
+                                <p className='text-18'>
+                                    <strong>Executive summary:</strong> {prosData?.executive_summary}
+                                </p>
+
+                            </div>
 
                         </div>
                     
@@ -85,11 +87,21 @@ export default function ProsAndCons({
 
                         <div className={styles.title}>
 
-                            <ShieldMinus />
+                            <div className={styles.icon}>
+                                <ShieldMinus />
+                            </div>
 
-                            <h3 className='text-30 bold'>
-                                Cons
-                            </h3>
+                            <div className={styles.inner}>
+
+                                <h3 className='uppercase bold'>
+                                    Cons
+                                </h3>
+
+                                <p className='text-18'>
+                                    <strong>Executive summary:</strong> {consData?.executive_summary}
+                                </p>
+
+                            </div>
 
                         </div>
                         

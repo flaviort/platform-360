@@ -198,7 +198,7 @@ export default function PriceDistributionByBrand({
                     <Bar
                         dataKey='price'
                         radius={[20, 20, 0, 0]}
-                        barSize={20}
+                        barSize={30}
                         spacing={20}
                         fill='url(#verticalBarsGradient)'
                     >

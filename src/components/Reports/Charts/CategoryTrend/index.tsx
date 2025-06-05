@@ -178,9 +178,6 @@ export default function CategoryTrend({
     // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
     const fontSize = windowSize.width < 575 ? 8 : 12
-        
-    // determine if the data represents prices (check if any item has a price-formatted displayValue)
-    const isPriceData = false
     
     // Format function for YAxis ticks
     const formatYAxisTick = (value: number) => {
@@ -245,7 +242,7 @@ export default function CategoryTrend({
                     <Bar
                         dataKey='value'
                         radius={[30, 30, 0, 0]}
-                        barSize={15}
+                        barSize={25}
                         spacing={20}
                         fill='url(#verticalBarsGradient)'
                     >

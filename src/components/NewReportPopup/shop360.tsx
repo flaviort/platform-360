@@ -32,7 +32,7 @@ import {
 	extractSelectedItems,
 	formatISODate,
 	createTimeRangeText,
-	createShop360FallbackGoalText,
+	generateShop360Goal,
 	transformGender
 } from '@/utils/reports'
 
@@ -209,7 +209,7 @@ export default function PopupShop360({
 		}
 	}, [])
 
-	// create request parameters for suggestion API
+	// create request parameters for GOAL suggestion API
 	const createRequestParams = useCallback((formData: Shop360FormData, goalValue: string) => ({
 		product_name: 'Shop360',
 		category: formData.subCategories.length > 0 ? formData.subCategories : [formData.category || ''],
@@ -257,8 +257,8 @@ export default function PopupShop360({
 				retailers: selectedRetailers,
 				brands: selectedBrands,
 				genders: selectedGenders,
-				type_store: [data.type],
-				include_images: data.includeImages,
+				//type_store: [data.type],
+				//include_images: data.includeImages,
 				start_date: selectedStartDate,
 				end_date: selectedEndDate
 			}
@@ -286,7 +286,7 @@ export default function PopupShop360({
 	const { generateGoal, isGenerating } = useGoalGeneration<Shop360FormData>({
 		productType: 'shop360',
 		productName: 'Shop360',
-		createFallbackText: createShop360FallbackGoalText,
+		createFallbackText: generateShop360Goal,
 		createRequestParams,
 		extractFormData
 	})
@@ -342,9 +342,11 @@ export default function PopupShop360({
 
 				<Genders />
 
+				{/*
 				<Type />
 
 				<IncludeImages />
+				*/}
 
 				<div className='relative'>
 

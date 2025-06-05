@@ -107,6 +107,7 @@ export default function Goal() {
 					
 					// Check brands
 					const hasBrandsInsight = Object.values(brands).some(value => value === true)
+
 					if (!hasBrandsInsight) {
 						fieldsToValidate.push('brands')
 						fieldsToShow.push('Brands')
@@ -260,7 +261,7 @@ export default function Goal() {
 					name='goal'
 					hideLabel
 					id='report-goal'
-					maxLength={1000}
+					maxLength={600}
 				/>
 			</div>
 		</div>

@@ -30,19 +30,39 @@ export function useChartSuggestion(): UseChartSuggestionResult {
             setLoading(true)
             setError(null)
             
+            // Get the auth token from localStorage
+            const token = localStorage.getItem('auth_token')
+            
+            console.log('Sending goal to API:', {
+                params,
+                hasToken: !!token,
+                endpoint: '/api/suggestion'
+            })
+            
             const response = await fetch('/api/suggestion', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                 },
                 body: JSON.stringify(params),
             })
 
+            console.log('Goal response from API:', response.status, response.statusText)
+
             if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                console.error('❌ API Error Response:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorData
+                })
                 throw new Error(`Error ${response.status}: ${response.statusText}`)
             }
 
             const data = await response.json()
+            console.log('✅ API Success Response:', data)
+            
             setSuggestions(data)
             
             // Call the success callback with the data if provided
@@ -51,8 +71,12 @@ export function useChartSuggestion(): UseChartSuggestionResult {
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+            console.error('💥 Error in getSuggestions:', {
+                error: err,
+                errorMessage,
+                params
+            })
             setError(errorMessage)
-            console.error('Error fetching chart suggestions:', err)
         } finally {
             setLoading(false)
         }

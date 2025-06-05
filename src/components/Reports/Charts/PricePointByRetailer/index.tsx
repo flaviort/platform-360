@@ -168,7 +168,7 @@ export default function PricePointByRetailer({
     const getBarSize = () => {
         const retailerCount = processedData.length
         if (retailerCount <= 3) return windowSize.width < 575 ? 15 : 25
-        if (retailerCount <= 5) return windowSize.width < 575 ? 10 : 20
+        if (retailerCount <= 5) return windowSize.width < 575 ? 12 : 25
         return windowSize.width < 575 ? 8 : 15
     }
     

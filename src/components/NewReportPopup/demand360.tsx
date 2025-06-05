@@ -30,7 +30,7 @@ import {
 	createDuringTimeRangeText,
 	formatDisplayDate,
 	getAllRegionsForLocation,
-	createDemand360FallbackGoalText
+	generateDemand360Goal
 } from '@/utils/reports'
 import loadingMessages from '@/utils/loadingMessages'
 
@@ -112,12 +112,11 @@ export default function PopupDemand360({
 		}
 	}, [])
 
-	// create request parameters for suggestion API
+	// create request parameters for GOAL suggestion API
 	const createRequestParams = useCallback((formData: Demand360FormData, goalValue: string) => ({
 		product_name: 'Demand360',
 		category: [formData.category || ''],
 		location: [formData.location || ''],
-		regions: formData.regions.join(','),
 		comment: goalValue
 	}), [])
 
@@ -125,7 +124,7 @@ export default function PopupDemand360({
 	const { generateGoal, isGenerating } = useGoalGeneration<Demand360FormData>({
 		productType: 'demand360',
 		productName: 'Demand360',
-		createFallbackText: createDemand360FallbackGoalText,
+		createFallbackText: generateDemand360Goal,
 		createRequestParams,
 		extractFormData
 	})

@@ -236,7 +236,7 @@ export default function SkuAnalysis({
                     <Bar
                         dataKey='count'
                         radius={[20, 20, 0, 0]}
-                        barSize={20}
+                        barSize={30}
                         spacing={20}
                         fill='url(#verticalBarsGradient)'
                     >
