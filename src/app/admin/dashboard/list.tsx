@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 // svg
-import { LoaderCircle, ArrowLeft, ArrowRight, Trash } from 'lucide-react'
+import { LoaderCircle, ArrowLeft, ArrowRight, Trash, Crown } from 'lucide-react'
 
 // css
 import styles from './index.module.scss'
@@ -40,6 +40,7 @@ export default function List() {
 	const itemsPerPage = 100
 	const [updatingUsers, setUpdatingUsers] = useState<{[key: string]: boolean}>({})
 	const [deletingUsers, setDeletingUsers] = useState<{[key: string]: boolean}>({})
+	const [updatingSuperusers, setUpdatingSuperusers] = useState<{[key: string]: boolean}>({})
 
 	// Fetch users from API
 	useEffect(() => {
@@ -164,6 +165,54 @@ export default function List() {
 		}
 	}
 
+	// toggle superuser
+	const handleToggleSuperuser = async (userId: string, userEmail: string) => {
+		try {
+			setUpdatingSuperusers(prev => ({ ...prev, [userId]: true }))
+			
+			const token = localStorage.getItem('auth_token')
+			if (!token) {
+				window.location.href = '/account/login'
+				return
+			}
+
+			const response = await fetch('/api/users/superuser', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					email: userEmail
+				})
+			})
+			
+			if (!response.ok) {
+				if (response.status === 401) {
+					window.location.href = '/account/login'
+					return
+				}
+				const errorData = await response.json().catch(() => ({}))
+				throw new Error(`Failed to promote user to superuser: ${errorData.details || errorData.error || 'Unknown error'}`)
+			}
+
+			// Update local state
+			setUsers(prevUsers => 
+				prevUsers.map(user => 
+					user.id === userId 
+						? { ...user, is_superuser: true }
+						: user
+				)
+			)
+
+		} catch (error) {
+			console.error('Error promoting user to superuser:', error)
+			alert(error instanceof Error ? error.message : 'Failed to promote user to superuser')
+		} finally {
+			setUpdatingSuperusers(prev => ({ ...prev, [userId]: false }))
+		}
+	}
+
 	// Delete user
 	const handleDeleteUser = async (userId: string) => {
 		// Show confirmation dialog
@@ -253,6 +302,9 @@ export default function List() {
 								{
 									text: 'Country / City / Zipcode'
 								},
+								{
+									text: 'Admin?'
+								},
 								/*
 								{
 									text: 'Delete'
@@ -292,8 +344,10 @@ export default function List() {
 								user={user} 
 								onToggleActive={handleToggleActive}
 								onDeleteUser={handleDeleteUser}
+								onToggleSuperuser={handleToggleSuperuser}
 								isUpdating={updatingUsers[user.id]}
 								isDeleting={deletingUsers[user.id]}
+								isUpdatingSuperuser={updatingSuperusers[user.id]}
 							/>
 						))}
 
@@ -338,23 +392,33 @@ interface ListItemProps {
 	user: User
 	onToggleActive: (userId: string, newStatus: boolean) => Promise<void>
 	onDeleteUser: (userId: string) => Promise<void>
+	onToggleSuperuser: (userId: string, userEmail: string) => Promise<void>
 	isUpdating: boolean
 	isDeleting: boolean
+	isUpdatingSuperuser: boolean
 }
 
 export function ListItem({
 	user,
 	onToggleActive,
 	onDeleteUser,
+	onToggleSuperuser,
 	isUpdating,
-	isDeleting
+	isDeleting,
+	isUpdatingSuperuser
 }: ListItemProps) {
 	const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newStatus = e.target.checked
 		await onToggleActive(user.id, newStatus)
 	}
 
-	console.log(user)
+	const handleSuperuserClick = async () => {
+		if (!user.is_superuser) {
+			await onToggleSuperuser(user.id, user.email)
+		}
+	}
+
+	//console.log(user)
 
 	return (
 		<div className={styles.listItem}>
@@ -472,6 +536,43 @@ export function ListItem({
 						<span className={styles.mobile}>Zipcode: </span>{user.zip_code}
 					</p>
 				)}
+			</div>
+
+			<div className={styles.item}>
+				<button
+					className={clsx(
+						styles.adminToggle,
+						'text-14',
+						user.is_superuser && styles.active,
+						isUpdatingSuperuser && styles.updating
+					)}
+					onClick={handleSuperuserClick}
+					disabled={user.is_superuser || isUpdatingSuperuser}
+				>
+
+					<span className={styles.mobile}>
+						Admin:
+					</span>
+
+					<span className={styles.toggle}>
+
+						<span className={styles.icon}>
+							{isUpdatingSuperuser ? (
+								<span className='rotation gray-400' style={{ '--speed': '.5' } as any}>
+									<LoaderCircle />
+								</span>
+							) : (
+								<Crown />
+							)}
+						</span>
+
+						<span className={styles.text}>
+							{isUpdatingSuperuser ? '...' : user.is_superuser ? 'Yes' : 'No'}
+						</span>
+
+					</span>
+
+				</button>
 			</div>
 
 			{/*<div className={styles.item}>

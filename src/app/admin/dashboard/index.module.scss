@@ -75,7 +75,7 @@
         .listTitle {
             position: relative;
             display: grid;
-            grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem /*3rem*/;
+            grid-template-columns: 10rem 10rem 15rem 20rem 20rem 13rem 5rem /*3rem*/;
             padding: 1rem 0;
             border-top: var(--1px) solid $gray-200;
             border-bottom: var(--1px) solid $gray-200;
@@ -124,14 +124,14 @@
             background-color: $pure-white;
             padding: 1rem;
             border-radius: .5rem;
-            margin-bottom: .5rem;
+            margin-bottom: 1.5rem;
             border: var(--1px) solid $gray-200;
 
             @media #{$mq-md-min} {
                 background-color: transparent;
                 display: grid;
                 align-items: center;
-                grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem /*3rem*/;
+                grid-template-columns: 10rem 10rem 15rem 20rem 20rem 13rem 5rem /*3rem*/;
                 padding: 1rem 0;
                 transition: .1s ease-in-out;
                 min-width: fit-content;
@@ -171,6 +171,89 @@
 
                     * {
                         word-break: break-word;
+                    }
+                }
+
+                .adminToggle {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: .5rem;
+                    width: fit-content;
+                    height: fit-content;
+                    position: relative;
+
+                    @media #{$mq-md-max} {
+                        width: 100%;
+                        padding-top: 1rem;
+                        border-top: var(--1px) solid $gray-200;
+                        margin-top: 1rem;
+                        //justify-content: flex-start;
+                    }
+
+                    &.active {
+                        .toggle {
+                            background-color: $blue;
+                            color: $white;
+
+                            .icon {
+                                background-color: $purple;
+                                color: $white;
+                                transform: translateY(-50%) translateX(2rem);
+                            }
+
+                            .text {
+                                transform: translateY(-50%) translateX(.5rem);
+                            }
+                        }
+                    }
+
+                    .toggle {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: .5rem;
+                        position: relative;
+                        width: 4rem;
+                        height: 2rem;
+                        background-color: $gray-100;
+                        border: var(--1px) solid $gray-200;
+                        border-radius: .25rem;
+                        margin-left: 3.425rem;
+
+                        @media #{$mq-md-min} {
+                            margin-left: 0;
+                        }
+
+                        .icon {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background-color: $gray-200;
+                            border-radius: .125rem;
+                            width: 1.5rem;
+                            min-width: 1.5rem;
+                            height: 1.5rem;
+                            padding: .375rem;
+                            position: absolute;
+                            top: 50%;
+                            left: .25rem;
+                            transform: translateY(-50%);
+                            transition: .3s ease-in-out;
+
+                            svg {
+                                width: 100%;
+                            }
+                        }
+
+                        .text {
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            transform: translateY(-50%) translateX(2.325rem);
+                            white-space: nowrap;
+                            transition: .3s ease-in-out;
+                        }
                     }
                 }
 
