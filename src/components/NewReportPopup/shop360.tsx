@@ -259,6 +259,8 @@ export default function PopupShop360({
 				genders: selectedGenders,
 				//type_store: [data.type],
 				//include_images: data.includeImages,
+				type_store: [],
+				include_images: false,
 				start_date: selectedStartDate,
 				end_date: selectedEndDate
 			}

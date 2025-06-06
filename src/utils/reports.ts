@@ -782,7 +782,7 @@ export function validateReportData(data: CreateReportData): void {
 			if (!data.product_settings.retailers?.length) { throw new Error('At least one retailer must be selected') }
 			if (!data.product_settings.brands?.length) { throw new Error('At least one brand must be selected') }
 			if (!data.product_settings.genders?.length) { throw new Error('At least one gender must be selected') }
-			if (!data.product_settings.type_store) { throw new Error('Type of store must be selected') }
+			//if (!data.product_settings.type_store) { throw new Error('Type of store must be selected') }
 			if (!data.product_settings.start_date) { throw new Error('Start date must be selected') }
 			if (!data.product_settings.end_date) { throw new Error('End date must be selected') }
 			break

@@ -261,7 +261,7 @@ export default function Goal() {
 					name='goal'
 					hideLabel
 					id='report-goal'
-					maxLength={600}
+					maxLength={900}
 				/>
 			</div>
 		</div>
