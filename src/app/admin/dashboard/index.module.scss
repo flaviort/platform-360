@@ -75,7 +75,7 @@
         .listTitle {
             position: relative;
             display: grid;
-            grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem 3rem;
+            grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem /*3rem*/;
             padding: 1rem 0;
             border-top: var(--1px) solid $gray-200;
             border-bottom: var(--1px) solid $gray-200;
@@ -131,7 +131,7 @@
                 background-color: transparent;
                 display: grid;
                 align-items: center;
-                grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem 3rem;
+                grid-template-columns: 10rem 10rem 15rem 20rem 22rem 13rem /*3rem*/;
                 padding: 1rem 0;
                 transition: .1s ease-in-out;
                 min-width: fit-content;

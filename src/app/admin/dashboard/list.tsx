@@ -253,9 +253,11 @@ export default function List() {
 								{
 									text: 'Country / City / Zipcode'
 								},
+								/*
 								{
 									text: 'Delete'
 								}
+								*/
 							].map((item, i) => (
 								<p className='gray-400 uppercase text-12 bold' key={i}>
 									{item.text}
@@ -351,6 +353,8 @@ export function ListItem({
 		const newStatus = e.target.checked
 		await onToggleActive(user.id, newStatus)
 	}
+
+	console.log(user)
 
 	return (
 		<div className={styles.listItem}>
@@ -470,7 +474,7 @@ export function ListItem({
 				)}
 			</div>
 
-			<div className={styles.item}>
+			{/*<div className={styles.item}>
 				<button
 					className={clsx(
 						styles.delete,
@@ -493,7 +497,7 @@ export function ListItem({
 					</span>
 
 				</button>
-			</div>
+			</div>*/}
 
 		</div>
 	)
