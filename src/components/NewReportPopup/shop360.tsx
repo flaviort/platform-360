@@ -198,6 +198,7 @@ export default function PopupShop360({
 			report_id: report.id,
 			query: {
 				category: footwear.map((item) => item.name), // temporary fix to send all footwear sub-categories to the API
+				//category: [], // temporary fix to NOT SEND any categories
 				company: selectedRetailers,
 				brand: selectedBrands,
 				gender: selectedGenders,

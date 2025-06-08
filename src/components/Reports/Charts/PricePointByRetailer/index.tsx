@@ -173,6 +173,9 @@ export default function PricePointByRetailer({
     }
     
     const barSize = getBarSize()
+    
+    // dynamic spacing based on window width
+    const barGap = windowSize.width > 575 ? 10 : 1
 
     return (
         <div className={styles.component}>
@@ -185,7 +188,8 @@ export default function PricePointByRetailer({
                 <BarChart 
                     data={processedData}
                     margin={{ bottom: 0, left: 0, right: 0, top: 20 }}
-                    barGap={15}
+                    barGap={barGap}
+                    barCategoryGap={10}
                 >
                     <defs>
 

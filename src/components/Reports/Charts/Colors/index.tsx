@@ -192,10 +192,28 @@ export default function Colors({
         }
     })
     
-    // the functions below changes the size of the font and the bars according to the window size
+    // the functions below changes the size of the font according to the window size and bars according to number of entries
     const windowSize = useWindowSize()
     const fontSize = windowSize.width < 575 ? 10 : 12
-    const barSize = dataWithPercentages.length > 10 ? (windowSize.width < 575 ? 10 : windowSize.width < 992 ? 15 : 22) : 15
+    
+    // Calculate barSize based on number of entries
+    const getBarSize = (entryCount: number, windowWidth: number) => {
+        let baseSize
+        if (entryCount < 5) baseSize = 35
+        else if (entryCount <= 10) baseSize = 30
+        else if (entryCount <= 15) baseSize = 25
+        else if (entryCount <= 20) baseSize = 20
+        else baseSize = 15 // 20+ entries
+        
+        // Reduce size for smaller screens
+        if (windowWidth < 575) {
+            baseSize -= 15
+        }
+        
+        return baseSize
+    }
+    
+    const barSize = getBarSize(dataWithPercentages.length, windowSize.width)
 
     return (
         <div className={styles.component}>
@@ -248,7 +266,7 @@ export default function Colors({
                         dataKey='count'
                         radius={[20, 20, 0, 0]}
                         barSize={barSize}
-                        spacing={20}
+                        spacing={10}
                     >
                         {dataWithPercentages.map((entry, index) => (
                             <Cell

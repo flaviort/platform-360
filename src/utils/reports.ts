@@ -136,7 +136,7 @@ export const generateShop360Goal = (formData: {
 	timePeriodStart?: string
 	timePeriodEnd?: string
 }): string => {
-	return ""
+	return ''
 }
 
 // Create goal text for demand360
@@ -146,7 +146,7 @@ export const generateDemand360Goal = (formData: {
 	timePeriodStart?: string
 	timePeriodEnd?: string
 }): string => {
-	return ""
+	return ''
 }
 
 // ===============================
@@ -374,7 +374,7 @@ async function createChartWithRetry(
 				console.log(`Creating ${chartDefinition.name} chart...`)
 			}
 			
-			console.log('Chart data:', chartDefinition.data)
+			console.log('Chart data:', JSON.stringify(chartDefinition.data))
 			
 			const response = await fetchWithTimeoutAndRetry(
 				'/api/proxy?endpoint=/api/charts',

@@ -251,6 +251,7 @@ export default function ProjectDetails({
 									</>
 								)}
 
+								{/*
 								{summary?.type && (
 									<>
 										<p className='text-14 gray-700 bold'>
@@ -278,6 +279,7 @@ export default function ProjectDetails({
 										</div>
 									</>
 								)}
+								*/}
 
 								{summary?.timePeriod && (
 									<>

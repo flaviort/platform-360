@@ -90,7 +90,25 @@ export default function PricePointAnalysis({
     // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
     const fontSize = windowSize.width < 575 ? 8 : 12
-    const barSize = windowSize.width < 992 ? 12 : 18
+    
+    // Calculate barSize based on number of entries
+    const getBarSize = (entryCount: number, windowWidth: number) => {
+        let baseSize
+        if (entryCount < 5) baseSize = 35
+        else if (entryCount <= 10) baseSize = 30
+        else if (entryCount <= 15) baseSize = 25
+        else if (entryCount <= 20) baseSize = 20
+        else baseSize = 15 // 20+ entries
+        
+        // Reduce size for smaller screens
+        if (windowWidth < 575) {
+            baseSize -= 15
+        }
+        
+        return baseSize
+    }
+    
+    const barSize = getBarSize(data.length, windowSize.width)
     
     // Sort data by numeric order, keeping '$145 - $150' at the end
     const sortedData = [...data].sort((a, b) => {
