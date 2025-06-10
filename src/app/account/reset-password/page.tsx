@@ -25,6 +25,7 @@ function ResetPasswordForm() {
 	const searchParams = useSearchParams()
 	const token = searchParams.get('token')
 	const [error, setError] = useState<string | null>(null)
+	const [success, setSuccess] = useState<string | null>(null)
 
 	if (!token) {
 		return (
@@ -73,7 +74,7 @@ function ResetPasswordForm() {
 						contentType='application/json'
 						onSuccess={() => {
 							// show success message briefly before redirecting
-							setError('Password reset successful! Redirecting to login...')
+							setSuccess('Password reset successful! Redirecting to login...')
 							setTimeout(() => {
 								router.push(pages.account.login)
 							}, 3000)
@@ -119,8 +120,14 @@ function ResetPasswordForm() {
 						/>
 
 						{error && (
-							<p className='text-14 red mt-1'>
+							<p className='text-14 red mt-2'>
 								{error}
+							</p>
+						)}
+
+						{success && (
+							<p className='text-14 blue mt-2'>
+								{success}
 							</p>
 						)}
 

@@ -14,8 +14,6 @@ import Submit from '@/components/Form/Submit'
 
 // data / utils / db
 import { pages } from '@/utils/routes'
-import { sendEmail } from '@/utils/email'
-import ForgotPasswordEmail from '@/components/Emails/ForgotPasswordEmail'
 
 // css
 import styles from './index.module.scss'
@@ -23,31 +21,6 @@ import styles from './index.module.scss'
 export default function ForgotPassword() {
 	const router = useRouter()
 	const [emailError, setEmailError] = useState<string | null>(null)
-	const [resetToken, setResetToken] = useState<string | null>(null)
-
-	const sendAutomatedEmail = async (email: string, resetToken: string) => {
-		try {
-			setEmailError(null)
-			const emailContent = ForgotPasswordEmail({ resetToken })
-			const response = await sendEmail({
-				to: email,
-				from: 'noreply@platform360.ai',
-				subject: emailContent.subject,
-				body_html: emailContent.body_html,
-				body_text: emailContent.body_text
-			})
-
-			if (!response.success) {
-				throw new Error(response.error || 'Failed to send password reset email')
-			}
-
-			return response.message
-		} catch (error) {
-			console.error('Error sending password reset email:', error)
-			setEmailError(error instanceof Error ? error.message : 'Failed to send email')
-			throw error
-		}
-	}
 
 	return (
 		<AccountWrapper>
@@ -67,30 +40,11 @@ export default function ForgotPassword() {
 						method='POST'
 						contentType='application/json'
 						onSuccess={async (responseData, formData) => {
-							console.log('API Response:', responseData)
-							
+							// Email is now handled by the backend
 							// The API returns null for successful requests
-							if (responseData === null) {
+							if (responseData === null || responseData) {
 								router.push(pages.account.forgot_confirmation)
 							}
-							
-							// If we get here, the response wasn't null, so try to extract the token
-							const token = responseData.reset_token || responseData.token || responseData
-
-							if (!token || typeof token !== 'string') {
-								throw new Error('Invalid token format received from API')
-							}
-							
-							setResetToken(token)
-							
-							if (process.env.NODE_ENV === 'development') {
-								// In development, just show the link
-								return
-							}
-							
-							// In production, send the email
-							await sendAutomatedEmail(formData.email, token)
-							router.push(pages.account.forgot_confirmation)
 						}}
 						onError={(error) => {
 							console.error('Error:', error)

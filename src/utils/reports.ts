@@ -236,14 +236,14 @@ export function useGoalGeneration<T = any>(config: GoalGenerationConfig<T>) {
 						}
 						
 						if (selectedSuggestion) {
-							console.log('Setting goal value to:', selectedSuggestion)
+							//console.log('Setting goal value to:', selectedSuggestion)
 							setGoalValue(selectedSuggestion)
 						} else {
-							console.log('No valid suggestion found, using fallback')
+							//console.log('No valid suggestion found, using fallback')
 							setGoalValue(fallbackGoalText)
 						}
 					} else {
-						console.log('No goal_suggestion in response, using fallback')
+						//console.log('No goal_suggestion in response, using fallback')
 						setGoalValue(fallbackGoalText)
 					}
 				})
@@ -256,7 +256,7 @@ export function useGoalGeneration<T = any>(config: GoalGenerationConfig<T>) {
 		
 		// Handle incomplete form data
 		const handleIncompleteData = (e: any) => {
-			console.log('Incomplete form data:', e.detail)
+			//console.log('Incomplete form data:', e.detail)
 			setIsGenerating(false)
 		}
 		
@@ -649,7 +649,7 @@ export async function createReportWithCharts(
 			
 			// If there are failed charts, retry them in the background
 			if (failedCharts.length > 0) {
-				console.log(`Starting background retry for ${failedCharts.length} failed charts...`)
+				//console.log(`Starting background retry for ${failedCharts.length} failed charts...`)
 				
 				// Create chart definitions for failed charts
 				const failedChartDefinitions = chartsToCreate.filter(chart => 
@@ -672,7 +672,7 @@ export async function createReportWithCharts(
 							)
 						
 						const backgroundSuccessful = backgroundResults.filter(r => r.ok && r.hasData)
-						console.log(`Background retry completed: ${backgroundSuccessful.length}/${failedCharts.length} charts recovered`)
+						//console.log(`Background retry completed: ${backgroundSuccessful.length}/${failedCharts.length} charts recovered`)
 						
 					} catch (error) {
 						console.error('Background chart retry failed:', error)
@@ -895,7 +895,7 @@ export const createReport = async (data: CreateReportData): Promise<any> => {
         
         const responseData = await response.json()
 
-		console.log('Report created successfully:', responseData)
+		//console.log('Report created successfully:', responseData)
 
         return responseData
 		
