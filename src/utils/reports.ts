@@ -374,7 +374,8 @@ async function createChartWithRetry(
 				console.log(`Creating ${chartDefinition.name} chart...`)
 			}
 			
-			console.log('Chart data:', JSON.stringify(chartDefinition.data))
+			console.log('Chart data:', chartDefinition.data)
+			console.log('Chart data JSON:', JSON.stringify(chartDefinition.data))
 			
 			const response = await fetchWithTimeoutAndRetry(
 				'/api/proxy?endpoint=/api/charts',

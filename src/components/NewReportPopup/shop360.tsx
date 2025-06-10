@@ -197,7 +197,7 @@ export default function PopupShop360({
 		return {
 			report_id: report.id,
 			query: {
-				category: footwear.map((item) => item.name), // temporary fix to send all footwear sub-categories to the API
+				//category: footwear.map((item) => item.name), // temporary fix to send all footwear sub-categories to the API
 				//category: [], // temporary fix to NOT SEND any categories
 				company: selectedRetailers,
 				brand: selectedBrands,
@@ -254,7 +254,7 @@ export default function PopupShop360({
 			goal: data.goal,
 			project_id: projectId,
 			product_settings: {
-				category: selectedSubCategories.length > 0 ? selectedSubCategories : [data.category],
+				//category: selectedSubCategories.length > 0 ? selectedSubCategories : [data.category],
 				retailers: selectedRetailers,
 				brands: selectedBrands,
 				genders: selectedGenders,

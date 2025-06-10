@@ -21,6 +21,14 @@ export default function Genders() {
 
 				<Checkbox
 					type='checkbox'
+					id='report-genders-unisex'
+					name='genders'
+					label="Unisex"
+					required
+				/>
+
+				<Checkbox
+					type='checkbox'
 					id='report-genders-men'
 					name='genders'
 					label="Men's"
