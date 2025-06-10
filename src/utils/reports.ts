@@ -447,12 +447,45 @@ async function createChartWithRetry(
 	}
 }
 
+export async function createChartsWithStaggeredStart(
+	chartDefinitions: any[],
+	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void,
+	delayMs: number = 2000
+): Promise<ChartCreationResult[]> {
+	
+	//console.log(`Starting staggered creation of ${chartDefinitions.length} charts with ${delayMs}ms delay between each request...`)
+	
+	// Start all chart creation promises with staggered delays
+	const chartPromises = chartDefinitions.map((chart, index) => {
+		return new Promise<ChartCreationResult>(async (resolve) => {
+			// Wait for the staggered delay before starting this chart
+			if (index > 0) {
+				const waitTime = index * delayMs
+				//console.log(`Chart ${chart.name} will start in ${waitTime}ms...`)
+				await new Promise(delayResolve => setTimeout(delayResolve, waitTime))
+			}
+			
+			//console.log(`Starting chart ${index + 1}/${chartDefinitions.length}: ${chart.name}`)
+			
+			// Create the chart with retry logic
+			const result = await createChartWithRetry(chart, onProgress)
+			resolve(result)
+		})
+	})
+
+	// Wait for all charts to complete (they were started with staggered delays)
+	const results = await Promise.all(chartPromises)
+	
+	return results
+}
+
+// Keep the parallel version for background retries
 export async function createChartsInParallel(
 	chartDefinitions: any[],
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void
 ): Promise<ChartCreationResult[]> {
 	
-	console.log(`Starting creation of ${chartDefinitions.length} charts with retry logic...`)
+	//console.log(`Starting creation of ${chartDefinitions.length} charts with retry logic...`)
 	
 	// Create all charts in parallel with retry logic
 	const chartPromises = chartDefinitions.map(chart => 
@@ -554,17 +587,18 @@ export async function createReportWithCharts(
 		// Define all charts to create
 		const chartsToCreate = config.chartDefinitionsFactory(baseChartData)
 		
-		// Use custom chart creation if provided, otherwise use default
+		// Use custom chart creation if provided, otherwise use staggered creation with 2s delay
 		const results = config.customChartCreation
 			? await config.customChartCreation(
 				formData,
 				report,
 				chartsToCreate,
-				(chartName, status) => config.onProgress?.('chart_progress', { chartName, status })
+				(chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => config.onProgress?.('chart_progress', { chartName, status })
 			)
-			: await createChartsInParallel(
+			: await createChartsWithStaggeredStart(
 				chartsToCreate,
-				(chartName, status) => config.onProgress?.('chart_progress', { chartName, status })
+				(chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => config.onProgress?.('chart_progress', { chartName, status }),
+				2000 // 2 second delay between chart starts
 			)
 			
 		const successfulCharts = results.filter(r => r.ok && r.hasData)
@@ -604,7 +638,7 @@ export async function createReportWithCharts(
 		} else {
 			// Success - at least one chart was created successfully
 			config.onProgress?.('success', { reportId: report.id })
-			console.log('Report and charts creation completed successfully')
+			//console.log('Report and charts creation completed successfully')
 			document.dispatchEvent(new Event('formSent'))
 			
 			// Get project ID from the report data
@@ -619,7 +653,7 @@ export async function createReportWithCharts(
 				
 				// Create chart definitions for failed charts
 				const failedChartDefinitions = chartsToCreate.filter(chart => 
-					failedCharts.some(failed => failed.name === chart.name)
+					failedCharts.some((failed: ChartCreationResult) => failed.name === chart.name)
 				)
 				
 				// Start background retry - don't wait for it
