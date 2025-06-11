@@ -106,7 +106,7 @@ export default function PopupInsight360({
 		return {
 			report_id: report.id,
 			query: {
-				product_description: data.question + `. Make a pros and cons list using the following fields along with the previous text: Category: ${selectedCategory}, Brand(s): ${selectedBrands}, Gender(s): ${selectedGenders}`
+				product_description: data.question + `. Make a pros and cons list using the following fields along with the previous text: Category: ${selectedCategory}, Brands: ${selectedBrands}, Genders: ${selectedGenders}`
 			}
 		}
 	}, [])
@@ -118,10 +118,30 @@ export default function PopupInsight360({
 				chartDefinitionsFactory: getChartDefinitions,
 				formatFormData,
 				createBaseChartData,
-				router
+				router,
+				maxRetries: 10,
+				onProgress: (step: string, details?: any) => {
+					if (step === 'chart_progress' && details) {
+						const { chartName, status } = details
+						console.log(`Insight360 Chart progress: ${chartName} - ${status}`)
+						
+						if (status === 'duplicate') {
+							console.log(`⚠️ Duplicate chart creation prevented for: ${chartName}`)
+						} else if (status === 'retrying') {
+							console.log(`🔄 Retrying chart creation for: ${chartName} (up to 10 attempts)`)
+						}
+					}
+				}
 			})
 		} catch (error) {
-			console.error('Error during report creation:', error)
+			console.error('Error during insight360 report creation:', error)
+			
+			if (error instanceof Error) {
+				if (error.message.includes('timeout') || error.message.includes('504')) {
+					console.error('⚠️ Insight360 chart creation timed out. This may be due to high server load. Some charts may still be processing in the background.')
+				}
+			}
+			
 			throw error
 		}
 	}
