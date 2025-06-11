@@ -191,10 +191,32 @@ export default function PopupDemand360({
 				chartDefinitionsFactory: getChartDefinitions,
 				formatFormData,
 				createBaseChartData,
-				router
+				router,
+				onProgress: (step: string, details?: any) => {
+					// Handle progress updates
+					if (step === 'chart_progress' && details) {
+						const { chartName, status } = details
+						console.log(`Chart progress: ${chartName} - ${status}`)
+						
+						// You could dispatch custom events here to update UI
+						if (status === 'duplicate') {
+							console.log(`⚠️ Duplicate chart creation prevented for: ${chartName}`)
+						} else if (status === 'retrying') {
+							console.log(`🔄 Retrying chart creation for: ${chartName}`)
+						}
+					}
+				}
 			})
 		} catch (error) {
 			console.error('Error during report creation:', error)
+			
+			// Provide better error messages for timeout issues
+			if (error instanceof Error) {
+				if (error.message.includes('timeout') || error.message.includes('504')) {
+					console.error('⚠️ Chart creation timed out. This may be due to high server load. Some charts may still be processing in the background.')
+				}
+			}
+			
 			throw error
 		}
 	}

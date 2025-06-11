@@ -120,13 +120,13 @@ function ResetPasswordForm() {
 						/>
 
 						{error && (
-							<p className='text-14 red mt-2'>
+							<p className='text-14 red my-1'>
 								{error}
 							</p>
 						)}
 
 						{success && (
-							<p className='text-14 blue mt-2'>
+							<p className='text-14 blue my-1'>
 								{success}
 							</p>
 						)}

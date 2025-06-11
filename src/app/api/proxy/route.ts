@@ -1,9 +1,29 @@
 const backendUrl = 'http://shop36-testb-a0u5doexwffx-959882810.us-east-1.elb.amazonaws.com'
-// Set timeout to 2 minutes (120,000ms) for chart generation requests
-const TIMEOUT_MS = 120000
+
+// Adjust timeout based on environment
+const getApiTimeout = () => {
+	const isDevelopment = process.env.NODE_ENV === 'development'
+	const isVercel = process.env.VERCEL === '1'
+	
+	if (isDevelopment) {
+		return 120000 // 2 minutes for local development
+	}
+	
+	if (isVercel) {
+		// Use aggressive timeout for Vercel Pro plan to stay well under function limits
+		// Pro plan allows up to 300s (5 minutes), so we use 4.5 minutes for charts
+		return 270000 // 4.5 minutes - allows time for response processing
+	}
+	
+	return 60000 // 1 minute for other environments
+}
+
+// Set timeout for chart generation requests
+const CHART_TIMEOUT_MS = getApiTimeout()
+const DEFAULT_TIMEOUT_MS = 120000 // 2 minutes for non-chart requests (Pro plan benefit)
 
 // Helper function to add timeout to fetch requests
-const fetchWithTimeout = async (url: string, options: RequestInit, timeout: number = TIMEOUT_MS) => {
+const fetchWithTimeout = async (url: string, options: RequestInit, timeout: number = DEFAULT_TIMEOUT_MS) => {
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeout)
     
@@ -16,6 +36,12 @@ const fetchWithTimeout = async (url: string, options: RequestInit, timeout: numb
         return response
     } catch (error) {
         clearTimeout(id)
+        // Add more context to timeout errors
+        if (error instanceof Error && error.name === 'AbortError') {
+        	const timeoutError = new Error(`Request timeout after ${timeout}ms for ${url}`)
+        	timeoutError.name = 'TimeoutError'
+        	throw timeoutError
+        }
         throw error
     }
 }
@@ -59,7 +85,7 @@ export async function POST(request: Request) {
 
         // Use extended timeout for chart generation requests
         const isChartRequest = targetEndpoint.includes('/api/charts')
-        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+        const timeout = isChartRequest ? CHART_TIMEOUT_MS : DEFAULT_TIMEOUT_MS
 
         const response = await fetchWithTimeout(
             `${backendUrl}${targetEndpoint}`,
@@ -205,7 +231,7 @@ export async function GET(request: Request) {
     try {
         // Use extended timeout for chart requests
         const isChartRequest = targetEndpoint.includes('/api/charts')
-        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+        const timeout = isChartRequest ? CHART_TIMEOUT_MS : DEFAULT_TIMEOUT_MS
 
         const response = await fetchWithTimeout(
             `${backendUrl}${targetEndpoint}`,
@@ -279,7 +305,7 @@ export async function PATCH(request: Request) {
 
         // Use extended timeout for chart requests
         const isChartRequest = targetEndpoint.includes('/api/charts')
-        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+        const timeout = isChartRequest ? CHART_TIMEOUT_MS : DEFAULT_TIMEOUT_MS
 
         const response = await fetchWithTimeout(
             `${backendUrl}${targetEndpoint}`,
@@ -361,7 +387,7 @@ export async function DELETE(request: Request) {
     try {
         // Use extended timeout for chart requests
         const isChartRequest = targetEndpoint.includes('/api/charts')
-        const timeout = isChartRequest ? TIMEOUT_MS : 30000 // 2 minutes for charts, 30s for others
+        const timeout = isChartRequest ? CHART_TIMEOUT_MS : DEFAULT_TIMEOUT_MS
 
         const response = await fetchWithTimeout(
             `${backendUrl}${targetEndpoint}`,
