@@ -97,6 +97,7 @@ export default function TimePeriod() {
                         maxDate={new Date().toISOString().split('T')[0]}
                         placeholderText='Start date'
                         hideValidations
+						selectedDay='firstDay'
                     />
 
                     {errors.timePeriodStart && (
@@ -120,6 +121,7 @@ export default function TimePeriod() {
                         maxDate={new Date().toISOString().split('T')[0]}
                         placeholderText='End date'
                         hideValidations
+						selectedDay='lastDay'
                     />
 
                     {errors.timePeriodEnd && (

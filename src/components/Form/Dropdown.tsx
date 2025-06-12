@@ -1,16 +1,18 @@
 'use client'
 
 // libraries
-import { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import clsx from 'clsx'
 import { useFormContext, useController } from 'react-hook-form'
-import React from 'react'
 
 // svg
 import { ChevronDown, Check, X } from 'lucide-react'
 
 // css
 import styles from './form.module.scss'
+
+// utils
+import { formatDateToMonthYear } from '@/utils/functions'
 
 interface DropdownProps {
     label?: string
@@ -23,6 +25,8 @@ interface DropdownProps {
         label: string
         name: string
         id?: string
+        min_creation_date?: string
+        max_creation_date?: string
     }>
     limitSelected?: number
     searchable?: boolean
@@ -331,6 +335,11 @@ export default function Dropdown({
 
                                 <span className={clsx(styles.text, 'text-16 capitalize')}>
                                     {typeof item.label === 'string' ? item.label : String(item.label || '')}
+                                    {(item.min_creation_date || item.max_creation_date) && (
+                                        <span className={styles.date}>
+                                            ({item.min_creation_date && formatDateToMonthYear(item.min_creation_date)} - {item.max_creation_date && formatDateToMonthYear(item.max_creation_date)})
+                                        </span>
+                                    )}
                                 </span>
 
                             </span>

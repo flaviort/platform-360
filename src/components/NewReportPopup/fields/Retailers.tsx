@@ -13,6 +13,8 @@ import styles from '../index.module.scss'
 interface Retailer {
 	slug: string
 	name: string
+	min_creation_date?: string
+	max_creation_date?: string
 }
 
 export default function Retailers() {
@@ -36,6 +38,8 @@ export default function Retailers() {
 		fetchRetailers()
 	}, [])
 
+	//console.log('retailers: ' + retailers.map((retailer) => retailer.min_creation_date))
+
 	return (
 		<div className={styles.group}>
 
@@ -54,7 +58,9 @@ export default function Retailers() {
 						limitSelected={5}
 						items={retailers.map((retailer) => ({
 							name: retailer.slug,
-							label: retailer.name
+							label: retailer.name,
+							min_creation_date: retailer.min_creation_date,
+							max_creation_date: retailer.max_creation_date
 						}))}
 						//searchable
 						required
