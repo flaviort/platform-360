@@ -621,11 +621,32 @@ async function createChartInternal(
 			const chartData = responseText ? JSON.parse(responseText) : {}
 			onProgress?.(chartDefinition.name, 'success')
 			
+			// Log response data for debugging
+			console.log(`Chart ${chartDefinition.name} response data:`, chartData)
+			
+			// Determine if chart has data based on chart type
+			let hasData = false
+			const chartType = chartDefinition.data?.preferences?.chart_type
+			
+			if (chartType === 'pros_and_cons') {
+				// For pros and cons charts, check if there's any content
+				hasData = chartData && (
+					chartData.pros || 
+					chartData.cons || 
+					chartData.content || 
+					chartData.data ||
+					Object.keys(chartData).length > 0
+				)
+			} else {
+				// For other chart types, check results array
+				hasData = chartData && chartData.results && chartData.results.length > 0
+			}
+			
 			return { 
 				ok: true, 
 				data: chartData, 
 				name: chartDefinition.name,
-				hasData: chartData && chartData.results && chartData.results.length > 0,
+				hasData: hasData,
 				retryCount: attempt
 			}
 			

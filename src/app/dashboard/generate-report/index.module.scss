@@ -279,12 +279,14 @@
                                 }
 
                                 [data-pros-and-cons] {
+                                    margin-top: -2vw;
+
                                     [data-blocks] {
                                         grid-template-columns: 1fr 1fr;
 
                                         [data-title] {
                                             padding: 1vw;
-                                            
+
                                             [data-icon] {
                                                 display: none;
                                             }
@@ -294,13 +296,18 @@
                                             }
 
                                             p {
-                                                font-size: .75vw;
+                                                font-size: .7vw;
+
+                                                strong {
+                                                    display: none;
+                                                }
                                             }
                                         }
 
                                         [data-block] {
                                             grid-template-columns: 1fr;
                                             padding: 1vw;
+                                            gap: .75vw;
 
                                             > div {
                                                 padding: 0;
@@ -312,7 +319,7 @@
 
                                                 p {
                                                     padding: 0;
-                                                    font-size: .75vw;
+                                                    font-size: .7vw;
                                                 }
                                             }
                                         }
