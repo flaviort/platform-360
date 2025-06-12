@@ -84,7 +84,7 @@ const getChartDefinitions = (baseChartData: any) => [
 			},
 			query: {
 				...baseChartData.query,
-				category: ['shoes', 'boots', 'oxfords', 'sneakers', 'clogs', 'sandals', 'heels'], // temporary fix to send only a few subcategories to the API due some instability problem with this specific chart
+				//category: ['shoes', 'boots', 'oxfords', 'sneakers', 'clogs', 'sandals', 'heels'], // temporary fix to send only a few subcategories to the API due some instability problem with this specific chart
 				operator: {
 					...baseChartData.query.operator,
 					limit: 6,

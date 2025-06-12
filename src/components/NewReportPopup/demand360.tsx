@@ -202,7 +202,7 @@ export default function PopupDemand360({
 						if (status === 'duplicate') {
 							console.log(`⚠️ Duplicate chart creation prevented for: ${chartName}`)
 						} else if (status === 'retrying') {
-							console.log(`🔄 Retrying chart creation for: ${chartName} (using default 3 retries)`)
+							console.log(`🔄 Retrying chart creation for: ${chartName} (using default 10 retries)`)
 						}
 					}
 				}
