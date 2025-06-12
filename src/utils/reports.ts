@@ -7,6 +7,41 @@ import { ukRegions } from '@/db/uk'
 import { europeanCountries } from '@/db/europe'
 import { canadaProvinces } from '@/db/canada'
 
+// ===============================
+// CONFIGURATION CONSTANTS
+// ===============================
+
+const CONFIG = {
+	MAX_RETRIES: 20,
+	CHART_STAGGER_DELAY: 1000, // 1 second delay between chart starts
+	BACKOFF_BASE_MS: 1000, // Base backoff time for retries
+	DB_CONSISTENCY_DELAY: 1000, // Delay to ensure DB consistency
+	BACKGROUND_RETRY_DELAY: 2000, // Delay before starting background retries
+} as const
+
+// Detect Vercel environment and adjust timeouts accordingly
+const getVercelTimeout = () => {
+	const isDevelopment = process.env.NODE_ENV === 'development'
+	const isVercel = process.env.VERCEL === '1'
+	
+	if (isDevelopment) {
+		return 120000 // 2 minutes for local development
+	}
+	
+	if (isVercel) {
+		// Use aggressive timeouts for Vercel Pro plan
+		// Pro plan supports up to 300s (5 minutes) without Fluid Compute
+		// Pro plan supports up to 800s (13+ minutes) with Fluid Compute
+		return 270000 // 4.5 minutes - safe buffer under 5 minute Pro limit
+	}
+	
+	return 60000 // 1 minute for other environments
+}
+
+// ===============================
+// TYPE DEFINITIONS
+// ===============================
+
 export interface CreateReportData {
 	name: string
 	product_type: 'shop360' | 'demand360' | 'insight360' | 'feedback360'
@@ -47,6 +82,39 @@ export interface CreateReportData {
 interface ProjectAndCategoryIds {
 	projectId: string
 	categoryId: string
+}
+
+interface ChartCreationResult {
+	ok: boolean
+	name: string
+	data?: any
+	hasData?: boolean
+	retryCount?: number
+	isDuplicate?: boolean
+}
+
+interface GoalGenerationConfig<T = any> {
+	productType: string
+	productName: string
+	createFallbackText: (formData: T) => string
+	createRequestParams: (formData: T, goalValue: string) => any
+	extractFormData: (eventDetail: any) => T
+}
+
+interface ReportCreationConfig {
+	productType: string
+	chartDefinitionsFactory: (baseChartData: any) => any[]
+	formatFormData: (data: any) => CreateReportData | Promise<CreateReportData>
+	createBaseChartData: (data: any, report: any) => any
+	router: any
+	onProgress?: (step: string, details?: any) => void
+	maxRetries?: number // Allow configurable retry attempts
+	customChartCreation?: (
+		formData: any,
+		report: any,
+		chartDefinitions: any[],
+		onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void
+	) => Promise<ChartCreationResult[]>
 }
 
 // ===============================
@@ -122,6 +190,14 @@ export const createDuringTimeRangeText = (startDate?: string, endDate?: string) 
 		: 'during the selected time period'
 }
 
+// Sleep utility function
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Calculate backoff delay for retries
+const calculateBackoffDelay = (attempt: number, baseMs: number = CONFIG.BACKOFF_BASE_MS): number => {
+	return Math.pow(2, attempt) * baseMs
+}
+
 // ===============================
 // GOAL TEXTS
 // ===============================
@@ -151,14 +227,6 @@ export const generateDemand360Goal = (formData: {
 // ===============================
 // GOAL GENERATION FUNCTIONALITY
 // ===============================
-
-interface GoalGenerationConfig<T = any> {
-	productType: string
-	productName: string
-	createFallbackText: (formData: T) => string
-	createRequestParams: (formData: T, goalValue: string) => any
-	extractFormData: (eventDetail: any) => T
-}
 
 export function useGoalGeneration<T = any>(config: GoalGenerationConfig<T>) {
 	const { getSuggestions, loading, error } = useChartSuggestion()
@@ -299,34 +367,6 @@ export function useGoalGeneration<T = any>(config: GoalGenerationConfig<T>) {
 // CHART CREATION UTILITIES
 // ===============================
 
-interface ChartCreationResult {
-	ok: boolean
-	name: string
-	data?: any
-	hasData?: boolean
-	retryCount?: number
-	isDuplicate?: boolean
-}
-
-// Detect Vercel environment and adjust timeouts accordingly
-const getVercelTimeout = () => {
-	const isDevelopment = process.env.NODE_ENV === 'development'
-	const isVercel = process.env.VERCEL === '1'
-	
-	if (isDevelopment) {
-		return 120000 // 2 minutes for local development
-	}
-	
-	if (isVercel) {
-		// Use aggressive timeouts for Vercel Pro plan
-		// Pro plan supports up to 300s (5 minutes) without Fluid Compute
-		// Pro plan supports up to 800s (13+ minutes) with Fluid Compute
-		return 270000 // 4.5 minutes - safe buffer under 5 minute Pro limit
-	}
-	
-	return 60000 // 1 minute for other environments
-}
-
 // Generate a unique chart request ID to prevent duplicates
 const generateChartRequestId = (chartDefinition: any): string => {
 	// Use chart name and type as the primary identifiers
@@ -387,7 +427,7 @@ async function fetchWithTimeoutAndRetry(
 	url: string,
 	options: RequestInit,
 	timeoutMs: number = getVercelTimeout(),
-	maxRetries: number = 20 // Increased default from 3 to 20
+	maxRetries: number = CONFIG.MAX_RETRIES
 ): Promise<Response> {
 	let lastError: Error
 	
@@ -412,9 +452,9 @@ async function fetchWithTimeoutAndRetry(
 				// For 504 errors, don't retry immediately as the original request might still be processing
 				if (attempt < maxRetries) {
 					// With Pro plan, we can afford longer backoff times
-					const backoffTime = Math.pow(2, attempt + 3) * 1000 // 8s, 16s, 32s
+					const backoffTime = calculateBackoffDelay(attempt + 3) // 8s, 16s, 32s
 					console.log(`Waiting ${backoffTime}ms before retry due to 504 error...`)
-					await new Promise(resolve => setTimeout(resolve, backoffTime))
+					await sleep(backoffTime)
 					continue
 				}
 			}
@@ -438,10 +478,10 @@ async function fetchWithTimeoutAndRetry(
 			// Handle abort errors (timeouts) with longer backoff
 			if (error instanceof Error && error.name === 'AbortError') {
 				console.warn(`Request timeout on attempt ${attempt + 1}, retrying...`)
-				await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt + 2) * 2000)) // 8s, 16s
+				await sleep(calculateBackoffDelay(attempt + 2, 2000)) // 8s, 16s
 			} else {
 				console.warn(`Attempt ${attempt + 1} failed with error: ${error}, retrying...`)
-				await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt + 1) * 1000)) // 2s, 4s
+				await sleep(calculateBackoffDelay(attempt + 1)) // 2s, 4s
 			}
 		}
 	}
@@ -450,13 +490,13 @@ async function fetchWithTimeoutAndRetry(
 }
 
 // Enhanced chart creation with duplicate prevention and better error handling
-async function createChartWithRetry(
+async function createSingleChart(
 	chartDefinition: any,
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
-	maxRetries: number = 20 // Increased default from 3 to 20
+	maxRetries: number = CONFIG.MAX_RETRIES
 ): Promise<ChartCreationResult> {
 	
-	console.log(`createChartWithRetry called for ${chartDefinition.name} with maxRetries: ${maxRetries}`)
+	console.log(`createSingleChart called for ${chartDefinition.name} with maxRetries: ${maxRetries}`)
 	
 	// Generate unique request ID for this chart
 	const requestId = generateChartRequestId(chartDefinition)
@@ -496,8 +536,8 @@ async function createChartWithRetry(
 // Internal chart creation logic
 async function createChartInternal(
 	chartDefinition: any,
-	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void,
-	maxRetries: number = 20 // Increased default from 3 to 20
+	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
+	maxRetries: number = CONFIG.MAX_RETRIES
 ): Promise<ChartCreationResult> {
 	
 	console.log(`createChartInternal called for ${chartDefinition.name} with maxRetries: ${maxRetries}`)
@@ -607,7 +647,7 @@ async function createChartInternal(
 			}
 			
 			// Wait before retry
-			await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+			await sleep(calculateBackoffDelay(attempt))
 		}
 	}
 	
@@ -619,11 +659,12 @@ async function createChartInternal(
 	}
 }
 
+// Main chart creation function with staggered start
 export async function createChartsWithStaggeredStart(
 	chartDefinitions: any[],
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
-	delayMs: number = 1000, // Reduced delay since we have Pro plan timeouts now
-	maxRetries: number = 20 // Increased default from 3 to 20
+	delayMs: number = CONFIG.CHART_STAGGER_DELAY,
+	maxRetries: number = CONFIG.MAX_RETRIES
 ): Promise<ChartCreationResult[]> {
 	
 	console.log(`createChartsWithStaggeredStart called with maxRetries: ${maxRetries}`)
@@ -636,13 +677,13 @@ export async function createChartsWithStaggeredStart(
 			if (index > 0) {
 				const waitTime = index * delayMs
 				console.log(`Chart ${chart.name} will start in ${waitTime}ms...`)
-				await new Promise(delayResolve => setTimeout(delayResolve, waitTime))
+				await sleep(waitTime)
 			}
 			
 			console.log(`Starting chart ${index + 1}/${chartDefinitions.length}: ${chart.name}`)
 			
 			// Create the chart with configurable retry logic
-			const result = await createChartWithRetry(chart, onProgress, maxRetries)
+			const result = await createSingleChart(chart, onProgress, maxRetries)
 			resolve(result)
 		})
 	})
@@ -660,18 +701,16 @@ export async function createChartsWithStaggeredStart(
 	return results
 }
 
-// Keep the parallel version for background retries with duplicate prevention
+// Parallel chart creation (for background retries)
 export async function createChartsInParallel(
 	chartDefinitions: any[],
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
-	maxRetries: number = 20 // Increased default from 3 to 20
+	maxRetries: number = CONFIG.MAX_RETRIES
 ): Promise<ChartCreationResult[]> {
-	
-	//console.log(`Starting creation of ${chartDefinitions.length} charts with retry logic...`)
 	
 	// Create all charts in parallel with configurable retry logic
 	const chartPromises = chartDefinitions.map(chart => 
-		createChartWithRetry(chart, onProgress, maxRetries)
+		createSingleChart(chart, onProgress, maxRetries)
 	)
 
 	const results = await Promise.all(chartPromises)
@@ -690,12 +729,12 @@ export async function createChartsInParallel(
 export async function retryFailedChartsInBackground(
 	failedCharts: any[],
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
-	maxRetries: number = 20 // Increased default from 3 to 20
+	maxRetries: number = CONFIG.MAX_RETRIES
 ): Promise<ChartCreationResult[]> {
 	console.log(`Retrying ${failedCharts.length} failed charts in background...`)
 	
 	const retryPromises = failedCharts.map(chart => 
-		createChartWithRetry(chart, onProgress, maxRetries)
+		createSingleChart(chart, onProgress, maxRetries)
 	)
 	
 	return Promise.all(retryPromises)
@@ -704,22 +743,6 @@ export async function retryFailedChartsInBackground(
 // ===============================
 // REPORT CREATION WORKFLOW
 // ===============================
-
-interface ReportCreationConfig {
-	productType: string
-	chartDefinitionsFactory: (baseChartData: any) => any[]
-	formatFormData: (data: any) => CreateReportData | Promise<CreateReportData>
-	createBaseChartData: (data: any, report: any) => any
-	router: any
-	onProgress?: (step: string, details?: any) => void
-	maxRetries?: number // Allow configurable retry attempts
-	customChartCreation?: (
-		formData: any,
-		report: any,
-		chartDefinitions: any[],
-		onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void
-	) => Promise<ChartCreationResult[]>
-}
 
 export async function createReportWithCharts(
 	formData: any,
@@ -743,7 +766,6 @@ export async function createReportWithCharts(
 
 		// Step 2: Verify report exists in database
 		config.onProgress?.('verifying_report', { reportId: report.id })
-		//console.log(`Verifying report ${report.id} exists in database...`)
 		
 		const verifyReportResponse = await fetch(`/api/proxy?endpoint=/api/charts/report/${report.id}`, {
 			method: 'GET',
@@ -757,14 +779,12 @@ export async function createReportWithCharts(
 		}
 
 		const reportCharts = await verifyReportResponse.json()
-		//console.log('Report verification successful:', reportCharts)
 		
 		// Step 3: Create charts for the report
 		config.onProgress?.('creating_charts')
-		//console.log('Creating charts for report ID:', report.id)
 		
 		// Add a delay to ensure DB consistency
-		await new Promise(resolve => setTimeout(resolve, 1000))
+		await sleep(CONFIG.DB_CONSISTENCY_DELAY)
 
 		// Create base chart data
 		const baseChartData = config.createBaseChartData(formData, report)
@@ -773,7 +793,7 @@ export async function createReportWithCharts(
 		const chartsToCreate = config.chartDefinitionsFactory(baseChartData)
 		
 		// Use custom chart creation if provided, otherwise use staggered creation with configurable retries
-		const maxRetries = config.maxRetries ?? 20 // Default to 20 retries if not specified
+		const maxRetries = config.maxRetries ?? CONFIG.MAX_RETRIES
 		const results = config.customChartCreation
 			? await config.customChartCreation(
 				formData,
@@ -784,8 +804,8 @@ export async function createReportWithCharts(
 			: await createChartsWithStaggeredStart(
 				chartsToCreate,
 				(chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => config.onProgress?.('chart_progress', { chartName, status }),
-				1000, // 1 second delay between chart starts (Pro plan)
-				maxRetries // Use configurable retry count
+				CONFIG.CHART_STAGGER_DELAY,
+				maxRetries
 			)
 			
 		const successfulCharts = results.filter(r => r.ok && r.hasData)
@@ -825,7 +845,6 @@ export async function createReportWithCharts(
 		} else {
 			// Success - at least one chart was created successfully
 			config.onProgress?.('success', { reportId: report.id })
-			//console.log('Report and charts creation completed successfully')
 			document.dispatchEvent(new Event('formSent'))
 			
 			// Get project ID from the report data
@@ -836,7 +855,6 @@ export async function createReportWithCharts(
 			
 			// If there are failed charts, retry them in the background
 			if (failedCharts.length > 0) {
-				//console.log(`Starting background retry for ${failedCharts.length} failed charts...`)
 				
 				// Create chart definitions for failed charts
 				const failedChartDefinitions = chartsToCreate.filter(chart => 
@@ -856,16 +874,15 @@ export async function createReportWithCharts(
 							: await retryFailedChartsInBackground(
 								failedChartDefinitions,
 								(chartName, status) => console.log(`Background retry: ${chartName} - ${status}`),
-								maxRetries // Use same retry count for background retries
+								maxRetries
 							)
 						
 						const backgroundSuccessful = backgroundResults.filter(r => r.ok && r.hasData)
-						//console.log(`Background retry completed: ${backgroundSuccessful.length}/${failedCharts.length} charts recovered`)
 						
 					} catch (error) {
 						console.error('Background chart retry failed:', error)
 					}
-				}, 2000) // Start background retry after 2 seconds
+				}, CONFIG.BACKGROUND_RETRY_DELAY)
 			}
 		}
 	} catch (error) {
@@ -904,8 +921,6 @@ export async function getProjectAndCategoryIds(data: { selectedProject: string, 
 			project_goal: data.projectGoal
 		}
 
-		//console.log('Creating new project with data:', requestBody)
-
 		const newProjectResponse = await fetch('/api/proxy?endpoint=/api/projects', {
 			method: 'POST',
 			headers: {
@@ -931,8 +946,6 @@ export async function getProjectAndCategoryIds(data: { selectedProject: string, 
 		}
 
 		const newProject = await newProjectResponse.json()
-
-		//console.log('New project created with response:', newProject)
 
 		projectId = newProject.id
 		projectName = newProject.name
@@ -1082,8 +1095,6 @@ export const createReport = async (data: CreateReportData): Promise<any> => {
         }
         
         const responseData = await response.json()
-
-		//console.log('Report created successfully:', responseData)
 
         return responseData
 		

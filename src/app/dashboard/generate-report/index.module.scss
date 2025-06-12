@@ -277,6 +277,47 @@
                                         display: none;
                                     }
                                 }
+
+                                [data-pros-and-cons] {
+                                    [data-blocks] {
+                                        grid-template-columns: 1fr 1fr;
+
+                                        [data-title] {
+                                            padding: 1vw;
+                                            
+                                            [data-icon] {
+                                                display: none;
+                                            }
+
+                                            h3 {
+                                                font-size: .8vw;
+                                            }
+
+                                            p {
+                                                font-size: .75vw;
+                                            }
+                                        }
+
+                                        [data-block] {
+                                            grid-template-columns: 1fr;
+                                            padding: 1vw;
+
+                                            > div {
+                                                padding: 0;
+                                                border: none;
+
+                                                h4 {
+                                                    font-size: .8vw;
+                                                }
+
+                                                p {
+                                                    padding: 0;
+                                                    font-size: .75vw;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
 

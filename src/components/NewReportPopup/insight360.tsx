@@ -119,7 +119,7 @@ export default function PopupInsight360({
 				formatFormData,
 				createBaseChartData,
 				router,
-				maxRetries: 10,
+				maxRetries: 30,
 				onProgress: (step: string, details?: any) => {
 					if (step === 'chart_progress' && details) {
 						const { chartName, status } = details
@@ -128,7 +128,7 @@ export default function PopupInsight360({
 						if (status === 'duplicate') {
 							console.log(`⚠️ Duplicate chart creation prevented for: ${chartName}`)
 						} else if (status === 'retrying') {
-							console.log(`🔄 Retrying chart creation for: ${chartName} (up to 10 attempts)`)
+							console.log(`🔄 Retrying chart creation for: ${chartName} (up to 30 attempts)`)
 						}
 					}
 				}

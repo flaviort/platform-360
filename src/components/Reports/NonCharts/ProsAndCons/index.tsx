@@ -36,16 +36,16 @@ export default function ProsAndCons({
     const cons_features = consData?.features
 
     return (
-        <div className={styles.component}>
+        <div className={styles.component} data-pros-and-cons>
 
-            <div className={styles.blocks}>
+            <div className={styles.blocks} data-blocks>
 
                 {pros_features && (
                     <div className={clsx(styles.column, styles.pros)}>
 
-                        <div className={styles.title}>
+                        <div className={styles.title} data-title>
 
-                            <div className={styles.icon}>
+                            <div className={styles.icon} data-icon>
                                 <ShieldPlus />
                             </div>
 
@@ -63,7 +63,7 @@ export default function ProsAndCons({
 
                         </div>
                     
-                        <div className={styles.innerBlocks}>
+                        <div className={styles.innerBlocks} data-block>
                             {pros_features.map((item, i) => (
                                 <div key={i} className={styles.block}>
 
@@ -85,9 +85,9 @@ export default function ProsAndCons({
                 {cons_features && (
                     <div className={clsx(styles.column, styles.cons)}>
 
-                        <div className={styles.title}>
+                        <div className={styles.title} data-title>
 
-                            <div className={styles.icon}>
+                            <div className={styles.icon} data-icon>
                                 <ShieldMinus />
                             </div>
 
@@ -105,7 +105,7 @@ export default function ProsAndCons({
 
                         </div>
                         
-                        <div className={styles.innerBlocks}>
+                        <div className={styles.innerBlocks} data-block>
                             {cons_features.map((item, i) => (
                                 <div key={i} className={styles.block}>
 
