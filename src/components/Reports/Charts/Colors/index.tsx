@@ -207,7 +207,7 @@ export default function Colors({
         
         // Reduce size for smaller screens
         if (windowWidth < 575) {
-            baseSize -= 15
+            baseSize -= 8
         }
         
         return baseSize

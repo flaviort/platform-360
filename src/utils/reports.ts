@@ -387,7 +387,7 @@ async function fetchWithTimeoutAndRetry(
 	url: string,
 	options: RequestInit,
 	timeoutMs: number = getVercelTimeout(),
-	maxRetries: number = 10 // Increased default from 3 to 10
+	maxRetries: number = 20 // Increased default from 3 to 20
 ): Promise<Response> {
 	let lastError: Error
 	
@@ -453,7 +453,7 @@ async function fetchWithTimeoutAndRetry(
 async function createChartWithRetry(
 	chartDefinition: any,
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
-	maxRetries: number = 10 // Increased default from 3 to 10
+	maxRetries: number = 20 // Increased default from 3 to 20
 ): Promise<ChartCreationResult> {
 	
 	console.log(`createChartWithRetry called for ${chartDefinition.name} with maxRetries: ${maxRetries}`)
@@ -497,7 +497,7 @@ async function createChartWithRetry(
 async function createChartInternal(
 	chartDefinition: any,
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying') => void,
-	maxRetries: number = 10 // Increased default from 3 to 10
+	maxRetries: number = 20 // Increased default from 3 to 20
 ): Promise<ChartCreationResult> {
 	
 	console.log(`createChartInternal called for ${chartDefinition.name} with maxRetries: ${maxRetries}`)
@@ -623,7 +623,7 @@ export async function createChartsWithStaggeredStart(
 	chartDefinitions: any[],
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
 	delayMs: number = 1000, // Reduced delay since we have Pro plan timeouts now
-	maxRetries: number = 10 // Increased default from 3 to 10
+	maxRetries: number = 20 // Increased default from 3 to 20
 ): Promise<ChartCreationResult[]> {
 	
 	console.log(`createChartsWithStaggeredStart called with maxRetries: ${maxRetries}`)
@@ -664,7 +664,7 @@ export async function createChartsWithStaggeredStart(
 export async function createChartsInParallel(
 	chartDefinitions: any[],
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
-	maxRetries: number = 10 // Increased default from 3 to 10
+	maxRetries: number = 20 // Increased default from 3 to 20
 ): Promise<ChartCreationResult[]> {
 	
 	//console.log(`Starting creation of ${chartDefinitions.length} charts with retry logic...`)
@@ -690,7 +690,7 @@ export async function createChartsInParallel(
 export async function retryFailedChartsInBackground(
 	failedCharts: any[],
 	onProgress?: (chartName: string, status: 'creating' | 'success' | 'error' | 'retrying' | 'duplicate') => void,
-	maxRetries: number = 10 // Increased default from 3 to 10
+	maxRetries: number = 20 // Increased default from 3 to 20
 ): Promise<ChartCreationResult[]> {
 	console.log(`Retrying ${failedCharts.length} failed charts in background...`)
 	
@@ -773,7 +773,7 @@ export async function createReportWithCharts(
 		const chartsToCreate = config.chartDefinitionsFactory(baseChartData)
 		
 		// Use custom chart creation if provided, otherwise use staggered creation with configurable retries
-		const maxRetries = config.maxRetries ?? 10 // Default to 10 retries if not specified
+		const maxRetries = config.maxRetries ?? 20 // Default to 20 retries if not specified
 		const results = config.customChartCreation
 			? await config.customChartCreation(
 				formData,
