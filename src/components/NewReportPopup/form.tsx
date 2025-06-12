@@ -229,7 +229,7 @@ export default function PopupForm({
 
 										<Submit
 											style='gradient-blue'
-											text='Create Report'
+											text='Run Analysis'
 											className={styles.submit}
 										/>
 

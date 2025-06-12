@@ -224,6 +224,18 @@ export default function Dropdown({
                         <ChevronDown />
                     </div>
 
+                    {selectedCount > 0 && isDropdownVisible && (
+                        <div className={styles.close}>
+                            <button
+                                type='button'
+                                className='button text-14 button--gradient-purple'
+                                onClick={() => setIsDropdownVisible(false)}
+                            >
+                                Proceed
+                            </button>
+                        </div>
+                    )}
+
                 </div>
 
                 <div className={clsx(

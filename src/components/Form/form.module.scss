@@ -199,6 +199,7 @@
                     display: flex;
                     flex-wrap: wrap;
                     gap: .375rem;
+                    margin-right: 5.5rem;
 
                     .button {
                         display: flex;
@@ -224,6 +225,21 @@
                             height: .75rem;
                             stroke-width: .125rem;
                         }
+                    }
+                }
+
+                .close {
+                    position: absolute;
+                    z-index: 3;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    right: .5rem;
+                    display: flex;
+                    justify-content: flex-end;
+
+                    button {
+                        padding: .5rem 1rem;
+                        border-radius: .175rem;
                     }
                 }
             }

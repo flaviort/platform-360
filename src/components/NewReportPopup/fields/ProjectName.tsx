@@ -102,6 +102,14 @@ export default function ProjectName() {
 						<option value='' disabled>
 							{isLoading ? 'Loading projects...' : 'Select or create one'}
 						</option>
+
+						<option value='New Project'>
+							New Project
+						</option>
+
+						<option value='--' disabled>
+							--
+						</option>
 						
 						{projects.map((project) => (
 							<option key={project.id} value={project.name}>
@@ -109,9 +117,6 @@ export default function ProjectName() {
 							</option>
 						))}
 
-						<option value='New Project'>
-							New Project
-						</option>
 					</Select>
 				</div>
 			</div>

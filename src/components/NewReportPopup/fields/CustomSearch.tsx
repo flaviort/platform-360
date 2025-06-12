@@ -176,6 +176,7 @@ export default function CustomSearch({
                 ref={dropdownRef}
             >
                 <div className={styles.dropdownInnerWrapper}>
+
                     <button
                         ref={buttonRef}
                         type='button'
@@ -189,12 +190,26 @@ export default function CustomSearch({
                     <div className={styles.sideIcon}>
                         <ChevronDown />
                     </div>
+
+                    {selectedCount > 0 && isDropdownVisible && (
+                        <div className={styles.close}>
+                            <button
+                                type='button'
+                                className='button text-14 button--gradient-purple'
+                                onClick={() => setIsDropdownVisible(false)}
+                            >
+                                Proceed
+                            </button>
+                        </div>
+                    )}
+                    
                 </div>
 
                 <div className={clsx(
                     styles.options,
                     isDropdownVisible && styles.visible
                 )}>
+
                     {/* Search Input */}
                     <div className={styles.search}>
                         <input
@@ -288,6 +303,7 @@ export default function CustomSearch({
                             )}
                         </>
                     )}
+                    
                 </div>
             </div>
 

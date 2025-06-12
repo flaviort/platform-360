@@ -23,8 +23,9 @@ export default function Genders() {
 					type='checkbox'
 					id='report-genders-unisex'
 					name='genders'
-					label="Unisex"
+					label='Unisex'
 					required
+					checked
 				/>
 
 				<Checkbox
@@ -47,7 +48,7 @@ export default function Genders() {
 					type='checkbox'
 					id='report-genders-kids'
 					name='genders'
-					label="Kids"
+					label='Kids'
 					required
 				/>
 				
