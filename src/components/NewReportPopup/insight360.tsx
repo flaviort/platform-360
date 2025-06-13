@@ -77,7 +77,7 @@ export default function PopupInsight360({
 
 		// format data for API
 		const selectedBrands = extractSelectedItems(data.brands)
-		const selectedGenders = Array.isArray(data.genders) ? data.genders.map(transformGender) : (data.genders ? [transformGender(data.genders)] : [])
+		const selectedGenders = transformGender(data.genders)
 
 		return {
 			name: data.reportName,
@@ -101,7 +101,7 @@ export default function PopupInsight360({
 		// format data for API
 		let selectedCategory = [ data.subCategory || '' ].filter(Boolean)
 		const selectedBrands = extractSelectedItems(data.brands)
-		const selectedGenders = Array.isArray(data.genders) ? data.genders.map(transformGender) : (data.genders ? [transformGender(data.genders)] : [])
+		const selectedGenders = transformGender(data.genders)
 
 		return {
 			report_id: report.id,

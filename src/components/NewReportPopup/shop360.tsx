@@ -216,7 +216,7 @@ export default function PopupShop360({
 		category: formData.subCategories.length > 0 ? formData.subCategories : [formData.category || ''],
 		company: formData.retailers,
 		brand: formData.brands,
-		gender: formData.genders,
+		gender: transformGender(formData.genders),
 		comment: goalValue
 	}), [])
 

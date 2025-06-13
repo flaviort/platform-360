@@ -155,7 +155,18 @@ export const extractSelectedItems = (items: Record<string, boolean> = {}) =>
 		.map(([name, _]) => name)
 
 // Helper function to transform gender values
-export const transformGender = (gender: string): string => {
+export const transformGender = (gender: string | string[]): string[] => {
+	// If it's already an array, transform each item
+	if (Array.isArray(gender)) {
+		return gender.map(g => transformGenderValue(g))
+	}
+	
+	// If it's a single string, transform and wrap in array
+	return [transformGenderValue(gender)].filter(Boolean)
+}
+
+// Internal helper to transform a single gender value
+const transformGenderValue = (gender: string): string => {
 	const lowercased = gender.toLowerCase()
 
 	if (lowercased === 'kids') {
