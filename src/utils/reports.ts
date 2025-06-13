@@ -167,19 +167,43 @@ export const transformGender = (gender: string | string[]): string[] => {
 
 // Internal helper to transform a single gender value
 const transformGenderValue = (gender: string): string => {
+	if (!gender) return ''
+
 	const lowercased = gender.toLowerCase()
 
+	// Handle special cases
 	if (lowercased === 'kids') {
 		return 'kids'
 	}
 	
+	// Handle possessive forms
 	if (lowercased.endsWith("'s")) {
-		return lowercased.slice(0, -2)
-	} else if (lowercased.endsWith('s')) {
-		return lowercased.slice(0, -1)
+		const base = lowercased.slice(0, -2)
+		return base === 'men' || base === 'women' ? base : 'unisex'
+	}
+	
+	// Handle plural forms
+	if (lowercased.endsWith('s')) {
+		const base = lowercased.slice(0, -1)
+		return base === 'men' || base === 'women' ? base : 'unisex'
 	}
 
-	return lowercased
+	// Handle base forms
+	if (lowercased === 'man' || lowercased === 'men') {
+		return 'men'
+	}
+	if (lowercased === 'woman' || lowercased === 'women') {
+		return 'women'
+	}
+	if (lowercased === 'kid' || lowercased === 'kids') {
+		return 'kids'
+	}
+	if (lowercased === 'unisex') {
+		return 'unisex'
+	}
+
+	// Default to unisex for unknown values
+	return 'unisex'
 }
 
 // Helper function to format dates for API
