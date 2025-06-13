@@ -335,9 +335,16 @@ export default function Dropdown({
 
                                 <span className={clsx(styles.text, 'text-16 capitalize')}>
                                     {typeof item.label === 'string' ? item.label : String(item.label || '')}
+                                    {/*
                                     {(item.min_creation_date || item.max_creation_date) && (
                                         <span className={styles.date}>
                                             ({item.min_creation_date && formatDateToMonthYear(item.min_creation_date)} - {item.max_creation_date && formatDateToMonthYear(item.max_creation_date)})
+                                        </span>
+                                    )}
+                                    */}
+                                    {(item.min_creation_date) && (
+                                        <span className={styles.date}>
+                                            ({item.min_creation_date && formatDateToMonthYear(item.min_creation_date)})
                                         </span>
                                     )}
                                 </span>
