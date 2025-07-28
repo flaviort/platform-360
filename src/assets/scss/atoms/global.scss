@@ -115,13 +115,7 @@ body {
 	}
 
 	&.is-sending {
-		pointer-events: none;
 		cursor: not-allowed;
-
-		* {
-			pointer-events: none;
-			cursor: not-allowed;
-		}
 	}
 }
 

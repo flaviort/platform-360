@@ -78,8 +78,6 @@ export default function RootLayout({
 
 				{/*<GoogleAnalytics gaId='G-FE8FLM7CTP' />*/}
 
-				<FullScreenLoader />
-
 			</body>
 
 		</html>

@@ -322,3 +322,10 @@
         opacity: 0;
     }
 }
+
+.loader {
+	position: fixed;
+	z-index: 99999999999999999;
+	cursor: not-allowed;
+	pointer-events: all!important;
+}

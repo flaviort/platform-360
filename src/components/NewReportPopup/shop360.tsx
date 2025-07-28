@@ -178,13 +178,18 @@ export default function PopupShop360({
 
 	// create base chart data
 	const createBaseChartData = useCallback((data: any, report: any) => {
+		
+		// get selected sub-categories (use multiple subcategories from dropdown)
+		//const selectedSubCategories = extractSelectedItems(data.subCategories || {})
+		
+		// Use subcategories if selected, otherwise use the main category
+		//const selectedCategory = selectedSubCategories.length > 0 ? selectedSubCategories : [data.category]
+		
 		const selectedRetailers = extractSelectedItems(data.retailers)
 		const selectedBrands = extractSelectedItems(data.brands)
-		const selectedGenders = data.genders 
-			? (Array.isArray(data.genders) 
-				? data.genders.map((g: string) => transformGender(g)).flat() 
-				: transformGender(data.genders))
-			: []
+		const selectedGenders = Array.isArray(data.genders) 
+			? data.genders.map(transformGender) 
+			: (data.genders ? [transformGender(data.genders)] : [])
 		
 		const selectedStartDate = formatISODate(data.timePeriodStart)
 		const selectedEndDate = formatISODate(data.timePeriodEnd)
@@ -192,6 +197,8 @@ export default function PopupShop360({
 		return {
 			report_id: report.id,
 			query: {
+				//category: footwear.map((item) => item.name), // temporary fix to send all footwear sub-categories to the API
+				//category: [], // temporary fix to NOT SEND any categories
 				company: selectedRetailers,
 				brand: selectedBrands,
 				gender: selectedGenders,
@@ -209,16 +216,13 @@ export default function PopupShop360({
 		category: formData.subCategories.length > 0 ? formData.subCategories : [formData.category || ''],
 		company: formData.retailers,
 		brand: formData.brands,
-		gender: formData.genders 
-			? (Array.isArray(formData.genders) 
-				? formData.genders.map((g: string) => transformGender(g)).flat() 
-				: transformGender(formData.genders))
-			: [],
+		gender: formData.genders,
 		comment: goalValue
 	}), [])
 
 	// format form data for report creation
 	const formatFormData = useCallback(async (data: any): Promise<CreateReportData> => {
+
 		// get project and category IDs
 		const { projectId, categoryId } = await getProjectAndCategoryIds({
 			selectedProject: data.selectedProject,
@@ -233,13 +237,11 @@ export default function PopupShop360({
 		const selectedRetailers = extractSelectedItems(data.retailers)
 		const selectedBrands = extractSelectedItems(data.brands)
 		
-		// transform and prepare gender values - ensure it's not nested
-		const selectedGenders = data.genders 
-			? (Array.isArray(data.genders) 
-				? data.genders.map((g: string) => transformGender(g)).flat() 
-				: transformGender(data.genders))
-			: []
-
+		// transform and prepare gender values
+		const selectedGenders = Array.isArray(data.genders) 
+			? data.genders.map(transformGender) 
+			: (data.genders ? [transformGender(data.genders)] : [])
+		
 		// format dates for API
 		const selectedStartDate = formatISODate(data.timePeriodStart)
 		const selectedEndDate = formatISODate(data.timePeriodEnd)
@@ -252,9 +254,12 @@ export default function PopupShop360({
 			goal: data.goal,
 			project_id: projectId,
 			product_settings: {
+				//category: selectedSubCategories.length > 0 ? selectedSubCategories : [data.category],
 				retailers: selectedRetailers,
 				brands: selectedBrands,
 				genders: selectedGenders,
+				//type_store: [data.type],
+				//include_images: data.includeImages,
 				type_store: [],
 				include_images: false,
 				start_date: selectedStartDate,

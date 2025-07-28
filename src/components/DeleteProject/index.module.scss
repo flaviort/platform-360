@@ -111,3 +111,9 @@ body .popup {
         }
     }
 }
+
+.loader {
+    position: fixed;
+    z-index: 99999999999999999;
+    cursor: not-allowed;
+}

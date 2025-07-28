@@ -11,6 +11,7 @@ import Portal from '@/components/Utils/Portal'
 import usePopoverPosition from '@/components/Utils/Portal/usePopoverPosition'
 import FormReport from '@/components/Form/FormReport'
 import Submit from '@/components/Form/Submit'
+import FullScreenLoader from '@/components/FullScreenLoader'
 
 // svg
 import { X, ChevronRight } from 'lucide-react'
@@ -71,6 +72,7 @@ export default function PopupForm({
 			clearTimeout(changeMessageTimeout)
 		}
 	}, [currentMessageIndex, loadingMessages, isSubmitting])
+
 
 	// listen for form submission events
 	useEffect(() => {
@@ -140,9 +142,10 @@ export default function PopupForm({
 
 			</button>
 
-			<AnimatePresence>
+			<AnimatePresence mode='wait'>
 				{optionsSub && (
 					<Portal>
+						
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
@@ -213,20 +216,6 @@ export default function PopupForm({
 
 									<div className={styles.bottom}>
 
-										{isSubmitting ? (
-											<div 
-												className={clsx(
-													styles.loadingMessages, 
-													'text-16 purple',
-													isMessageVisible ? styles.fadeIn : styles.fadeOut
-												)}
-											>
-												{messageArray[currentMessageIndex]}
-											</div>
-										) : (
-											<div className={styles.loadingMessages}></div>
-										)}
-
 										<Submit
 											style='gradient-blue'
 											text='Run Analysis'
@@ -237,6 +226,31 @@ export default function PopupForm({
 								</FormReport>
 							</motion.div>
 						</motion.div>
+
+						{isSubmitting && (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{
+									opacity: 1,
+									transition: {
+										duration: .3,
+										ease: 'easeInOut' 
+									}
+								}}
+								exit={{
+									opacity: 0,
+									transition: {
+										duration: .3,
+										delay: 2,
+										ease: 'easeInOut' 
+									}
+								}}
+								className={styles.loader}
+							>
+								<FullScreenLoader text={messageArray[currentMessageIndex]} />
+							</motion.div>
+						)}
+						
 					</Portal>
 				)}
 			</AnimatePresence>

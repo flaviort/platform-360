@@ -1,21 +1,71 @@
+'use client'
+
+// libraries
+import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { motion } from 'framer-motion'
+
 // css
 import styles from './index.module.scss'
 
-// img / svg
-import { LoaderCircle } from 'lucide-react'
+// types
+interface FullScreenLoaderProps {
+    text?: string
+}
 
-export default function FullScreenLoader() {
+export default function FullScreenLoader({
+    text = 'Loading...'
+}: FullScreenLoaderProps) {
     return (
-        <div className={styles.component}>
+        <motion.div  className={styles.component}>
 
-            <span className='rotation purple' style={{ '--speed': '.5' } as any}>
-                <LoaderCircle />
-            </span>
+            <motion.div
+                className={styles.bg}
+                initial={{ transform: 'translateY(110%)' }}
+                animate={{ transform: 'translateY(0)' }}
+                exit={{
+                    transform: 'translateY(-110%)',
+                    transition: {
+                        duration: .3,
+                        delay: .5,
+                        ease: 'easeInOut'
+                    }
+                }}
+            />
 
-            <p className='text-16 semi-bold gray-500'>
-                Loading...
-            </p>
+            <motion.div
+                className={styles.container}
+                initial={{ opacity: 0 }}
+                animate={{
+                    opacity: 1,
+                    transition: {
+                        duration: .3,
+                        delay: .5,
+                        ease: 'easeInOut'
+                    }
+                }}
+                exit={{
+                    opacity: 0,
+                    transition: {
+                        duration: .3,
+                        ease: 'easeInOut'
+                    }
+                }}
+            >
 
-        </div>
+                <span className={styles.loader}>
+                    <DotLottieReact
+                        src='/svg/lottie/walk-shoes.lottie'
+                        loop
+                        autoplay
+                    />
+                </span>
+
+                <p className='text-24 semi-bold white'>
+                    {text}
+                </p>
+
+            </motion.div>
+
+        </motion.div>
     )
 }

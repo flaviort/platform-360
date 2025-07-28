@@ -1,4 +1,6 @@
 .form {
+    pointer-events: all!important;
+
     &:global {
         &.is-sending {
             pointer-events: none;
