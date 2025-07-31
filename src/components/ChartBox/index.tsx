@@ -136,10 +136,21 @@ export default function ChartBox({
     // State for toggling between numbers and percentages (only for Colors chart)
     const [showAsPercentage, setShowAsPercentage] = useState(false)
     
+    // State for toggling between month and year view (only for CategoryTrend chart)
+    const [showAsYear, setShowAsYear] = useState(false)
+    
     // Handle View in % button click
     const handleViewInPercentage = () => {
         setShowAsPercentage(prev => !prev)
     }
+    
+    // Handle month/year toggle button click
+    const handleToggleMonthYear = () => {
+        setShowAsYear(prev => !prev)
+    }
+    
+    // Show month/year toggle only for CategoryTrend charts
+    const toggleMonthYear = chart.categoryTrend
     
     // determine the effective box size - override to 'half' for Canada geographic trend charts
     const effectiveBoxSize = chart.geographyTrend && reportSummary.location === 'CA' || reportSummary.location === 'EU'
@@ -206,6 +217,26 @@ export default function ChartBox({
                             >
                                 {showAsPercentage ? 'View as numbers' : 'View in %'}
                             </button>
+                        )}
+
+                        {toggleMonthYear && (
+                            <label className={styles.toggleMonthYear}>
+
+                                <input 
+                                    type='checkbox' 
+                                    checked={showAsYear}
+                                    onChange={handleToggleMonthYear}
+                                />
+                                
+                                <span className={clsx(styles.text, styles.month, 'text-12')}>
+                                    Month
+                                </span>
+
+                                <span className={clsx(styles.text, styles.year, 'text-12')}>
+                                    Year
+                                </span>
+
+                            </label>
                         )}
 
                         <DeleteChart id={id} />
@@ -286,6 +317,7 @@ export default function ChartBox({
                 {chart.categoryTrend && (
                     <CategoryTrend
                         data={chart.categoryTrend}
+                        showAsYear={showAsYear}
                     />
                 )}
 

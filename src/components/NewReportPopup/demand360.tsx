@@ -70,7 +70,7 @@ const getChartDefinitions = (baseChartData: any) => {
 				description: 'Interest in the selected category over time, from 0 (lowest) to 100 (highest).',
 				preferences: {
 					chart_type: 'category_trend',
-					box_size: 'half'
+					box_size: 'full'
 				},
 				query: {
 					...baseChartData.query,

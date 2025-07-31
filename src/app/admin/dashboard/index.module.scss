@@ -241,8 +241,10 @@
                             transform: translateY(-50%);
                             transition: .3s ease-in-out;
 
+                            span,
                             svg {
-                                width: 100%;
+                                width: 1rem;
+                                height: 1rem;
                             }
                         }
 

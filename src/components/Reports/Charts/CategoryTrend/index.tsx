@@ -19,6 +19,7 @@ export interface CategoryTrendProps {
     }>
     height?: number
     showAllNumbers?: boolean
+    showAsYear?: boolean
 }
 
 const CustomValueLabel = (props: any) => {
@@ -66,13 +67,13 @@ const CustomTooltip = ({ active, payload }: any) => {
 }
 
 // Helper function to process incoming data into a consistent format
-const processData = (rawData: any[]) => {
+const processData = (rawData: any[], showAsYear: boolean = false) => {
     if (!Array.isArray(rawData) || rawData.length === 0) {
         return []
     }
 
-    // If data length > 14, group by year and calculate averages
-    if (rawData.length > 14) {
+    // If showAsYear is true, group by year and calculate averages
+    if (showAsYear) {
         // Group data by year
         const yearGroups: { [year: string]: number[] } = {}
         let categoryName = ''
@@ -117,7 +118,7 @@ const processData = (rawData: any[]) => {
             })
     }
 
-    // Original monthly logic for data length <= 12
+    // Original monthly logic when showAsYear is false
     return rawData.map(item => {
         // Extract date and format it for display
         const date = item.date || ''
@@ -169,11 +170,12 @@ const processData = (rawData: any[]) => {
 export default function CategoryTrend({
     data,
     height,
-    showAllNumbers
+    showAllNumbers,
+    showAsYear = false
 }: CategoryTrendProps) {
     
     // process the input data into a consistent format
-    const processedData = processData(data)
+    const processedData = processData(data, showAsYear)
 
     // the functions below changes the size of the font and the bars according to the window size
     const windowSize = useWindowSize()
@@ -189,6 +191,10 @@ export default function CategoryTrend({
     
     // Generate ticks for 0-100 range
     const yAxisTicks = [0, 25, 50, 75, 100]
+
+    const dataLength = processedData.length
+
+    const barSize = dataLength > 10 ? 20 : 50
 
     return (
         <div className={styles.component}>
@@ -242,7 +248,7 @@ export default function CategoryTrend({
                     <Bar
                         dataKey='value'
                         radius={[30, 30, 0, 0]}
-                        barSize={25}
+                        barSize={barSize}
                         spacing={20}
                         fill='url(#verticalBarsGradient)'
                     >

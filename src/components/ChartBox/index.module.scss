@@ -51,6 +51,53 @@
                 }
             }
 
+            .toggleMonthYear {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                text-align: center;
+                gap: .1rem;
+                height: 2rem;
+                border: var(--1px) solid $gray-200;
+                border-radius: .25rem;
+                padding: .1rem;
+
+                &:has(input:checked) {
+                    .month {
+                        background-color: transparent;
+                        color: $gray-600;
+                    }
+
+                    .year {
+                        background-color: $blue;
+                        color: $white;
+                    }
+                }
+
+                input {
+                    position: absolute;
+                }
+
+                .text {
+                    position: relative;
+                    z-index: 2;
+                    padding: 0 1rem;
+                    text-align: center;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    border-radius: .2rem;
+                    height: 100%;
+
+                    &.month {
+                        background-color: $blue;
+                        color: $white;
+                    }
+                }
+            }
+
             .switch {
                 display: flex;
                 align-items: center;
